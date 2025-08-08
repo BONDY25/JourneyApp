@@ -1,0 +1,17 @@
+{
+  "name": "JourneyApp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "../frontend/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "private": true,
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "mongodb": "^6.18.0",
+    "mongoose": "^8.17.0"
+  }
+}

@@ -1,0 +1,77 @@
+const submit = document.getElementById('submit');
+
+// Calculate values-----------------------------------------------
+function calculateValues(tankVolume, {timeUnit = 'minutes', gallon = 'imperial'} = {}) {
+    console.log("Calculating Values");
+
+    const description = String(document.getElementById('description').value);
+    const dateTimeRaw = (document.getElementById('datetime').value);
+    const dateTime = dateTimeRaw ? new Date(dateTimeRaw) : null;
+    const mpg = Number(document.getElementById('mpg').value);
+    const distance = Number(document.getElementById('distance').value);
+    const timeDriven = Number(document.getElementById('timeDriven').value);
+    const temp = Number(document.getElementById('temp').value);
+    const condition = String(document.getElementById('condition').value);
+    const costPerLitre = Number(document.getElementById('cost').value);
+
+    const hours = timeUnit === 'minutes' ? (timeDriven / 60) : timeDriven;
+    const safeHours = hours > 0 ? hours : null;
+    const GALLON_L = (gallon === 'us') ? 3.79541 : 4.54609;
+    const milesPerLitre = mpg > 0 ? (mpg / GALLON_L) : null;
+
+    const avgSpeed = safeHours ? (distance / safeHours) : 0;
+    const fuelUsedL = milesPerLitre ? (distance / milesPerLitre) : 0;
+    const costPerMile = milesPerLitre ? (costPerLitre / milesPerLitre) : 0;
+    const totalCost = costPerMile * distance;
+    const percOfTank = tankVolume > 0 ? (fuelUsedL / tankVolume) : 0;
+
+    const round = (n, dp = 3) => Number(Number(n).toFixed(dp));
+
+    const output = {
+        description,
+        dateTime,
+        distance: round(distance, 2),
+        mpg: round(mpg, 2),
+        timeDriven,
+        temp,
+        condition,
+        costPl: round(costPerLitre, 2),
+        avgSpeed: round(avgSpeed, 2),
+        totalCost: round(totalCost, 2),
+        costPerMile: round(costPerMile, 2),
+        fuelUsedL: round(fuelUsedL, 2),
+        percOfTank: round(percOfTank, 4),
+    }
+    console.log(output);
+    return output;
+}
+
+// Event Listener to submit form ---------------------------------------------------------------------
+submit.addEventListener('click', async (event) => {
+    event.preventDefault(); // Stop form reload
+    console.log("Journey Submission attempted.");
+
+    const journeyData = calculateValues(64);
+
+    try {
+        const res = await fetch('http://localhost:3000/api/journeys', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(journeyData)
+        });
+
+        if (res.ok) {
+            console.log("Journey Submission Successful.");
+            alert('Journey Save!');
+        } else {
+            const err = await res.text();
+            console.log("Journey Submission failed.");
+            alert(`Error: ${err}`);
+        }
+    } catch (error) {
+        console.log('Network Error:', error);
+    }
+
+});
