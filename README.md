@@ -14,6 +14,8 @@ Shows a quick snapshot of summary figures
 * Cost in the past 14 days  
 * Cost in the past 28 days
 
+<img width="298" height="559" alt="image" src="https://github.com/user-attachments/assets/9bddbbd7-5bfc-4fc2-8af8-3f7110b45fd6" />
+
 ### ✍️ New Journey
 
 This is a form that the user will fill in the data from their journey. The fields are:
@@ -28,19 +30,28 @@ This is a form that the user will fill in the data from their journey. The field
 * Fuel cost per liter (This will be pre populated a default set by the user on a settings page, but can be changed here to (changing it here will update the default))  
 * Tank Volume (This will be pre populated a default set by the user on a settings page, but can be changed here to (changing it here will update the default))
 
+<img width="302" height="568" alt="image" src="https://github.com/user-attachments/assets/e06b8146-d441-4b62-9f33-a9e8db01ce6e" />
+
 ### 📃 Summary
 
 This will show summary data for a given time period chosen by the user. Summary data TBD
+
+<img width="301" height="566" alt="image" src="https://github.com/user-attachments/assets/cb0c688e-11c1-4f34-8af8-df19b8dd717b" />
 
 ### 🛣️ All Journeys 
 
 This will show a list of all the journeys and where the user can click on each and all the details for the journey will be displayed.
 
+<img width="303" height="566" alt="image" src="https://github.com/user-attachments/assets/8c2d1a3c-8c1a-4e3e-b8d0-7cd78d89ab0f" />
+
 ### 🚗 Journey Details
 
 This will show the details of a journey with calculated values based on the user input so they can visualise 
+
+<img width="297" height="556" alt="image" src="https://github.com/user-attachments/assets/df7ca038-b957-4e60-8c3f-c35627d94677" />
 
 ### ⚙️ Settings Page
 
 This will allow the user to set default tank volume, fuel cost per litre, dark mode/light mode and maybe other settings, I haven't got to this bit yet
 
+<img width="293" height="556" alt="image" src="https://github.com/user-attachments/assets/0b132539-e590-45c5-89c8-5265923d799d" />
