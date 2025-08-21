@@ -25,9 +25,11 @@ function calculateValues(tankVolume, {timeUnit = 'minutes', gallon = 'imperial'}
     const totalCost = costPerMile * distance;
     const percOfTank = tankVolume > 0 ? (fuelUsedL / tankVolume) : 0;
 
+    const user = localStorage.getItem('username');
     const round = (n, dp = 3) => Number(Number(n).toFixed(dp));
 
     const output = {
+        user,
         description,
         dateTime,
         distance: round(distance, 2),

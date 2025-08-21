@@ -30,7 +30,9 @@ async function startServer() {
 
         const db = client.db('journeyAppDb');
         const journeys = db.collection('journeys');
+        const users = db.collection('users');
 
+        // Insert Journey --------------------------------------------------------------------------------------------
         app.post('/api/journeys', async (req, res) => {
             try {
                 await journeys.insertOne(req.body);
@@ -42,10 +44,59 @@ async function startServer() {
             }
         });
 
+        // Insert User --------------------------------------------------------------------------------------------
+        app.post('/api/users', async (req, res) => {
+            try {
+                const {username, password} = req.body;
+
+                // check is fields are complete
+                if (!username || !password) {
+                    return res.status(400).send('Username and Password required');
+                }
+
+                // check if the user already exists in the database
+                const existing = await users.findOne({username});
+                if (existing) {
+                    return res.status(400).send('Username already exist');
+                }
+
+                // create user document to insert
+                const userDoc = {
+                    username,
+                    password,
+                    dateCreated: new Date(),
+                };
+
+                // insert the user into the database
+                await users.insertOne(userDoc);
+                res.status(201).send('User created');
+            } catch (err) {
+                console.error('Error saving user:', err);
+                res.status(500).send('Error saving user:');
+            }
+        });
+
+        // Check User for Login --------------------------------------------------------------------------------------------
+        app.post('/api/login', async (req, res) => {
+            try {
+                const {username, password} = req.body;
+                const user = await users.findOne({username, password});
+                if (!user) {
+                    return res.status(400).send('Invalid username or password');
+                }
+
+                res.status(200).json({username: user.username});
+            } catch (err) {
+                console.error('Error saving user:', err);
+                res.status(500).send('Error logging in:');
+            }
+        });
+
         app.listen(3000, () => {
             console.log('Server running at http://localhost:3000');
         });
-    } catch (err) {
+    }
+    catch (err) {
         console.error('Failed to connect to MongoDB:', err);
     }
 }
