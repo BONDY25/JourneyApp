@@ -1,11 +1,13 @@
 import dotenv from 'dotenv';
+import bcrypt from 'bcrypt';
+
 dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
-import { MongoClient } from 'mongodb';
+import {MongoClient} from 'mongodb';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import {fileURLToPath} from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -60,10 +62,13 @@ async function startServer() {
                     return res.status(400).send('Username already exist');
                 }
 
+                // Hash password
+                const hashedPassword = await bcrypt.hash(req.body.password, 10);
+
                 // create user document to insert
                 const userDoc = {
                     username,
-                    password,
+                    password: hashedPassword,
                     dateCreated: new Date(),
                 };
 
@@ -80,11 +85,20 @@ async function startServer() {
         app.post('/api/login', async (req, res) => {
             try {
                 const {username, password} = req.body;
-                const user = await users.findOne({username, password});
+
+                // Find user
+                const user = await users.findOne({username});
                 if (!user) {
                     return res.status(400).send('Invalid username or password');
                 }
 
+                // Compare password
+                const isMatch = await bcrypt.compare(password, user.password);
+                if (!isMatch) {
+                    return res.status(400).send('Invalid username or password');
+                }
+
+                // Success Login
                 res.status(200).json({username: user.username});
             } catch (err) {
                 console.error('Error saving user:', err);
@@ -92,11 +106,93 @@ async function startServer() {
             }
         });
 
+        // Get user totals ---------------------------------------------------------------------------------
+        app.get('/api/summary/:username', async (req, res) => {
+
+            const username = req.params.username;
+
+            try {
+                // Get all user journey data
+                const summary = await db.collection('journeys').aggregate([
+                    {$match: {user: username}},
+                    {
+                        // Calculate summary
+                        $group: {
+                            _id: null,
+                            totalMiles: {$sum: "$distance"},
+                            totalTime: {$sum: "$timeDriven"},
+                            totalFuel: {$sum: "$fuelUsedL"},
+                            totalCost: {$sum: "$totalCost"},
+                            avgMpg: {$avg: "$mpg"}
+                        }
+                    }
+                ]).toArray();
+
+                // Handle No data
+                if (summary.length === 0) {
+                    return res.json({
+                        totalMiles: 0,
+                        totalTime: 0,
+                        totalFuel: 0,
+                        totalCost: 0,
+                        avgMpg: 0
+                    });
+                }
+
+                // Return results
+                res.json(summary[0]);
+            } catch (err) {
+                console.error(err);
+                res.status(500).send('Error retrieving summary');
+            }
+
+        });
+
+        // Cost Breakdown --------------------------------------------------------------------------------
+        app.get('/api/costs/:username', async (req, res) => {
+            const username = req.params.username;
+
+            try {
+                const journeysCollection = db.collection('journeys');
+                const now = new Date();
+                const sevenDaysAgo = new Date(now);
+                sevenDaysAgo.setDate(now.getDate() - 7);
+                const fourteenDaysAgo = new Date(now);
+                fourteenDaysAgo.setDate(now.getDate() - 14);
+                const twentyEightDaysAgo = new Date(now);
+                twentyEightDaysAgo.setDate(now.getDate() - 28);
+
+                const result = await journeysCollection.aggregate([
+                    {$match: {user: username, dateTime: {$gte: twentyEightDaysAgo}}},
+                    {
+                        $group: {
+                            _id: null,
+                            seven: {
+                                $sum: {$cond: [{$gte: ["$dateTime", sevenDaysAgo]}, "$totalCost", 0]}
+                            },
+                            fourteen: {
+                                $sum: {$cond: [{$gte: ["$dateTime", fourteenDaysAgo]}, "$totalCost", 0]}
+                            },
+                            twentyEight: {$sum: "$totalCost"} // everything in last 28 days
+                        }
+                    }
+                ]).toArray();
+
+                console.log(result);
+                const costs = result.length > 0 ? result[0] : {seven: 0, fourteen: 0, twentyEight: 0};
+
+                res.json({cost: costs});
+            } catch (err) {
+                console.error("Error retrieving costs:", err);
+                res.status(500).send("Error retrieving costs");
+            }
+        });
+
+
         app.listen(3000, () => {
             console.log('Server running at http://localhost:3000');
         });
-    }
-    catch (err) {
+    } catch (err) {
         console.error('Failed to connect to MongoDB:', err);
     }
 }

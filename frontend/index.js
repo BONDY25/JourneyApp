@@ -6,7 +6,7 @@ submitLogin.addEventListener('click', async (e) => {
     e.preventDefault();
 
     // Get username and password form UI
-    const username = String(document.getElementById('username').value);
+    const username = String(document.getElementById('username').value).toLowerCase();
     const password = String(document.getElementById('password').value);
 
     try {
@@ -36,14 +36,14 @@ submitLogin.addEventListener('click', async (e) => {
 });
 
 // User Clicks Register button ------------------------------------------------------------
-submitReg.addEventListener('click', async(e) => {
+submitReg.addEventListener('click', async (e) => {
     e.preventDefault();
 
     // Get username and password form UI
-    const username = String(document.getElementById('username').value);
+    const username = String(document.getElementById('username').value).toLowerCase();
     const password = String(document.getElementById('password').value);
 
-    try{
+    try {
         // send request to backend
         const res = await fetch('http://localhost:3000/api/users', {
             method: 'POST',
@@ -52,7 +52,7 @@ submitReg.addEventListener('click', async(e) => {
         });
 
         // evaluate backend response
-        if (res.ok){
+        if (res.ok) {
             alert('User Registered!');
 
             // save username and open home page
