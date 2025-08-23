@@ -108,3 +108,19 @@ form input, form select, form button {
     border: none;
     font-size: 1em;
 }
+
+#import-button {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#import-button:hover {
+    background-color: #0056b3;
+}

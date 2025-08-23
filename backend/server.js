@@ -18,7 +18,7 @@ app.use(express.static(path.join(__dirname, 'frontend')));
 
 const corsOptions = {
     origin: 'http://localhost:63342', // Allow requests from this origin
-    optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+    optionsSuccessStatus: 200
 };
 
 app.use(cors(corsOptions));
@@ -173,7 +173,7 @@ async function startServer() {
                             fourteen: {
                                 $sum: {$cond: [{$gte: ["$dateTime", fourteenDaysAgo]}, "$totalCost", 0]}
                             },
-                            twentyEight: {$sum: "$totalCost"} // everything in last 28 days
+                            twentyEight: {$sum: "$totalCost"} // everything in the last 28 days
                         }
                     }
                 ]).toArray();
@@ -188,6 +188,25 @@ async function startServer() {
             }
         });
 
+        // Import Journey ---------------------------------------------------------------
+        app.post("/api/importJourneys", async (req, res) => {
+            const {journeys} = req.body;
+
+            // Check valid data
+            if (!Array.isArray(journeys) || journeys.length === 0) {
+                return res.status(400).send('No journeys provided');
+            }
+
+            // Import Journeys
+            try {
+                const journeysCollection = db.collection('journeys');
+                await journeysCollection.insertMany(journeys);
+                res.status(201).send('Successfully imported journeys');
+            } catch (err) {
+                console.error('Error importing Journeys:', err);
+                res.status(500).send('Error importing Journeys:');
+            }
+        });
 
         app.listen(3000, () => {
             console.log('Server running at http://localhost:3000');
