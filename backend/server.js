@@ -189,22 +189,55 @@ async function startServer() {
         });
 
         // Import Journey ---------------------------------------------------------------
-        app.post("/api/importJourneys", async (req, res) => {
-            const {journeys} = req.body;
-
-            // Check valid data
-            if (!Array.isArray(journeys) || journeys.length === 0) {
-                return res.status(400).send('No journeys provided');
-            }
-
-            // Import Journeys
+        app.post('/api/importJourneys', async (req, res) => {
             try {
-                const journeysCollection = db.collection('journeys');
-                await journeysCollection.insertMany(journeys);
-                res.status(201).send('Successfully imported journeys');
+                let journeys = req.body;
+                console.log(journeys);
+
+                // Check is Array has data
+                if (!Array.isArray(journeys) || journeys.length === 0) {
+                    return res.status(400).send("No journeys provided");
+                }
+
+                // Clean data before import
+                const tankVolume = 64;
+
+                journeys = journeys.map(j => {
+                    const distance = Number(j.distance) || 0;
+                    const mpg = Number(j.mpg) || 0;
+
+                    const fuelUsedL = mpg > 0 ? distance / (mpg / 3.785) : 0;
+                    const percOfTank = tankVolume > 0 ? fuelUsedL / tankVolume : 0;
+
+                    return {
+                        user: j.user?.toLowerCase() || "unknown",
+                        description: j.description || "",
+                        dateTime: new Date(j.dateTime),
+                        distance,
+                        mpg,
+                        timeDriven: Number(j.timeDriven) || 0,
+                        temp: Number(j.temp) || 0,
+                        condition: j.condition || "Dry",
+                        costPl: Number(j.costPl) || 0,
+                        avgSpeed: Number(j.avgSpeed) || 0,
+                        totalCost: Number(j.totalCost) || 0,
+                        costPerMile: Number(j.costPerMile) || 0,
+                        fuelUsedL,
+                        percOfTank
+                    };
+                });
+
+
+                // Declare Db & Collection
+                const db = client.db('journeyAppDb');
+                const collection = db.collection('journeys');
+
+                // insert records
+                await collection.insertMany(journeys);
+                res.status(201).send("Journeys imported successfully");
             } catch (err) {
-                console.error('Error importing Journeys:', err);
-                res.status(500).send('Error importing Journeys:');
+                console.error("Error importing journeys:", err);
+                res.status(500).send("Error importing journeys");
             }
         });
 

@@ -1,56 +1,48 @@
-import Papa from "https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js";
-
-const csvFileInput = document.getElementById("csvFile");
+const fileInput = document.getElementById("csvFile");
 const importBtn = document.getElementById("importBtn");
 
 // Import button Clicked -------------------------------------------------------------------
-importBtn.addEventListener("click", () => {
-    const file = csvFileInput.files[0];
+importBtn.addEventListener('click', () => {
+
+    const file = fileInput.files[0];
+
     if (!file) {
-        alert("Please choose a CSV file!");
+        alert("Please choose a CSV file first.");
         return;
     }
 
     Papa.parse(file, {
-        header: true,
+        header: true, // <-- CSV columns become object keys
+        dynamicTyping: true, // automatically convert numbers
         skipEmptyLines: true,
-        complete: async function (result) {
-            console.log("CSV Parsed:", result.data);
+        complete: async function(results) {
+            console.log("Parsed CSV:", results.data); // check in console
 
-            // Format data
-            const journeys = result.data.map(j => ({
-                user: j.user,
-                description: j.description,
-                dateTime: new Date(j.dateTime),
-                distance: Number(j.distance),
-                mpg: Number(j.mpg),
-                timeDriven: Number(j.timeDriven),
-                temp: Number(j.temp),
-                condition: j.condition || "Dry",
-                costPl: Number(j.costPl),
-                avgSpeed: Number(j.avgSpeed),
-                totalCost: Number(j.totalCost),
-                costPerMile: Number(j.costPerMile),
-                fuelUsedL: Number(j.fuelUsedL),
-                percOfTank: Number(j.percOfTank),
-            }));
+            const journeys = results.data;
 
-            // Send data to backend
+            if (!Array.isArray(journeys) || journeys.length === 0) {
+                alert("No journeys found in CSV");
+                return;
+            }
+
             try {
-                const res = await fetch("https://localhost:3000/api/importJourneys", {
+                const res = await fetch("http://localhost:3000/api/importJourneys", {
                     method: "POST",
-                    headers: {"content-type": "application/json"},
-                    body: JSON.stringify(journeys),
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(journeys)
                 });
 
                 if (res.ok) {
-                    alert("Successfully imported!");
+                    alert("Journeys imported successfully!");
+                    fileInput.value = "";
                 } else {
                     const err = await res.text();
-                    alert("Failed to import. " + err);
+                    alert(`Error importing journeys: ${err}`);
                 }
             } catch (err) {
-                console.error(err);
+                console.error("Network Error:", err);
                 alert("Network error while importing CSV");
             }
         }
