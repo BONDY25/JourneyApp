@@ -3,6 +3,8 @@
 window.addEventListener('DOMContentLoaded', async () => {
     const username = localStorage.getItem('username').toLowerCase();
     console.log(username);
+    console.log(localStorage.getItem('tankVolume'));
+    console.log(localStorage.getItem('fuelCost'));
     if (!username) {
         alert('Please Login');
         window.location.href = "index.html";

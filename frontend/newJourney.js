@@ -1,8 +1,21 @@
+// Populate default values
+window.addEventListener('DOMContentLoaded', () => {
+    const costField = document.getElementById('cost');
+    if(costField){
+        const storedCost = localStorage.getItem('fuelCost');
+        costField.value = storedCost!== null ? parseFloat(storedCost) : 0;
+    }
+    console.log("Fuel cost from localStorage:", localStorage.getItem('fuelCost'));
+});
+
 const submit = document.getElementById('submit');
 
 // Calculate values-----------------------------------------------
-function calculateValues(tankVolume, {timeUnit = 'minutes', gallon = 'imperial'} = {}) {
+function calculateValues({timeUnit = 'minutes', gallon = 'imperial'} = {}) {
     console.log("Calculating Values");
+
+    // Get tank volume from user defaults
+    const tankVolume = Number(localStorage.getItem('tankVolume')) ?? 64;
 
     const description = String(document.getElementById('description').value);
     const dateTimeRaw = (document.getElementById('datetime').value);
@@ -66,6 +79,7 @@ submit.addEventListener('click', async (event) => {
 
         if (res.ok) {
             console.log("Journey Submission Successful.");
+            window.location.href = "home.html";
             alert('Journey Save!');
         } else {
             const err = await res.text();

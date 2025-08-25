@@ -11,7 +11,7 @@ import {fileURLToPath} from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const tankVolume = 64;
+let tankVolume = 64;
 
 const app = express();
 app.use(express.json());
@@ -71,6 +71,8 @@ async function startServer() {
                     username,
                     password: hashedPassword,
                     dateCreated: new Date(),
+                    tankVolume: tankVolume,
+                    defFuelCost: 0.0,
                 };
 
                 // insert the user into the database
@@ -201,8 +203,6 @@ async function startServer() {
                 }
 
                 // Clean data before import
-                const tankVolume = 64;
-
                 journeys = journeys.map(j => {
                     const distance = Number(j.distance) || 0;
                     const mpg = Number(j.mpg) || 0;
@@ -327,6 +327,42 @@ async function startServer() {
                 res.status(500).send("Error retrieving stats");
             }
         });
+
+        // Get Users Endpoint -------------------------------------------------------------------
+        app.get('/api/getUsers/:username', async (req, res) => {
+            const username = req.params.username.toLowerCase();
+            try {
+                const db = client.db('journeyAppDb');
+                const user = await db.collection('users').findOne({username}, {projection: {password: 0}});
+                if (!user) return res.status(404).send('No user found.');
+                res.json(user);
+            } catch (err) {
+                console.error("Error retrieving user:", err);
+                res.status(500).send("Error retrieving user");
+            }
+        });
+
+        // Save User Endpoint -----------------------------------------------------------------
+        app.put('/api/saveUsers/:username', async (req, res) => {
+            const username = req.params.username.toLowerCase();
+            const {tankVolume, defFuelCost}=req.body;
+
+            try{
+                const db = client.db('journeyAppDb');
+                const result = await db.collection('users').updateOne(
+                    {username},
+                    {$set: {tankVolume, defFuelCost}}
+                );
+                if (result.matchedCount===0) return res.status(404).send('No user found.');
+                res.send("Successfully updated");
+            } catch (err) {
+                console.error("Error updating settings user:", err);
+                res.status(500).send("Error updating user");
+            }
+        })
+
+
+        // Save Users Endpoint ------------------------------------------------------------------
 
         app.listen(3000, () => {
             console.log('Server running at http://localhost:3000');
