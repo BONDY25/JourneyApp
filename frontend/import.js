@@ -12,10 +12,10 @@ importBtn.addEventListener('click', () => {
     }
 
     Papa.parse(file, {
-        header: true, // <-- CSV columns become object keys
+        header: true, // CSV columns become object keys
         dynamicTyping: true, // automatically convert numbers
         skipEmptyLines: true,
-        complete: async function(results) {
+        complete: async function (results) {
             console.log("Parsed CSV:", results.data); // check in console
 
             const journeys = results.data;

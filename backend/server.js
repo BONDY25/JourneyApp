@@ -11,6 +11,7 @@ import {fileURLToPath} from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+const tankVolume = 64;
 
 const app = express();
 app.use(express.json());
@@ -194,7 +195,7 @@ async function startServer() {
                 let journeys = req.body;
                 console.log(journeys);
 
-                // Check is Array has data
+                // Check if Array has data
                 if (!Array.isArray(journeys) || journeys.length === 0) {
                     return res.status(400).send("No journeys provided");
                 }
@@ -238,6 +239,92 @@ async function startServer() {
             } catch (err) {
                 console.error("Error importing journeys:", err);
                 res.status(500).send("Error importing journeys");
+            }
+        });
+
+        // Full Stats Endpoint ---------------------------------------------------------------
+        app.get('/api/stats/:username', async (req, res) => {
+            // Declare Parameters
+            const username = req.params.username;
+            const {start, end} = req.query;
+
+            try {
+                const query = {user: username};
+
+                // Check date parameters
+                if (start || end) {
+                    query.dateTime = {};
+                    if (start) query.dateTime.$gte = new Date(start);
+                    if (end) {
+                        const endDate = new Date(end);
+                        endDate.setHours(23, 59, 59, 999); // Included end of the date
+                        query.dateTime.$lte = endDate;
+                    }
+                }
+
+                const journeysData = await journeys.find(query).toArray();
+                console.log(journeysData);
+
+                // Handle empty array
+                if (!journeysData || journeysData.length === 0) {
+                    return res.json({
+                        totalMiles: 0,
+                        totalTime: 0,
+                        totalFuel: 0,
+                        totalCost: 0,
+                        avgMilesPerTank: 0,
+                        avgMpg: 0,
+                        avgSpeed: 0,
+                        avgCostPerDay: 0,
+                        avgCostPerMile: 0,
+                        avgFuelPrice: 0,
+                        avgTemp: 0,
+                        avgTimeDriven: 0
+                    });
+                }
+
+                // Calculate base totals
+                const totalMiles = journeysData.reduce((sum, j) => sum + j.distance, 0);
+                const totalTime = journeysData.reduce((sum, j) => sum + j.timeDriven, 0);
+                const totalFuel = journeysData.reduce((sum, j) => sum + j.fuelUsedL, 0);
+                const totalCost = journeysData.reduce((sum, j) => sum + j.totalCost, 0);
+
+                // Calculate Averages
+                const avgTimeDriven = totalTime / journeysData.length;
+                const avgMpg = journeysData.reduce((sum, j) => +j.mpg, 0) / journeysData.length;
+                const avgSpeed = journeysData.reduce((sum, j) => sum + j.avgSpeed, 0) / journeysData.length;
+                const avgFuelPrice = journeysData.reduce((sum, j) => sum + j.costPl, 0) / journeysData.length;
+                const avgTemp = journeysData.reduce((sum, j) => sum + j.temp, 0) / journeysData.length;
+
+                // Derived Stats
+                const avgMilesPerTank = totalFuel > 0 ? totalMiles / totalFuel * tankVolume : 0;
+                const avgCostPerDay = (() => {
+                    const dates = journeysData.map(j => new Date(j.dateTime));
+                    const minDate = start ? new Date(start) : new Date(Math.min(...dates));
+                    const maxDate = end ? new Date(end) : new Date(Math.max(...dates));
+                    const diffDays = Math.max(1, Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24)));
+                    return totalCost / diffDays;
+                })();
+                const avgCostPerMile = totalMiles > 0 ? totalCost / totalMiles : 0;
+
+                // Build object
+                res.json({
+                    totalMiles,
+                    totalTime,
+                    totalFuel,
+                    totalCost,
+                    avgMilesPerTank,
+                    avgMpg,
+                    avgSpeed,
+                    avgCostPerDay,
+                    avgCostPerMile,
+                    avgFuelPrice,
+                    avgTemp,
+                    avgTimeDriven
+                });
+            } catch (err) {
+                console.error("Error retrieving stats:", err);
+                res.status(500).send("Error retrieving stats");
             }
         });
 
