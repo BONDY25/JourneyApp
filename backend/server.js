@@ -41,7 +41,7 @@ async function startServer() {
                 const logEntry = req.body;
                 console.log(logEntry);
                 const db = client.db('journeyAppDb');
-                await db.collection('users').insertOne(logEntry);
+                await db.collection('logBook').insertOne(logEntry);
                 res.status(200).json({success: true, message: "Log recorded"});
             } catch (err) {
                 console.error('Error saving log:', err);

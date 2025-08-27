@@ -1,7 +1,7 @@
 export default class SessionMaintenance {
 
     // Global Variables
-    static debugMode = true;
+    static debugMode = false;
     static currentVersion = "1.0.0";
     static appName = "journeyApp";
     static sessionId = null;
@@ -11,6 +11,11 @@ export default class SessionMaintenance {
     static startSession(username) {
         this.sessionId = crypto.randomUUID();
         this.username = username;
+
+        // Save Session ID & Username
+        localStorage.setItem("username", this.username);
+        localStorage.setItem("sessionId", this.sessionId);
+
         this.logBook("SessionMaintenance", "startSession", `Starting session for ${username}`);
     }
 
@@ -21,8 +26,8 @@ export default class SessionMaintenance {
             timestamp: new Date().toISOString(),
             app: this.appName,
             version: this.currentVersion,
-            sessionId: this.sessionId,
-            username: this.username,
+            sessionId: this.sessionId ?? localStorage.getItem("sessionId"),
+            username: this.username ?? localStorage.getItem("username"),
             source,
             func,
             notes
@@ -38,7 +43,7 @@ export default class SessionMaintenance {
         } else {
             console.log(entry);
             try {
-                await fetch("/api/logBook", {
+                await fetch("http://localhost:3000/api/logBook", {
                     method: "POST",
                     headers: {"content-type": "application/json"},
                     body: JSON.stringify(entry)

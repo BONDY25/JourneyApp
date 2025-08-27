@@ -11,6 +11,11 @@ window.addEventListener('DOMContentLoaded', async () => {
     console.log("Fuel cost from localStorage:", localStorage.getItem('fuelCost'));
 });
 
+// Check Fields --------------------------------------------------------------
+function checkFields(fields) {
+    return fields && fields.length > 0;
+}
+
 // Get Submit button
 const submit = document.getElementById('submit');
 
@@ -31,6 +36,8 @@ async function calculateValues({timeUnit = 'minutes', gallon = 'imperial'} = {})
     const temp = Number(document.getElementById('temp').value);
     const condition = String(document.getElementById('condition').value);
     const costPerLitre = Number(document.getElementById('cost').value);
+
+
 
     // Calculate Helpers
     const hours = timeUnit === 'minutes' ? (timeDriven / 60) : timeDriven;
@@ -75,27 +82,32 @@ submit.addEventListener('click', async (event) => {
     await SessionMaintenance.logBook("newJourney", "submit.click", "Journey Submission attempted.");
 
     const journeyData = calculateValues(64);
+    const description = String(document.getElementById('description').value);
 
-    try {
-        const res = await fetch('http://localhost:3000/api/journeys', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(journeyData)
-        });
-
-        if (res.ok) {
-            await SessionMaintenance.logBook("newJourney", "submit.click", "Journey Submission Successful.");
-            window.location.href = "home.html";
-            alert('Journey Save!');
-        } else {
-            const err = await res.text();
-            await SessionMaintenance.logBook("newJourney", "submit.click", "Journey Submission failed.");
-            alert(`Error: ${err}`);
-        }
-    } catch (error) {
-        await SessionMaintenance.logBook("newJourney", "submit.click", `Network Error: ${error}`, true);
+    if(!checkFields(description)){
+        alert('Please enter a description');
     }
+    else {
+        try {
+            const res = await fetch('http://localhost:3000/api/journeys', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(journeyData)
+            });
 
+            if (res.ok) {
+                await SessionMaintenance.logBook("newJourney", "submit.click", "Journey Submission Successful.");
+                window.location.href = "home.html";
+                alert('Journey Save!');
+            } else {
+                const err = await res.text();
+                await SessionMaintenance.logBook("newJourney", "submit.click", "Journey Submission failed.");
+                alert(`Error: ${err}`);
+            }
+        } catch (error) {
+            await SessionMaintenance.logBook("newJourney", "submit.click", `Network Error: ${error}`, true);
+        }
+    }
 });

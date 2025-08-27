@@ -39,10 +39,10 @@ submitLogin.addEventListener('click', async (e) => {
         }
 
         // Store username
-        localStorage.setItem('username', username);
         await getDefaults(username);
         SessionMaintenance.startSession(username);
         window.location.href = "home.html";
+
     } catch (error) {
         console.error('Network Error:', error);
         alert(`Network Error: ${error}`);
