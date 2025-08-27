@@ -1,3 +1,5 @@
+import SessionMaintenance from "./sessionMaintenance.js";
+
 const submitLogin = document.getElementById('submitLogin');
 const submitReg = document.getElementById('submitRegister');
 
@@ -39,7 +41,7 @@ submitLogin.addEventListener('click', async (e) => {
         // Store username
         localStorage.setItem('username', username);
         await getDefaults(username);
-
+        SessionMaintenance.startSession(username);
         window.location.href = "home.html";
     } catch (error) {
         console.error('Network Error:', error);
@@ -71,6 +73,9 @@ submitReg.addEventListener('click', async (e) => {
             localStorage.setItem('username', username);
             localStorage.setItem('tankVolume', '64');
             localStorage.setItem('fuelCost', '1.4');
+
+            SessionMaintenance.startSession(username);
+
             window.location.href = "home.html";
         } else {
             const err = await res.text();

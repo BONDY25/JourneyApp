@@ -1,22 +1,27 @@
-// Populate default values
-window.addEventListener('DOMContentLoaded', () => {
+import SessionMaintenance from "./sessionMaintenance.js";
+
+// window loaded event listener ------------------------------------------------------------------------
+window.addEventListener('DOMContentLoaded', async () => {
+    await SessionMaintenance.logBook("newJourney", "window.DOMContentLoaded", "New Journey page loaded");
     const costField = document.getElementById('cost');
-    if(costField){
+    if (costField) {
         const storedCost = localStorage.getItem('fuelCost');
-        costField.value = storedCost!== null ? parseFloat(storedCost) : 0;
+        costField.value = storedCost !== null ? parseFloat(storedCost) : 0;
     }
     console.log("Fuel cost from localStorage:", localStorage.getItem('fuelCost'));
 });
 
+// Get Submit button
 const submit = document.getElementById('submit');
 
 // Calculate values-----------------------------------------------
-function calculateValues({timeUnit = 'minutes', gallon = 'imperial'} = {}) {
-    console.log("Calculating Values");
+async function calculateValues({timeUnit = 'minutes', gallon = 'imperial'} = {}) {
+    await SessionMaintenance.logBook("newJourney", "calculateValues", "Calculating Values");
 
     // Get tank volume from user defaults
     const tankVolume = Number(localStorage.getItem('tankVolume')) ?? 64;
 
+    // Get Elements
     const description = String(document.getElementById('description').value);
     const dateTimeRaw = (document.getElementById('datetime').value);
     const dateTime = dateTimeRaw ? new Date(dateTimeRaw) : null;
@@ -27,11 +32,13 @@ function calculateValues({timeUnit = 'minutes', gallon = 'imperial'} = {}) {
     const condition = String(document.getElementById('condition').value);
     const costPerLitre = Number(document.getElementById('cost').value);
 
+    // Calculate Helpers
     const hours = timeUnit === 'minutes' ? (timeDriven / 60) : timeDriven;
     const safeHours = hours > 0 ? hours : null;
     const GALLON_L = (gallon === 'us') ? 3.79541 : 4.54609;
     const milesPerLitre = mpg > 0 ? (mpg / GALLON_L) : null;
 
+    // Calculate Values
     const avgSpeed = safeHours ? (distance / safeHours) : 0;
     const fuelUsedL = milesPerLitre ? (distance / milesPerLitre) : 0;
     const costPerMile = milesPerLitre ? (costPerLitre / milesPerLitre) : 0;
@@ -41,6 +48,7 @@ function calculateValues({timeUnit = 'minutes', gallon = 'imperial'} = {}) {
     const user = localStorage.getItem('username');
     const round = (n, dp = 3) => Number(Number(n).toFixed(dp));
 
+    // Construct Output
     const output = {
         user,
         description,
@@ -57,14 +65,14 @@ function calculateValues({timeUnit = 'minutes', gallon = 'imperial'} = {}) {
         fuelUsedL: round(fuelUsedL, 2),
         percOfTank: round(percOfTank, 4),
     }
-    console.log(output);
+    await SessionMaintenance.logBook("newJourney", "calculateValues", `Values Calculated: ${output}`);
     return output;
 }
 
 // Event Listener to submit form ---------------------------------------------------------------------
 submit.addEventListener('click', async (event) => {
     event.preventDefault(); // Stop form reload
-    console.log("Journey Submission attempted.");
+    await SessionMaintenance.logBook("newJourney", "submit.click", "Journey Submission attempted.");
 
     const journeyData = calculateValues(64);
 
@@ -78,16 +86,16 @@ submit.addEventListener('click', async (event) => {
         });
 
         if (res.ok) {
-            console.log("Journey Submission Successful.");
+            await SessionMaintenance.logBook("newJourney", "submit.click", "Journey Submission Successful.");
             window.location.href = "home.html";
             alert('Journey Save!');
         } else {
             const err = await res.text();
-            console.log("Journey Submission failed.");
+            await SessionMaintenance.logBook("newJourney", "submit.click", "Journey Submission failed.");
             alert(`Error: ${err}`);
         }
     } catch (error) {
-        console.log('Network Error:', error);
+        await SessionMaintenance.logBook("newJourney", "submit.click", `Network Error: ${error}`, true);
     }
 
 });

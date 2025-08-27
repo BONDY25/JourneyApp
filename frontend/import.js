@@ -1,5 +1,12 @@
+import SessionMaintenance from "./sessionMaintenance.js";
+
 const fileInput = document.getElementById("csvFile");
 const importBtn = document.getElementById("importBtn");
+
+// window loaded event listener ------------------------------------------------------------------------
+window.addEventListener('DOMContentLoaded', async () => {
+    await SessionMaintenance.logBook("import", "window.DOMContentLoaded", "Import page loaded");
+});
 
 // Import button Clicked -------------------------------------------------------------------
 importBtn.addEventListener('click', () => {
@@ -16,11 +23,12 @@ importBtn.addEventListener('click', () => {
         dynamicTyping: true, // automatically convert numbers
         skipEmptyLines: true,
         complete: async function (results) {
-            console.log("Parsed CSV:", results.data); // check in console
+            await SessionMaintenance.logBook("import", "importBtn.click", `Parsed CSV: ${results.data}`);
 
             const journeys = results.data;
 
             if (!Array.isArray(journeys) || journeys.length === 0) {
+                await SessionMaintenance.logBook("import", "importBtn.click", "No journeys found in CSV");
                 alert("No journeys found in CSV");
                 return;
             }
@@ -39,10 +47,11 @@ importBtn.addEventListener('click', () => {
                     fileInput.value = "";
                 } else {
                     const err = await res.text();
+                    await SessionMaintenance.logBook("import", "importBtn.click", `Error importing journeys: ${err}`);
                     alert(`Error importing journeys: ${err}`);
                 }
             } catch (err) {
-                console.error("Network Error:", err);
+                await SessionMaintenance.logBook("import", "importBtn.click", `Network Error: ${err}`, true);
                 alert("Network error while importing CSV");
             }
         }
