@@ -1,17 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Journey App - Your Journeys</title>
-  <link href="assets/styles.css" rel="stylesheet"/>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Journey App - Your Journeys</title>
+    <link href="assets/styles.css" rel="stylesheet"/>
 </head>
 <body>
-<div id = "app" class = "app">
-  <h1>Your Journeys</h1>
-  <div class = button-group>
-    <a href = "home.html"><button type="button" id = "back" class = "button">Back</button></a>
-  </div>
+<div id="app" class="app">
+    <h1>Your Journeys</h1>
+    <div id="table-container" class="stats">
+        <table id="journeys-table">
+            <thead>
+            <tr>
+                <th>Date/Time</th>
+                <th>Description</th>
+                <th>Distance (miles)</th>
+            </tr>
+            </thead>
+            <tbody>
+            <!-- rows will go here dynamically -->
+            </tbody>
+        </table>
+    </div>
+    <div class=button-group>
+        <a href="home.html">
+            <button type="button" id="back" class="button">Back</button>
+        </a>
+    </div>
 </div>
+<!-- Link to the JavaScript file -->
+<script type="module" src="yourJourneys.js"></script>
 </body>
 </html>

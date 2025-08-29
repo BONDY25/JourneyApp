@@ -5,7 +5,7 @@ dotenv.config();
 
 import express from 'express';
 import cors from 'cors';
-import {MongoClient} from 'mongodb';
+import {MongoClient, ObjectId} from 'mongodb';
 import path from 'path';
 import {fileURLToPath} from 'url';
 
@@ -359,21 +359,52 @@ async function startServer() {
         // Save User Endpoint -----------------------------------------------------------------
         app.put('/api/saveUsers/:username', async (req, res) => {
             const username = req.params.username.toLowerCase();
-            const {tankVolume, defFuelCost}=req.body;
+            const {tankVolume, defFuelCost} = req.body;
 
-            try{
+            try {
                 const db = client.db('journeyAppDb');
                 const result = await db.collection('users').updateOne(
                     {username},
                     {$set: {tankVolume, defFuelCost}}
                 );
-                if (result.matchedCount===0) return res.status(404).send('No user found.');
+                if (result.matchedCount === 0) return res.status(404).send('No user found.');
                 res.send("Successfully updated");
             } catch (err) {
                 console.error("Error updating settings user:", err);
                 res.status(500).send("Error updating user");
             }
-        })
+        });
+
+        // Your Journeys Endpoint ----------------------------------------------------------------
+        app.get('/api/getJourneys', async (req, res) => {
+            try {
+                const {username} = req.params;
+
+                // Find all journeys for the username
+                const journeys = await db.collection('journeys')
+                    .find({username: username})
+                    .sort({dateTime: -1}) // newest first
+                    .toArray();
+
+                res.json(journeys);
+            } catch (err) {
+                console.error("Error retrieving journeys", err);
+                res.status(500).send("Error retrieving journeys");
+            }
+        });
+
+        // Journey Details Endpoint ------------------------------------------------------------------
+        app.get('/api/journeyDetails/:id', async (req, res) => {
+            try {
+                const journeyId = req.params.id;
+                const journey = await db.collection('journeyDetails').findOne({_id: new ObjectId(journeyId)});
+                if (!journey) return res.status(404).send('No journey found.');
+                res.json(journey);
+            } catch (err) {
+                console.error("Error retrieving Journey detail:", err);
+                res.status(500).send("Error retrieving Journey detail");
+            }
+        });
 
         app.listen(3000, () => {
             console.log('Server running at http://localhost:3000');
