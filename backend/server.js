@@ -394,17 +394,22 @@ async function startServer() {
         });
 
         // Journey Details Endpoint ------------------------------------------------------------------
-        app.get('/api/journeyDetails/:id', async (req, res) => {
+        app.get("/api/getJourney/:id", async (req, res) => {
             try {
                 const journeyId = req.params.id;
-                const journey = await db.collection('journeyDetails').findOne({_id: new ObjectId(journeyId)});
-                if (!journey) return res.status(404).send('No journey found.');
+                const journey = await db.collection("journeys").findOne({ _id: new ObjectId(journeyId) });
+
+                if (!journey) {
+                    return res.status(404).json({ error: "Journey not found" });
+                }
+
                 res.json(journey);
-            } catch (err) {
-                console.error("Error retrieving Journey detail:", err);
-                res.status(500).send("Error retrieving Journey detail");
+            } catch (error) {
+                console.error("Error fetching journey:", error);
+                res.status(500).json({ error: "Failed to fetch journey" });
             }
         });
+
 
         app.listen(3000, () => {
             console.log('Server running at http://localhost:3000');

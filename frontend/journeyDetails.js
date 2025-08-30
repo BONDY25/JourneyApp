@@ -1,18 +1,42 @@
-import SessionMaintenance from "./sessionMaintenance";
+import SessionMaintenance from "./sessionMaintenance.js";
 
 // window loaded event listener ------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
     await SessionMaintenance.logBook("journeyDetails", "window.DOMContentLoaded", "journey page loaded");
-    await getJourneys();
+
+    // Get ID from URL
+    const params = new URLSearchParams(window.location.search);
+    const journeyId = params.get("id");
+
+    // Log what we got
+    await SessionMaintenance.logBook("journeyDetails", "window.DOMContentLoaded", `Journey ID from URL: ${journeyId}`);
+
+    await getJourneys(journeyId);
 });
 
-// Get Journeys -----------------------------------------------------------------------------------------
-async function getJourneys() {
-    try {
-        // Get ID from URL
-        const params = new URLSearchParams(window.location.search);
-        const journeyId = params.get("id");
+// Format Date -----------------------------------------------------------------------------------------
+function formatDateTime(value){
+    if(!value){
+        return "-";
+    }
+    const date = new Date(value);
+    return date.toLocaleDateString("en-GB", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
 
+function formatNumber(value, decimals = 2){
+    if(value==null||value==="") return "-";
+    return Number(value).toFixed(decimals);
+}
+
+// Get Journeys -----------------------------------------------------------------------------------------
+async function getJourneys(journeyId) {
+    try {
         if (!journeyId) {
             await SessionMaintenance.logBook("journeyDetails", "getJourney", `No Journey Found ${journeyId}`, true);
             return;
@@ -30,21 +54,22 @@ async function getJourneys() {
         if (!response.ok) throw new Error("Failed to get journey details");
 
         const journey = await response.json();
-        await SessionMaintenance.logBook("journeyDetails", "getJourney", `journey Data: ${journey}`);
+        await SessionMaintenance.logBook("journeyDetails", "getJourney", `journey Data: ${JSON.stringify(journey)}`);
 
-        // Populate Fields
-        document.getElementById("DateTime").textContent = journey.dateTime || "-";
+
+// Populate Fields
+        document.getElementById("DateTime").textContent = formatDateTime(journey.dateTime);
         document.getElementById("description").textContent = journey.description || "-";
-        document.getElementById("distance").textContent = journey.distance || "0";
-        document.getElementById("timeDriven").textContent = journey.timeDriven || "-";
-        document.getElementById("fuelUsedL").textContent = journey.fuelUsedL || "0";
-        document.getElementById("cost").textContent = journey.cost || "0";
-        document.getElementById("mpg").textContent = journey.mpg || "0";
-        document.getElementById("temp").textContent = journey.temp || "0";
+        document.getElementById("distance").textContent = journey.distance ? `${formatNumber(journey.distance, 1)} mi` : "0 mi";
+        document.getElementById("timeDriven").textContent = `${journey.timeDriven} mins` || "-";
+        document.getElementById("fuelUsedL").textContent = journey.fuelUsedL ? `${formatNumber(journey.fuelUsedL, 2)} L` : "0 L";
+        document.getElementById("cost").textContent = journey.totalCost ? `£${formatNumber(journey.totalCost, 2)}` : "£0.00";
+        document.getElementById("mpg").textContent = journey.mpg ? `${formatNumber(journey.mpg, 1)}` : "0 mpg";
+        document.getElementById("temp").textContent = journey.temp ? `${formatNumber(journey.temp, 1)} °C` : "0 °C";
         document.getElementById("condition").textContent = journey.condition || "-";
-        document.getElementById("avgSpeed").textContent = journey.avgSpeed || "0";
-        document.getElementById("costPerMile").textContent = journey.costPerMile || "0";
-        document.getElementById("percOfTank").textContent = journey.percOfTank || "0";
+        document.getElementById("avgSpeed").textContent = journey.avgSpeed ? `${formatNumber(journey.avgSpeed, 1)} mph` : "0 mph";
+        document.getElementById("costPerMile").textContent = journey.costPerMile ? `£${formatNumber(journey.costPerMile, 2)}/mi` : "£0.00/mi";
+        document.getElementById("percOfTank").textContent = journey.percOfTank ? `${formatNumber(journey.percOfTank * 100, 2)} %` : "0 %";
     } catch (err) {
         await SessionMaintenance.logBook("journeyDetails", "getJourney", `Error getting journeys ${err}`, true);
     }

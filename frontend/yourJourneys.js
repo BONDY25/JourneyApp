@@ -37,7 +37,7 @@ async function getJourneys(tableBody, username) {
       `;
 
             row.addEventListener("click", () => {
-                window.location.href = `journey-detail.html?id=${journey._id}`;
+                window.location.href = `journey-details.html?id=${journey._id}`;
             });
 
             tableBody.appendChild(row);
