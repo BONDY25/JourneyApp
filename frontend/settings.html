@@ -1,34 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Journey App - Settings</title>
-  <link href="assets/styles.css" rel="stylesheet"/>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Journey App - Settings</title>
+    <link href="assets/styles.css" rel="stylesheet"/>
 </head>
 <body>
 <div id="app" class="app">
-  <h1>Settings</h1>
-  <div id="prams" class="stats">
-    <p>Username: <span id="username">John Doe</span></p>
-    <p>Total Journeys: <span id="totalJourneys">0</span></p>
-    <form id="settingsForm">
-      <label for="tankVolume">Default Tank Volume (L):</label>
-      <input type="number" id="tankVolume" step="0.1" min="0"/>
+    <h1>Settings</h1>
+    <div id="prams" class="stats">
+        <p>Username: <span id="username">John Doe</span></p>
+        <p>Total Journeys: <span id="totalJourneys">0</span></p>
+        <form id="settingsForm">
+            <label for="tankVolume">Default Tank Volume (L):</label>
+            <input type="number" id="tankVolume" step="0.1" min="0"/>
 
-      <label for="fuelCost">Default Fuel Cost (£/L):</label>
-      <input type="number" id="fuelCost" step="0.01" min="0"/>
+            <label for="fuelCost">Default Fuel Cost (£/L):</label>
+            <input type="number" id="fuelCost" step="0.01" min="0"/>
 
-      <button type="submit" class="button">Save</button>
-    </form>
-  </div>
-  <div class=button-group>
-    <a href="home.html">
-      <button type="button" id="back" class="button">Back</button>
-    </a>
-  </div>
+            <label for="gallon-select">Gallon (US/UK):</label>
+            <select id="gallon-select">
+                <option value="UK">UK</option>
+                <option value="US">US</option>
+            </select>
+
+            <label for="font-select">Choose Font:</label>
+            <select id="font-select">
+                <option value="Lexend">Normal</option>
+                <option value="Roboto Condensed">Roboto</option>
+                <option value="Google Sans Code">Code</option>
+                <option value="Permanent Marker">Permanent Marker</option>
+                <option value="Monsieur La Doulaise">Fancy</option>
+            </select>
+
+            <!-- <label for="theme-select">Choose Theme:</label>
+             <select id="theme-select">
+               <option value="Dark">Dark</option>
+               <option value="Light">Light</option>
+             </select>
+           -->
+            <button type="submit" class="button">Save</button>
+        </form>
+    </div>
+    <div class=button-group>
+        <a href="home.html">
+            <button type="button" id="back" class="button">Back</button>
+        </a>
+    </div>
 </div>
 <!-- Link to the JavaScript file -->
-<script type = "module" src="settings.js"></script>
+<script type="module" src="settings.js"></script>
 </body>
 </html>

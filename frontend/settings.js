@@ -1,6 +1,17 @@
 // Content loaded event listener -------------------------------------------------------------
 import SessionMaintenance from "./sessionMaintenance.js";
 
+const fontSelect = document.getElementById('font-select');
+
+// Font Select -----------------------------------------------------------------------
+fontSelect.addEventListener('change', (e) => {
+    document.documentElement.style.setProperty(
+        '--default-font',
+        `${e.target.value}, sans-serif`
+    );
+});
+
+// window loaded event listener ------------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', async () => {
     await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Settings page loaded");
     const username = localStorage.getItem('username');
@@ -18,6 +29,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const user = await res.json();
             document.getElementById('tankVolume').value = user.tankVolume ?? "";
             document.getElementById('fuelCost').value = user.defFuelCost ?? "";
+            document.getElementById('gallon-select').value = user.gallon ?? "UK";
+            document.getElementById('font-select').value = user.userFont ?? "Lexend";
+
         } else {
             await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Failed fetching user settings", true);
         }
@@ -31,13 +45,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const tankVolume = Number(document.getElementById('tankVolume').value);
         const fuelCost = Number(document.getElementById('fuelCost').value);
+        let gallon = document.getElementById('gallon-select').value.toUpperCase();
+        if (!gallon || gallon.trim() === "") gallon = "UK";
+        const userFont = document.getElementById('font-select').value || "Lexend";
+
+        console.log("Saving settings:", {tankVolume, defFuelCost: fuelCost, gallon, userFont});
 
         try {
             const res = await fetch(`http://localhost:3000/api/saveUsers/${username}`, {
                 method: 'PUT',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({tankVolume, defFuelCost: fuelCost}),
+                body: JSON.stringify({tankVolume, defFuelCost: fuelCost, gallon, userFont}),
             });
+
+            // Update Local storage
+            localStorage.setItem('tankVolume', tankVolume.toString());
+            localStorage.setItem('fuelCost', fuelCost.toString());
+            localStorage.setItem('gallon', gallon);
+            localStorage.setItem('userFont', userFont);
 
             if (res.ok) {
                 await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Settings saved successfully");

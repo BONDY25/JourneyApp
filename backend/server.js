@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import bcrypt from 'bcrypt';
+import bcryptjs from 'bcryptjs';
 
 dotenv.config();
 
@@ -78,7 +78,7 @@ async function startServer() {
                 }
 
                 // Hash password
-                const hashedPassword = await bcrypt.hash(req.body.password, 10);
+                const hashedPassword = await bcryptjs.hash(req.body.password, 10);
 
                 // create user document to insert
                 const userDoc = {
@@ -110,7 +110,7 @@ async function startServer() {
                 }
 
                 // Compare password
-                const isMatch = await bcrypt.compare(password, user.password);
+                const isMatch = await bcryptjs.compare(password, user.password);
                 if (!isMatch) {
                     return res.status(400).send('Invalid username or password');
                 }
@@ -359,13 +359,13 @@ async function startServer() {
         // Save User Endpoint -----------------------------------------------------------------
         app.put('/api/saveUsers/:username', async (req, res) => {
             const username = req.params.username.toLowerCase();
-            const {tankVolume, defFuelCost} = req.body;
+            const {tankVolume, defFuelCost, gallon, userFont} = req.body;
 
             try {
                 const db = client.db('journeyAppDb');
                 const result = await db.collection('users').updateOne(
                     {username},
-                    {$set: {tankVolume, defFuelCost}}
+                    {$set: {tankVolume, defFuelCost, gallon, userFont}}
                 );
                 if (result.matchedCount === 0) return res.status(404).send('No user found.');
                 res.send("Successfully updated");
@@ -397,16 +397,16 @@ async function startServer() {
         app.get("/api/getJourney/:id", async (req, res) => {
             try {
                 const journeyId = req.params.id;
-                const journey = await db.collection("journeys").findOne({ _id: new ObjectId(journeyId) });
+                const journey = await db.collection("journeys").findOne({_id: new ObjectId(journeyId)});
 
                 if (!journey) {
-                    return res.status(404).json({ error: "Journey not found" });
+                    return res.status(404).json({error: "Journey not found"});
                 }
 
                 res.json(journey);
             } catch (error) {
                 console.error("Error fetching journey:", error);
-                res.status(500).json({ error: "Failed to fetch journey" });
+                res.status(500).json({error: "Failed to fetch journey"});
             }
         });
 

@@ -73,6 +73,9 @@ submitReg.addEventListener('click', async (e) => {
             localStorage.setItem('username', username);
             localStorage.setItem('tankVolume', '64');
             localStorage.setItem('fuelCost', '1.4');
+            localStorage.setItem('gallon', 'UK');
+            localStorage.setItem('userFont', 'Lexend');
+
 
             SessionMaintenance.startSession(username);
 

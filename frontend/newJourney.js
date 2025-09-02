@@ -20,7 +20,7 @@ function checkFields(fields) {
 const submit = document.getElementById('submit');
 
 // Calculate values-----------------------------------------------
-async function calculateValues({timeUnit = 'minutes', gallon = 'imperial'} = {}) {
+async function calculateValues({timeUnit = 'minutes'} = {}) {
     await SessionMaintenance.logBook("newJourney", "calculateValues", "Calculating Values");
 
     // Get tank volume from user defaults
@@ -37,12 +37,11 @@ async function calculateValues({timeUnit = 'minutes', gallon = 'imperial'} = {})
     const condition = String(document.getElementById('condition').value);
     const costPerLitre = Number(document.getElementById('cost').value);
 
-
-
     // Calculate Helpers
+    const gallon = localStorage.getItem('gallon');
     const hours = timeUnit === 'minutes' ? (timeDriven / 60) : timeDriven;
     const safeHours = hours > 0 ? hours : null;
-    const GALLON_L = (gallon === 'us') ? 3.79541 : 4.54609;
+    const GALLON_L = (gallon === 'US') ? 3.79541 : 4.54609;
     const milesPerLitre = mpg > 0 ? (mpg / GALLON_L) : null;
 
     // Calculate Values
@@ -81,13 +80,12 @@ submit.addEventListener('click', async (event) => {
     event.preventDefault(); // Stop form reload
     await SessionMaintenance.logBook("newJourney", "submit.click", "Journey Submission attempted.");
 
-    const journeyData = calculateValues(64);
+    const journeyData = calculateValues();
     const description = String(document.getElementById('description').value);
 
-    if(!checkFields(description)){
+    if (!checkFields(description)) {
         alert('Please enter a description');
-    }
-    else {
+    } else {
         try {
             const res = await fetch('http://localhost:3000/api/journeys', {
                 method: 'POST',
@@ -96,6 +94,9 @@ submit.addEventListener('click', async (event) => {
                 },
                 body: JSON.stringify(journeyData)
             });
+
+            // Save fuel cost in case of change
+            localStorage.setItem('fuelCost', (await journeyData).costPl.toString());
 
             if (res.ok) {
                 await SessionMaintenance.logBook("newJourney", "submit.click", "Journey Submission Successful.");
