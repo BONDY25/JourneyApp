@@ -1,4 +1,5 @@
 import SessionMaintenance from "./sessionMaintenance.js";
+import { API_BASE_URL } from "./config.js";
 
 // window loaded event listener ------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
@@ -20,7 +21,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 // Load summary --------------------------------------------------------------------------------------
 async function loadSummary(username) {
     try {
-        const res = await fetch(`http://localhost:3000/api/summary/${username}`);
+        const res = await fetch(`${API_BASE_URL}/api/summary/${username}`);
         const summary = await res.json();
 
         document.getElementById('totalMiles').textContent = summary.totalMiles.toFixed(1);
@@ -38,7 +39,7 @@ async function loadSummary(username) {
 // Load Costs -------------------------------------------------------------------------------------
 async function loadCosts(username) {
     try {
-        const res = await fetch(`http://localhost:3000/api/costs/${username}`);
+        const res = await fetch(`${API_BASE_URL}/api/costs/${username}`);
         if (!res.ok) throw new Error("Failed to fetch costs");
 
         const data = await res.json();

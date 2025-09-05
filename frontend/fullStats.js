@@ -1,4 +1,5 @@
 import SessionMaintenance from "./sessionMaintenance.js";
+import { API_BASE_URL } from "./config.js";
 
 const getStatsBtn = document.getElementById('getStats');
 
@@ -17,7 +18,7 @@ getStatsBtn.addEventListener('click', async () => {
     try {
         // Get Data Endpoint
         await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", `Getting full stats: (${start}, ${end})`);
-        const res = await fetch(`http://localhost:3000/api/stats/${username}?start=${start}&end=${end}`);
+        const res = await fetch(`${API_BASE_URL}/api/stats/${username}?start=${start}&end=${end}`);
         const data = await res.json();
         await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", `Full Stats retrieved: ${data}`);
 

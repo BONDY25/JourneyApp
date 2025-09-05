@@ -1,4 +1,5 @@
 import SessionMaintenance from "./sessionMaintenance.js";
+import { API_BASE_URL } from "./config.js";
 
 // window loaded event listener ------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
@@ -46,7 +47,7 @@ async function getJourneys(journeyId) {
         await SessionMaintenance.logBook("journeyDetails", "getJourney", `Getting journey ${journeyId}`);
 
         // Get Journey Details
-        const response = await fetch(`http://localhost:3000/api/getJourney/${journeyId}`, {
+        const response = await fetch(`${API_BASE_URL}/api/getJourney/${journeyId}`, {
             method: "GET",
             headers: {"Content-Type": "application/json"}
         });

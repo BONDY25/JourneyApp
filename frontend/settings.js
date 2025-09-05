@@ -1,5 +1,5 @@
-// Content loaded event listener -------------------------------------------------------------
 import SessionMaintenance from "./sessionMaintenance.js";
+import { API_BASE_URL } from "./config.js";
 
 const fontSelect = document.getElementById('font-select');
 
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Fetch current user settings
     try {
         await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Getting current user settings");
-        const res = await fetch(`http://localhost:3000/api/getUsers/${username}`);
+        const res = await fetch(`${API_BASE_URL}/api/getUsers/${username}`);
 
         if (res.ok) {
             const user = await res.json();
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log("Saving settings:", {tankVolume, defFuelCost: fuelCost, gallon, userFont});
 
         try {
-            const res = await fetch(`http://localhost:3000/api/saveUsers/${username}`, {
+            const res = await fetch(`${API_BASE_URL}/api/saveUsers/${username}`, {
                 method: 'PUT',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({tankVolume, defFuelCost: fuelCost, gallon, userFont}),

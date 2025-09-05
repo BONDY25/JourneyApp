@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import bcryptjs from 'bcryptjs';
 
 dotenv.config();
+console.log("Mongo URI:", process.env.MONGO_URI); // test output
 
 import express from 'express';
 import cors from 'cors';

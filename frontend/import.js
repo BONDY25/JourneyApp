@@ -1,4 +1,5 @@
 import SessionMaintenance from "./sessionMaintenance.js";
+import { API_BASE_URL } from "./config.js";
 
 const fileInput = document.getElementById("csvFile");
 const importBtn = document.getElementById("importBtn");
@@ -34,7 +35,7 @@ importBtn.addEventListener('click', () => {
             }
 
             try {
-                const res = await fetch("http://localhost:3000/api/importJourneys", {
+                const res = await fetch(`${API_BASE_URL}/api/importJourneys`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"

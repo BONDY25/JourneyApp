@@ -1,4 +1,5 @@
 import SessionMaintenance from "./sessionMaintenance.js";
+import { API_BASE_URL } from "./config.js";
 
 // window loaded event listener ------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
@@ -87,7 +88,7 @@ submit.addEventListener('click', async (event) => {
         alert('Please enter a description');
     } else {
         try {
-            const res = await fetch('http://localhost:3000/api/journeys', {
+            const res = await fetch(`${API_BASE_URL}/api/journeys`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

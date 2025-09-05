@@ -1,4 +1,7 @@
+import { API_BASE_URL } from "./config.js";
+
 export default class SessionMaintenance {
+
 
     // Global Variables
     static debugMode = false;
@@ -43,7 +46,7 @@ export default class SessionMaintenance {
         } else {
             console.log(entry);
             try {
-                await fetch("http://localhost:3000/api/logBook", {
+                await fetch(`${API_BASE_URL}/api/logBook`, {
                     method: "POST",
                     headers: {"content-type": "application/json"},
                     body: JSON.stringify(entry)

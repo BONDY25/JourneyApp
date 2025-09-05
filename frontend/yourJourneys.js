@@ -1,4 +1,5 @@
 import SessionMaintenance from "./sessionMaintenance.js";
+import { API_BASE_URL } from "./config.js";
 
 // window loaded event listener ------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", async () => {
@@ -18,7 +19,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 // Get Journeys --------------------------------------------------------------------
 async function getJourneys(tableBody, username) {
     try {
-        const res = await fetch(`http://localhost:3000/api/getJourneys?username=${username}`, {})
+        const res = await fetch(`${API_BASE_URL}/api/getJourneys?username=${username}`, {})
         const journeys = await res.json();
 
         if (journeys.length === 0) {

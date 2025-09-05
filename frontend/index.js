@@ -1,11 +1,12 @@
 import SessionMaintenance from "./sessionMaintenance.js";
+import { API_BASE_URL } from "./config.js";
 
 const submitLogin = document.getElementById('submitLogin');
 const submitReg = document.getElementById('submitRegister');
 
 // Store defaults ---------------------------------------------------------------------
 async function getDefaults(username) {
-    const settingsRes = await fetch(`http://localhost:3000/api/getUsers/${username}`);
+    const settingsRes = await fetch(`${API_BASE_URL}/api/getUsers/${username}`);
     if (settingsRes.ok) {
         const user = await settingsRes.json();
         console.log("User object:", user);
@@ -25,7 +26,7 @@ submitLogin.addEventListener('click', async (e) => {
 
     try {
         // Send request to backed
-        const loginRes = await fetch('http://localhost:3000/api/login', {
+        const loginRes = await fetch(`${API_BASE_URL}/api/login`, {
             method: 'POST',
             headers: {'content-type': 'application/json'},
             body: JSON.stringify({username, password})
@@ -59,7 +60,7 @@ submitReg.addEventListener('click', async (e) => {
 
     try {
         // send request to backend
-        const res = await fetch('http://localhost:3000/api/users', {
+        const res = await fetch(`${API_BASE_URL}/api/users`, {
             method: 'POST',
             headers: {'content-type': 'application/json'},
             body: JSON.stringify({username, password})
