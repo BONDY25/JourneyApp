@@ -15,7 +15,7 @@ let tankVolume = 64;
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'frontend')));
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
 
 const corsOptions = {
     origin: 'http://localhost:63342', // Allow requests from this origin
@@ -23,7 +23,6 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.static("frontend"));
 
 const client = new MongoClient(process.env.MONGO_URI);
 
