@@ -23,6 +23,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+app.use(express.static("frontend"));
 
 const client = new MongoClient(process.env.MONGO_URI);
 
