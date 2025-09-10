@@ -14,6 +14,8 @@ fontSelect.addEventListener('change', (e) => {
 // window loaded event listener ------------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', async () => {
     await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Settings page loaded");
+    SessionMaintenance.hideLoader();
+
     const username = localStorage.getItem('username');
     if (!username) {
         alert('No user logged in!');
@@ -22,6 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Fetch current user settings
     try {
+        SessionMaintenance.showLoader();
         await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Getting current user settings");
         const res = await fetch(`${API_BASE_URL}/api/getUsers/${username}`);
 
@@ -37,6 +40,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     } catch (err) {
         await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", `Failed fetching user settings: ${err}`, true);
+    } finally {
+        SessionMaintenance.hideLoader();
     }
 
     // Handle save function
@@ -52,6 +57,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log("Saving settings:", {tankVolume, defFuelCost: fuelCost, gallon, userFont});
 
         try {
+            SessionMaintenance.showLoader();
             const res = await fetch(`${API_BASE_URL}/api/saveUsers/${username}`, {
                 method: 'PUT',
                 headers: {'Content-Type': 'application/json'},
@@ -74,6 +80,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (err) {
             await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", `Network Error: ${err}`, true);
+        } finally {
+            SessionMaintenance.hideLoader();
         }
     });
 });

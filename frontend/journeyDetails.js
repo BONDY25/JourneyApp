@@ -4,6 +4,7 @@ import { API_BASE_URL } from "./config.js";
 // window loaded event listener ------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
     await SessionMaintenance.logBook("journeyDetails", "window.DOMContentLoaded", "journey page loaded");
+    SessionMaintenance.hideLoader();
 
     // Get ID from URL
     const params = new URLSearchParams(window.location.search);
@@ -38,6 +39,7 @@ function formatNumber(value, decimals = 2){
 // Get Journeys -----------------------------------------------------------------------------------------
 async function getJourneys(journeyId) {
     try {
+        SessionMaintenance.showLoader();
         if (!journeyId) {
             await SessionMaintenance.logBook("journeyDetails", "getJourney", `No Journey Found ${journeyId}`, true);
             return;
@@ -73,5 +75,7 @@ async function getJourneys(journeyId) {
         document.getElementById("percOfTank").textContent = journey.percOfTank ? `${formatNumber(journey.percOfTank * 100, 2)} %` : "0 %";
     } catch (err) {
         await SessionMaintenance.logBook("journeyDetails", "getJourney", `Error getting journeys ${err}`, true);
+    } finally {
+        SessionMaintenance.hideLoader();
     }
 }

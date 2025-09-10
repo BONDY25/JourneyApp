@@ -21,6 +21,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 // Load summary --------------------------------------------------------------------------------------
 async function loadSummary(username) {
     try {
+        SessionMaintenance.showLoader();
         const res = await fetch(`${API_BASE_URL}/api/summary/${username}`);
         const summary = await res.json();
 
@@ -33,12 +34,15 @@ async function loadSummary(username) {
         await SessionMaintenance.logBook("home", "loadSummary", `Summary Loaded: ${summary}`);
     } catch (err) {
         console.error("error loading summary:", err);
+    } finally {
+        SessionMaintenance.hideLoader();
     }
 }
 
 // Load Costs -------------------------------------------------------------------------------------
 async function loadCosts(username) {
     try {
+        SessionMaintenance.showLoader();
         const res = await fetch(`${API_BASE_URL}/api/costs/${username}`);
         if (!res.ok) throw new Error("Failed to fetch costs");
 
@@ -51,5 +55,7 @@ async function loadCosts(username) {
         await SessionMaintenance.logBook("home", "loadCosts", `Costs Loaded: ${data}`);
     } catch (err) {
         console.error("Error loading Costs:", err);
+    } finally {
+        SessionMaintenance.hideLoader();
     }
 }

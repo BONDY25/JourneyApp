@@ -6,21 +6,23 @@ const getStatsBtn = document.getElementById('getStats');
 // window loaded event listener ------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
     await SessionMaintenance.logBook("fullStats", "window.DOMContentLoaded", "Full Stats page loaded");
+    SessionMaintenance.hideLoader();
 });
 
 // Get Stats Button Click --------------------------------------------------------------------------
 getStatsBtn.addEventListener('click', async () => {
     // Declare Variables
-    const username = localStorage.getItem('username');
+    const username = localStorage.getItem('username').toLowerCase();
     const start = document.getElementById('start').value;
     const end = document.getElementById('end').value;
 
     try {
+        SessionMaintenance.showLoader();
         // Get Data Endpoint
         await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", `Getting full stats: (${start}, ${end})`);
         const res = await fetch(`${API_BASE_URL}/api/stats/${username}?start=${start}&end=${end}`);
         const data = await res.json();
-        await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", `Full Stats retrieved: ${data}`);
+        await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", `Full Stats retrieved: ${JSON.stringify(data, null, 2)}`);
 
         // Populate UI with Data
         document.getElementById('totalMiles').textContent = data.totalMiles.toFixed(2);
@@ -38,5 +40,7 @@ getStatsBtn.addEventListener('click', async () => {
     } catch (err) {
         await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", `Error fetching stats: ${err}`, true);
         alert("Failed to load stats");
+    } finally {
+        SessionMaintenance.hideLoader();
     }
 });

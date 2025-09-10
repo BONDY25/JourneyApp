@@ -56,4 +56,13 @@ export default class SessionMaintenance {
             }
         }
     }
+
+    // show & hide Loader -------------------------------------------------------------------------------------
+    static showLoader() {
+        document.getElementById("loader").classList.remove("hidden");
+    }
+
+    static hideLoader(){
+        document.getElementById("loader").classList.add("hidden");
+    }
 }

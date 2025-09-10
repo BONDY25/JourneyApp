@@ -2,7 +2,13 @@ import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
 
 const submitLogin = document.getElementById('submitLogin');
-const submitReg = document.getElementById('submitRegister');
+//const submitReg = document.getElementById('submitRegister');
+
+// window loaded event listener ------------------------------------------------------------------------
+window.addEventListener('DOMContentLoaded', async () => {
+    await SessionMaintenance.logBook("login", "window.DOMContentLoaded", "login page loaded");
+    SessionMaintenance.hideLoader();
+});
 
 // Store defaults ---------------------------------------------------------------------
 async function getDefaults(username) {
@@ -59,6 +65,7 @@ submitReg.addEventListener('click', async (e) => {
     const password = String(document.getElementById('password').value);
 
     try {
+        SessionMaintenance.showLoader();
         // send request to backend
         const res = await fetch(`${API_BASE_URL}/api/users`, {
             method: 'POST',
@@ -88,6 +95,8 @@ submitReg.addEventListener('click', async (e) => {
     } catch (error) {
         console.error('Network Error:', error);
         alert(`Network Error: ${error}`);
+    } finally {
+        SessionMaintenance.hideLoader();
     }
 });
 

@@ -277,7 +277,21 @@ async function startServer() {
                     }
                 }
 
-                const journeysData = await journeys.find(query).toArray();
+                const journeysData = await journeys.aggregate([
+                    { $match: { user: username } },
+                    { $addFields: { dateTimeCorrected: { $toDate: "$dateTime" } } },
+                    { $match: (() => {
+                            const filter = {};
+                            if (start) filter.$gte = new Date(start);
+                            if (end) {
+                                const endDate = new Date(end);
+                                endDate.setHours(23, 59, 59, 999);
+                                filter.$lte = endDate;
+                            }
+                            return Object.keys(filter).length ? { dateTimeCorrected: filter } : {};
+                        })() }
+                ]).toArray();
+
                 console.log(journeysData);
 
                 // Handle empty array
@@ -379,13 +393,21 @@ async function startServer() {
         // Your Journeys Endpoint ----------------------------------------------------------------
         app.get('/api/getJourneys', async (req, res) => {
             try {
-                const {username} = req.params;
+                const { username } = req.query; // safer to get from query
 
-                // Find all journeys for the username
-                const journeys = await db.collection('journeys')
-                    .find({username: username})
-                    .sort({dateTime: -1}) // newest first
-                    .toArray();
+                const journeys = await db.collection('journeys').aggregate([
+                    {
+                        $match: { user: username }
+                    },
+                    {
+                        $addFields: {
+                            dateTimeCorrected: { $toDate: "$dateTime" } // cast to Date
+                        }
+                    },
+                    {
+                        $sort: { dateTimeCorrected: -1 } // newest first
+                    }
+                ]).toArray();
 
                 res.json(journeys);
             } catch (err) {
@@ -393,6 +415,7 @@ async function startServer() {
                 res.status(500).send("Error retrieving journeys");
             }
         });
+
 
         // Journey Details Endpoint ------------------------------------------------------------------
         app.get("/api/getJourney/:id", async (req, res) => {

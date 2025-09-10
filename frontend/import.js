@@ -7,6 +7,7 @@ const importBtn = document.getElementById("importBtn");
 // window loaded event listener ------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
     await SessionMaintenance.logBook("import", "window.DOMContentLoaded", "Import page loaded");
+    SessionMaintenance.hideLoader();
 });
 
 // Import button Clicked -------------------------------------------------------------------
@@ -35,6 +36,7 @@ importBtn.addEventListener('click', () => {
             }
 
             try {
+                SessionMaintenance.showLoader();
                 const res = await fetch(`${API_BASE_URL}/api/importJourneys`, {
                     method: "POST",
                     headers: {
@@ -54,6 +56,8 @@ importBtn.addEventListener('click', () => {
             } catch (err) {
                 await SessionMaintenance.logBook("import", "importBtn.click", `Network Error: ${err}`, true);
                 alert("Network error while importing CSV");
+            } finally {
+                SessionMaintenance.hideLoader();
             }
         }
     });
