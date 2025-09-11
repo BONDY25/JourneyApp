@@ -1,6 +1,6 @@
 import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
-import Papa from 'papaparse';
+import Papa from 'https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js';
 
 const fileInput = document.getElementById("csvFile");
 const importBtn = document.getElementById("importBtn");
