@@ -9,7 +9,7 @@ I use a MongoDb Atlas NoSql Database to store each journey entry and then go fro
 
 * Improve navigation
 * Add Logo
-* fix costing pannel on home page (Cost in the last 7,14,28 days)
+* fix costing pannel on home page (Cost in the last 7, 14 & 28 days)
 * Add protection against spam on the Login Page
 * Make view of stats easier to read? fields names on the left, field values on the right or table view?
 * Turn into Android app with a WebView
