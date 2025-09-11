@@ -10,7 +10,7 @@ I use a MongoDb Atlas NoSql Database to store each journey entry and then go fro
 * Improve navigation
 * Import has stopped working on render deployment
 * Add Logo
-* Fix costing pannel on home page (Cost in the last 7, 14 & 28 days)
+* Fix costing panel on home page (Cost in the last 7, 14 & 28 days)
 * Add protection against spam on the Login Page
 * Get username to show on setting page
 * Get total journeys to show on settings page
