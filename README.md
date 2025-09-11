@@ -11,7 +11,12 @@ I use a MongoDb Atlas NoSql Database to store each journey entry and then go fro
 * Add Logo
 * Fix costing pannel on home page (Cost in the last 7, 14 & 28 days)
 * Add protection against spam on the Login Page
+* Get username to show on setting page
+* Get total jounryes to show on settings page
+* Add delete function to journey details
 * Make view of stats easier to read? fields names on the left, field values on the right or table view?
+* Add Change password to user settings
+* Add summary stats for past 28 days on home page
 * Turn into Android app with a WebView
 
 ### Logo
