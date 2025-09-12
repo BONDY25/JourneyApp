@@ -55,7 +55,6 @@ This is a form that the user will fill in the data from their journey. The field
 * Temperature (C)  
 * Condition (Wet/Dry)  
 * Fuel cost per liter (This will be pre populated a default set by the user on a settings page, but can be changed here to (changing it here will update the default))  
-* Tank Volume (This will be pre populated a default set by the user on a settings page, but can be changed here to (changing it here will update the default))
 
 <img width="399" height="832" alt="image" src="https://github.com/user-attachments/assets/662e54f2-961e-41d8-af61-f39dcfa4f3e3" />
 
@@ -79,6 +78,6 @@ This will show the details of a journey with calculated values based on the user
 
 ### ⚙️ Settings Page
 
-This will allow the user to set default tank volume, fuel cost per litre, dark mode/light mode and maybe other settings, I haven't got to this bit yet
+This will allow the user to set default tank volume, fuel cost per litre, dark mode/light mode and maybe other settings.
 
 <img width="403" height="635" alt="image" src="https://github.com/user-attachments/assets/254cb39e-ff7b-4dfe-ba78-6ad1ab1d0697" />
