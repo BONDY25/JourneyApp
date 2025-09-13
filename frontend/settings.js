@@ -22,6 +22,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
+    document.getElementById('username').textContent = username;
+
     // Fetch current user settings
     try {
         SessionMaintenance.showLoader();
@@ -34,6 +36,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('fuelCost').value = user.defFuelCost ?? "";
             document.getElementById('gallon-select').value = user.gallon ?? "UK";
             document.getElementById('font-select').value = user.userFont ?? "Lexend";
+            document.getElementById('currency-select').value = user.currency ?? "£";
 
         } else {
             await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Failed fetching user settings", true);
@@ -53,15 +56,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         let gallon = document.getElementById('gallon-select').value.toUpperCase();
         if (!gallon || gallon.trim() === "") gallon = "UK";
         const userFont = document.getElementById('font-select').value || "Lexend";
+        const currency = document.getElementById('currency-select').value || "£";
 
-        console.log("Saving settings:", {tankVolume, defFuelCost: fuelCost, gallon, userFont});
+        console.log("Saving settings:", {tankVolume, defFuelCost: fuelCost, gallon, userFont, currency});
 
         try {
             SessionMaintenance.showLoader();
             const res = await fetch(`${API_BASE_URL}/api/saveUsers/${username}`, {
                 method: 'PUT',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({tankVolume, defFuelCost: fuelCost, gallon, userFont}),
+                body: JSON.stringify({tankVolume, defFuelCost: fuelCost, gallon, userFont, currency}),
             });
 
             // Update Local storage
@@ -69,6 +73,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             localStorage.setItem('fuelCost', fuelCost.toString());
             localStorage.setItem('gallon', gallon);
             localStorage.setItem('userFont', userFont);
+            localStorage.setItem('userFont', userFont);
+            localStorage.setItem('currency', currency);
 
             if (res.ok) {
                 await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Settings saved successfully");

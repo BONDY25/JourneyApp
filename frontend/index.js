@@ -19,6 +19,8 @@ async function getDefaults(username) {
 
         localStorage.setItem('tankVolume', user.tankVolume);
         localStorage.setItem('fuelCost', user.defFuelCost);
+        localStorage.setItem('gallon', user.gallon);
+        localStorage.setItem('currency', user.currency );
     }
 }
 
@@ -83,6 +85,7 @@ submitReg.addEventListener('click', async (e) => {
             localStorage.setItem('fuelCost', '1.4');
             localStorage.setItem('gallon', 'UK');
             localStorage.setItem('userFont', 'Lexend');
+            localStorage.setItem('currency', '£');
 
 
             SessionMaintenance.startSession(username);

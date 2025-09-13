@@ -1,6 +1,8 @@
 import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
 
+const currency = localStorage.getItem('currency');
+
 // window loaded event listener ------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
     await SessionMaintenance.logBook("journeyDetails", "window.DOMContentLoaded", "journey page loaded");
@@ -64,14 +66,14 @@ async function getJourneys(journeyId) {
         document.getElementById("DateTime").textContent = formatDateTime(journey.dateTime);
         document.getElementById("description").textContent = journey.description || "-";
         document.getElementById("distance").textContent = journey.distance ? `${formatNumber(journey.distance, 1)} mi` : "0 mi";
-        document.getElementById("timeDriven").textContent = `${journey.timeDriven} mins` || "-";
+        document.getElementById("timeDriven").textContent = `${currency}{journey.timeDriven} mins` || "-";
         document.getElementById("fuelUsedL").textContent = journey.fuelUsedL ? `${formatNumber(journey.fuelUsedL, 2)} L` : "0 L";
-        document.getElementById("cost").textContent = journey.totalCost ? `£${formatNumber(journey.totalCost, 2)}` : "£0.00";
+        document.getElementById("cost").textContent = journey.totalCost ? `${currency}${formatNumber(journey.totalCost, 2)}` : "£0.00";
         document.getElementById("mpg").textContent = journey.mpg ? `${formatNumber(journey.mpg, 1)}` : "0 mpg";
         document.getElementById("temp").textContent = journey.temp ? `${formatNumber(journey.temp, 1)} °C` : "0 °C";
         document.getElementById("condition").textContent = journey.condition || "-";
         document.getElementById("avgSpeed").textContent = journey.avgSpeed ? `${formatNumber(journey.avgSpeed, 1)} mph` : "0 mph";
-        document.getElementById("costPerMile").textContent = journey.costPerMile ? `£${formatNumber(journey.costPerMile, 2)}/mi` : "£0.00/mi";
+        document.getElementById("costPerMile").textContent = journey.costPerMile ? `${currency}${formatNumber(journey.costPerMile, 2)}/mi` : `${currency}0.00/mi`;
         document.getElementById("percOfTank").textContent = journey.percOfTank ? `${formatNumber(journey.percOfTank * 100, 2)} %` : "0 %";
     } catch (err) {
         await SessionMaintenance.logBook("journeyDetails", "getJourney", `Error getting journeys ${err}`, true);

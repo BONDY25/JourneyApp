@@ -88,6 +88,7 @@ async function startServer() {
                     dateCreated: new Date(),
                     tankVolume: tankVolume,
                     defFuelCost: 0.0,
+                    currency: "£",
                 };
 
                 // insert the user into the database
@@ -374,13 +375,13 @@ async function startServer() {
         // Save User Endpoint -----------------------------------------------------------------
         app.put('/api/saveUsers/:username', async (req, res) => {
             const username = req.params.username.toLowerCase();
-            const {tankVolume, defFuelCost, gallon, userFont} = req.body;
+            const {tankVolume, defFuelCost, gallon, userFont, currency} = req.body;
 
             try {
                 const db = client.db('journeyAppDb');
                 const result = await db.collection('users').updateOne(
                     {username},
-                    {$set: {tankVolume, defFuelCost, gallon, userFont}}
+                    {$set: {tankVolume, defFuelCost, gallon, userFont, currency}}
                 );
                 if (result.matchedCount === 0) return res.status(404).send('No user found.');
                 res.send("Successfully updated");

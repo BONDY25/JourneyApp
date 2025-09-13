@@ -1,6 +1,8 @@
 import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
 
+const currency = localStorage.getItem('currency');
+
 // window loaded event listener ------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
     await SessionMaintenance.logBook("home", "window.DOMContentLoaded", "Home page loaded");
@@ -28,7 +30,7 @@ async function loadSummary(username) {
         document.getElementById('totalMiles').textContent = summary.totalMiles.toFixed(1);
         document.getElementById('totalTime').textContent = summary.totalTime.toFixed(1) + " mins";
         document.getElementById('totalFuel').textContent = summary.totalFuel.toFixed(2) + " L";
-        document.getElementById('totalCost').textContent = "£" + summary.totalCost.toFixed(2);
+        document.getElementById('totalCost').textContent = currency + summary.totalCost.toFixed(2);
         document.getElementById('avgMpg').textContent = summary.avgMpg.toFixed(1);
 
         await SessionMaintenance.logBook("home", "loadSummary", `Summary Loaded: ${summary}`);
@@ -48,9 +50,9 @@ async function loadCosts(username) {
 
         const data = await res.json();
 
-        document.getElementById("seven").textContent = `£${data.seven}`;
-        document.getElementById("fourteen").textContent = `£${data.fourteen}`;
-        document.getElementById("twentyEight").textContent = `£${data.twentyEight}`;
+        document.getElementById("seven").textContent = currency + data.seven;
+        document.getElementById("fourteen").textContent = currency + data.fourteen;
+        document.getElementById("twentyEight").textContent = currency + data.twentyEight;
 
         await SessionMaintenance.logBook("home", "loadCosts", `Costs Loaded: ${data}`);
     } catch (err) {

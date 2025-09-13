@@ -1,6 +1,7 @@
 import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
 
+const currency = localStorage.getItem('currency');
 const getStatsBtn = document.getElementById('getStats');
 
 // window loaded event listener ------------------------------------------------------------------------
@@ -28,13 +29,13 @@ getStatsBtn.addEventListener('click', async () => {
         document.getElementById('totalMiles').textContent = data.totalMiles.toFixed(2);
         document.getElementById('totalTime').textContent = data.totalTime.toFixed(2);
         document.getElementById('totalFuel').textContent = data.totalFuel.toFixed(2);
-        document.getElementById('totalCost').textContent = data.totalCost.toFixed(2);
+        document.getElementById('totalCost').textContent = `${currency}${data.totalCost.toFixed(2)}`;
         document.getElementById('avgMilesPerTank').textContent = data.avgMilesPerTank.toFixed(2);
         document.getElementById('avgMpg').textContent = data.avgMpg.toFixed(2);
         document.getElementById('avgSpeed').textContent = data.avgSpeed.toFixed(2);
-        document.getElementById('avgCostPerDay').textContent = data.avgCostPerDay.toFixed(2);
-        document.getElementById('avgCostPerMile').textContent = data.avgCostPerMile.toFixed(2);
-        document.getElementById('avgFuelPrice').textContent = data.avgFuelPrice.toFixed(2);
+        document.getElementById('avgCostPerDay').textContent = `${currency}${data.avgCostPerDay.toFixed(2)}`;
+        document.getElementById('avgCostPerMile').textContent = `${currency}${data.avgCostPerMile.toFixed(2)}`;
+        document.getElementById('avgFuelPrice').textContent = `${currency}${data.avgFuelPrice.toFixed(2)}`;
         document.getElementById('avgTemp').textContent = data.avgTemp.toFixed(2);
         document.getElementById('avgTimeDriven').textContent = data.avgTimeDriven.toFixed(2);
     } catch (err) {
