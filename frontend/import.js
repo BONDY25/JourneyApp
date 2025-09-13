@@ -1,6 +1,6 @@
 import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
-import Papa from 'papaparse';
+//import Papa from 'papaparse';
 
 const fileInput = document.getElementById("csvFile");
 const importBtn = document.getElementById("importBtn");
@@ -21,7 +21,7 @@ importBtn.addEventListener('click', () => {
         return;
     }
 
-    Papa.parse(file, {
+    window.Papa.parse(file, {
         header: true, // CSV columns become object keys
         dynamicTyping: true, // automatically convert numbers
         skipEmptyLines: true,
