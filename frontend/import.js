@@ -1,5 +1,6 @@
 import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
+import Papa from 'papaparse';
 
 const fileInput = document.getElementById("csvFile");
 const importBtn = document.getElementById("importBtn");
