@@ -86,7 +86,6 @@ async function calculateValues({timeUnit = 'minutes'} = {}) {
     return output;
 }
 
-
 // Event Listener to submit form ---------------------------------------------------------------------
 submit.addEventListener('click', async (event) => {
     event.preventDefault(); // Stop form reload
