@@ -11,6 +11,15 @@ window.addEventListener('DOMContentLoaded', async () => {
     SessionMaintenance.hideLoader();
 });
 
+// Chunk Array helper method ------------------------------------------------------------------------------
+function chunkArray(arr, size) {
+    const result = [];
+    for (let i = 0; i < arr.length; i += size) {
+        result.push(arr.slice(i, i + size));
+    }
+    return result;
+}
+
 // Import button Clicked -------------------------------------------------------------------
 importBtn.addEventListener('click', () => {
 
@@ -38,22 +47,28 @@ importBtn.addEventListener('click', () => {
 
             try {
                 SessionMaintenance.showLoader();
-                const res = await fetch(`${API_BASE_URL}/api/importJourneys`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(journeys)
-                });
 
-                if (res.ok) {
-                    alert("Journeys imported successfully!");
-                    fileInput.value = "";
-                } else {
-                    const err = await res.text();
-                    await SessionMaintenance.logBook("import", "importBtn.click", `Error importing journeys: ${err}`);
-                    alert(`Error importing journeys: ${err}`);
+                // Split data into chunks
+                const chunks = chunkArray(journeys, 100);
+
+                for (let i = 0 ; i < chunks.length; i++) {
+                    const res = await fetch(`${API_BASE_URL}/api/importJourneys`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(chunks[i])
+                    });
+
+                    if (!res.ok) {
+                        const err = await res.text();
+                        await SessionMaintenance.logBook("import", "importBtn.click", `Error importing batch ${i + 1}: ${err}`);
+                        alert(`Error importing batch ${i + 1}: ${err}`);
+                        return;
+                    }
                 }
+
+                alert("All Journeys successfully imported.");
+                fileInput.value = "";
+
             } catch (err) {
                 await SessionMaintenance.logBook("import", "importBtn.click", `Network Error: ${err}`, true);
                 alert("Network error while importing CSV");
