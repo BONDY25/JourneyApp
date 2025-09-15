@@ -7,7 +7,6 @@ I use a MongoDb Atlas NoSql Database to store each journey entry and then go fro
 
 ## Current "To Do"
 
-* Improve navigation
 * Add protection against spam on the Login Page
 * Get total journeys to show on settings page
 * Add delete function to journey details
