@@ -26,18 +26,18 @@ getStatsBtn.addEventListener('click', async () => {
         await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", `Full Stats retrieved: ${JSON.stringify(data, null, 2)}`);
 
         // Populate UI with Data
-        document.getElementById('totalMiles').textContent = data.totalMiles.toFixed(2);
-        document.getElementById('totalTime').textContent = data.totalTime.toFixed(2);
-        document.getElementById('totalFuel').textContent = data.totalFuel.toFixed(2);
-        document.getElementById('totalCost').textContent = `${currency}${data.totalCost.toFixed(2)}`;
-        document.getElementById('avgMilesPerTank').textContent = data.avgMilesPerTank.toFixed(2);
-        document.getElementById('avgMpg').textContent = data.avgMpg.toFixed(2);
-        document.getElementById('avgSpeed').textContent = data.avgSpeed.toFixed(2);
-        document.getElementById('avgCostPerDay').textContent = `${currency}${data.avgCostPerDay.toFixed(2)}`;
-        document.getElementById('avgCostPerMile').textContent = `${currency}${data.avgCostPerMile.toFixed(2)}`;
-        document.getElementById('avgFuelPrice').textContent = `${currency}${data.avgFuelPrice.toFixed(2)}`;
-        document.getElementById('avgTemp').textContent = data.avgTemp.toFixed(2);
-        document.getElementById('avgTimeDriven').textContent = data.avgTimeDriven.toFixed(2);
+        document.getElementById('totalMiles').textContent = data.totalMiles.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('totalTime').textContent = data.totalTime.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('totalFuel').textContent = data.totalFuel.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('totalCost').textContent = `${currency}${data.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('avgMilesPerTank').textContent = data.avgMilesPerTank.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('avgMpg').textContent = data.avgMpg.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('avgSpeed').textContent = data.avgSpeed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('avgCostPerDay').textContent = `${currency}${data.avgCostPerDay.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('avgCostPerMile').textContent = `${currency}${data.avgCostPerMile.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('avgFuelPrice').textContent = `${currency}${data.avgFuelPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('avgTemp').textContent = data.avgTemp.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        document.getElementById('avgTimeDriven').textContent = data.avgTimeDriven.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     } catch (err) {
         await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", `Error fetching stats: ${err}`, true);
         alert("Failed to load stats");

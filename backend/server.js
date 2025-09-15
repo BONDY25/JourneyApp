@@ -174,38 +174,60 @@ async function startServer() {
             try {
                 const journeysCollection = db.collection('journeys');
                 const now = new Date();
+
                 const sevenDaysAgo = new Date(now);
                 sevenDaysAgo.setDate(now.getDate() - 7);
+
                 const fourteenDaysAgo = new Date(now);
                 fourteenDaysAgo.setDate(now.getDate() - 14);
+
                 const twentyEightDaysAgo = new Date(now);
                 twentyEightDaysAgo.setDate(now.getDate() - 28);
 
                 const result = await journeysCollection.aggregate([
-                    {$match: {user: username, dateTime: {$gte: twentyEightDaysAgo}}},
+                    {
+                        $match: { user: username }
+                    },
+                    {
+                        // Normalize dateTime
+                        $addFields: {
+                            parsedDate: {
+                                $cond: [
+                                    { $eq: [{ $type: "$dateTime" }, "string"] },
+                                    { $dateFromString: { dateString: "$dateTime" } },
+                                    "$dateTime"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        $match: {
+                            parsedDate: { $gte: twentyEightDaysAgo }
+                        }
+                    },
                     {
                         $group: {
                             _id: null,
                             seven: {
-                                $sum: {$cond: [{$gte: ["$dateTime", sevenDaysAgo]}, "$totalCost", 0]}
+                                $sum: { $cond: [{ $gte: ["$parsedDate", sevenDaysAgo] }, "$totalCost", 0] }
                             },
                             fourteen: {
-                                $sum: {$cond: [{$gte: ["$dateTime", fourteenDaysAgo]}, "$totalCost", 0]}
+                                $sum: { $cond: [{ $gte: ["$parsedDate", fourteenDaysAgo] }, "$totalCost", 0] }
                             },
-                            twentyEight: {$sum: "$totalCost"} // everything in the last 28 days
+                            twentyEight: { $sum: "$totalCost" }
                         }
                     }
                 ]).toArray();
 
-                console.log(result);
-                const costs = result.length > 0 ? result[0] : {seven: 0, fourteen: 0, twentyEight: 0};
+                const costs = result.length > 0 ? result[0] : { seven: 0, fourteen: 0, twentyEight: 0 };
 
-                res.json({cost: costs});
+                res.json({ cost: costs });
             } catch (err) {
                 console.error("Error retrieving costs:", err);
                 res.status(500).send("Error retrieving costs");
             }
         });
+
 
         // Import Journey ---------------------------------------------------------------
         app.post('/api/importJourneys', async (req, res) => {

@@ -27,11 +27,12 @@ async function loadSummary(username) {
         const res = await fetch(`${API_BASE_URL}/api/summary/${username}`);
         const summary = await res.json();
 
-        document.getElementById('totalMiles').textContent = summary.totalMiles.toFixed(1);
-        document.getElementById('totalTime').textContent = summary.totalTime.toFixed(1) + " mins";
-        document.getElementById('totalFuel').textContent = summary.totalFuel.toFixed(2) + " L";
-        document.getElementById('totalCost').textContent = currency + summary.totalCost.toFixed(2);
-        document.getElementById('avgMpg').textContent = summary.avgMpg.toFixed(1);
+        document.getElementById('totalMiles').textContent = summary.totalMiles.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        document.getElementById('totalTime').textContent = summary.totalTime.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + " mins";
+        document.getElementById('totalFuel').textContent = summary.totalFuel.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " L";
+        document.getElementById('totalCost').textContent = currency + summary.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('avgMpg').textContent = summary.avgMpg.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
 
         await SessionMaintenance.logBook("home", "loadSummary", `Summary Loaded: ${summary}`);
     } catch (err) {
@@ -50,9 +51,9 @@ async function loadCosts(username) {
 
         const data = await res.json();
 
-        document.getElementById("seven").textContent = currency + data.seven;
-        document.getElementById("fourteen").textContent = currency + data.fourteen;
-        document.getElementById("twentyEight").textContent = currency + data.twentyEight;
+        document.getElementById("seven").textContent = currency + data.cost.seven.toFixed(2);
+        document.getElementById("fourteen").textContent = currency + data.cost.fourteen.toFixed(2);
+        document.getElementById("twentyEight").textContent = currency + data.cost.twentyEight.toFixed(2)
 
         await SessionMaintenance.logBook("home", "loadCosts", `Costs Loaded: ${data}`);
     } catch (err) {
