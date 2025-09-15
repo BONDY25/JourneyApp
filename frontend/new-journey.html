@@ -1,55 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Journey App - New Journey</title>
-  <link href="assets/styles.css" rel="stylesheet"/>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Journey App - New Journey</title>
+    <link href="assets/styles.css" rel="stylesheet"/>
 </head>
 <body>
 <div id="loader" class="loader-overlay">
-  <div class="spinner"></div>
+    <div class="spinner"></div>
 </div>
-<div id = "app" class = "app">
-<h1>Add Journey</h1>
-  <a href="import.html"><button type = "button" id = "import-button">Import</button></a>
-<form id="journey-form">
-  <label for="description">Description</label>
-  <input type="text" id="description" required>
+<div id="app" class="app">
+    <h1>Add Journey</h1>
+    <a href="import.html">
+        <button type="button" id="import-button">Import</button>
+    </a>
+    <form id="journey-form">
+        <label for="description">Description</label>
+        <input type="text" id="description" required>
 
-  <label for="datetime">Date & Time</label>
-  <input type="datetime-local" id="datetime" required>
+        <label for="datetime">Date & Time</label>
+        <input type="datetime-local" id="datetime" required>
 
-  <label for="distance">Distance (miles)</label>
-  <input type="number" id="distance" step="0.1" required>
+        <label for="distance">Distance (miles)</label>
+        <input type="number" id="distance" step="0.1" required>
 
-  <label for="mpg">MPG</label>
-  <input type="number" id="mpg" step="0.1" required>
+        <label for="mpg">MPG</label>
+        <input type="number" id="mpg" step="0.1" required>
 
-  <label for="timeDriven">Time Driven</label>
-  <input type="text" id="timeDriven" placeholder="e.g., 1h 20m" required>
+        <label for="timeDriven">Time Driven</label>
+        <input type="text" id="timeDriven" placeholder="e.g., 1h 20m" required>
 
-  <label for="temp">Temperature (°C)</label>
-  <input type="number" id="temp" step="0.1">
+        <label for="temp">Temperature (°C)</label>
+        <input type="number" id="temp" step="0.1">
 
-  <label for="condition">Condition</label>
-  <select id="condition">
-    <option value="">Select</option>
-    <option value="dry">Dry</option>
-    <option value="wet">Wet</option>
-  </select>
+        <label for="condition">Condition</label>
+        <select id="condition">
+            <option value="">Select</option>
+            <option value="dry">Dry</option>
+            <option value="wet">Wet</option>
+        </select>
 
-  <label for="cost">Cost per L(£)</label>
-  <input type="number" id="cost" step="0.01" required>
+        <label for="cost">Cost per L(£)</label>
+        <input type="number" id="cost" step="0.01" required>
 
-  <button type="submit" id = "submit" class = "button">Add Journey</button>
+        <button type="submit" id="submit" class="button">Add Journey</button>
 
-</form>
-  <div class = button-group>
-    <a href = "home.html"><button type="button" id = "back" class = "button">Back</button></a>
-  </div>
+    </form>
+    <div class=button-group>
+        <a href="home.html">
+            <button type="button" id="back" class="button">Back</button>
+        </a>
+    </div>
 </div>
 <!-- Link to the JavaScript file -->
-<script type = "module" src="newJourney.js"></script>
+<script type="module" src="newJourney.js"></script>
 </body>
 </html>

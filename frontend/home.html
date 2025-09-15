@@ -1,44 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Journey App - Home</title>
     <link href="assets/styles.css" rel="stylesheet"/>
-    <link rel="icon" type="image/png" href="assets/JourneyApp-logo-1.png" />
+    <link rel="icon" type="image/png" href="assets/JourneyApp-logo-1.png"/>
 </head>
 <body>
 <div id="loader" class="loader-overlay">
     <div class="spinner"></div>
 </div>
-<div id = "app" class = "app">
+<div id="app" class="app">
     <h1>Journey App</h1>
     <hr>
-    <div id = "stats">
-        <div id = "sum-stats" class = "stats">
-            <p>Total Miles: <span id = "totalMiles">0</span></p>
-            <p>Total Time: <span id = "totalTime">0</span></p>
-            <p>Total Fuel Used: <span id = "totalFuel">0</span></p>
-            <p>Total Cost: <span id = "totalCost">0</span></p>
-            <p>Average MPG: <span id = "avgMpg">0</span></p>
+    <div id="stats">
+        <div id="sum-stats" class="stats">
+            <p>Total Miles: <span id="totalMiles">0</span></p>
+            <p>Total Time: <span id="totalTime">0</span></p>
+            <p>Total Fuel Used: <span id="totalFuel">0</span></p>
+            <p>Total Cost: <span id="totalCost">0</span></p>
+            <p>Average MPG: <span id="avgMpg">0</span></p>
         </div>
         <hr>
-        <div id = "detail-stats" class = "stats">
+        <div id="detail-stats" class="stats">
             <h3>Costing</h3>
-            <p>Last 7 Days: <span id = "seven">0</span></p>
-            <p>Last 14 Days: <span id = "fourteen">0</span></p>
-            <p>Last 28 Days: <span id = "twentyEight">0</span></p>
+            <p>Last 7 Days: <span id="seven">0</span></p>
+            <p>Last 14 Days: <span id="fourteen">0</span></p>
+            <p>Last 28 Days: <span id="twentyEight">0</span></p>
         </div>
         <hr>
     </div>
-    <div class = button-group>
-        <a href = "new-journey.html"><button type = "button" class = "button" id = "add-journey">Add Journey</button></a>
-        <a href = "full-stats.html"><button type = "button" class = "button" id = "full-stats">Full Statistics</button></a>
-        <a href = "your-journeys.html"><button type = "button" class = "button" id = "your-journeys">Your Journeys</button></a>
-        <a href = "settings.html"><button type = "button" class = "button" id = "settings">Settings</button></a>
+    <div class=button-group>
+        <a href="new-journey.html">
+            <button type="button" class="button" id="add-journey">Add Journey</button>
+        </a>
+        <a href="full-stats.html">
+            <button type="button" class="button" id="full-stats">Full Statistics</button>
+        </a>
+        <a href="your-journeys.html">
+            <button type="button" class="button" id="your-journeys">Your Journeys</button>
+        </a>
+        <a href="settings.html">
+            <button type="button" class="button" id="settings">Settings</button>
+        </a>
     </div>
 </div>
 <!-- Link to the JavaScript file -->
-<script type = "module" src="home.js"></script>
+<script type="module" src="home.js"></script>
 </body>
 </html>
