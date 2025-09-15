@@ -14,6 +14,10 @@ fontSelect.addEventListener('change', (e) => {
 // window loaded event listener ------------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', async () => {
     await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Settings page loaded");
+
+    const currentPage = window.location.pathname.split("/").pop();
+    SessionMaintenance.highlightActivePage(currentPage);
+
     SessionMaintenance.hideLoader();
 
     const username = localStorage.getItem('username');

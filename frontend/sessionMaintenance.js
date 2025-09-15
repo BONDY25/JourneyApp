@@ -65,4 +65,28 @@ export default class SessionMaintenance {
     static hideLoader(){
         document.getElementById("loader").classList.add("hidden");
     }
+
+    // Highlight active page on navbar -----------------------------------------------------------------------
+    static highlightActivePage(currentPage) {
+
+        // Map of pages
+        const pageMap = {
+            "home.html": "nav-home",
+            "new-journey.html": "nav-add",
+            "your-journeys.html": "nav-journeys",
+            "full-stats.html": "nav-stats",
+            "settings.html": "nav-settings"
+        };
+
+        const activeId = pageMap[currentPage];
+
+        if (!activeId) return;
+
+        // Remove class for all items first
+        document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
+
+        // add active class to current page
+        const activeEl = document.getElementById(activeId);
+        if (activeEl) activeEl.classList.add("active");
+    }
 }

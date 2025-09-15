@@ -6,6 +6,10 @@ const currency = localStorage.getItem('currency');
 // window loaded event listener ------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
     await SessionMaintenance.logBook("home", "window.DOMContentLoaded", "Home page loaded");
+
+    const currentPage = window.location.pathname.split("/").pop();
+    SessionMaintenance.highlightActivePage(currentPage);
+
     const username = localStorage.getItem('username').toLowerCase();
     console.log(username);
     console.log(localStorage.getItem('tankVolume'));
@@ -17,7 +21,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
     await loadCosts(username);
     await loadSummary(username);
-
 });
 
 // Load summary --------------------------------------------------------------------------------------

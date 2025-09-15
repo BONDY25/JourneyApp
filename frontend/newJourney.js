@@ -4,6 +4,10 @@ import { API_BASE_URL } from "./config.js";
 // window loaded event listener ------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
     await SessionMaintenance.logBook("newJourney", "window.DOMContentLoaded", "New Journey page loaded");
+
+    const currentPage = window.location.pathname.split("/").pop();
+    SessionMaintenance.highlightActivePage(currentPage);
+
     SessionMaintenance.hideLoader();
 
     const costField = document.getElementById('cost');

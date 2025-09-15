@@ -258,3 +258,48 @@ form input, form select, form button {
     100% { transform: rotate(360deg); }
 }
 
+/* --------------------------------------------------------------------------- */
+/* Nav bar */
+/* --------------------------------------------------------------------------- */
+
+#nav-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 60px;
+    background: #d95000;
+    border-top: 1px solid #d95000;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 1000;
+}
+
+.nav-item {
+    text-align: center;
+    flex: 1;
+    color: #000000;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+.nav-item .material-symbols-outlined {
+    display: block;
+    font-size: 24px;
+    margin-bottom: 2px;
+}
+
+.nav-item:hover {
+    color: #ffffff; /* highlight on hover */
+}
+
+.nav-item.active {
+    color: #ffffff; /* active blue, pick your color */
+}
+
+.nav-item.active .material-symbols-outlined {
+    color: #ffffff;
+}
+
+

@@ -4,6 +4,10 @@ import { API_BASE_URL } from "./config.js";
 // window loaded event listener ------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", async () => {
     await SessionMaintenance.logBook("yourJourneys", "window.DOMContentLoaded", "Home page loaded");
+
+    const currentPage = window.location.pathname.split("/").pop();
+    SessionMaintenance.highlightActivePage(currentPage);
+
     SessionMaintenance.hideLoader();
 
     const username = localStorage.getItem("username");

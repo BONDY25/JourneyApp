@@ -6,6 +6,7 @@
     <title>Journey App - Home</title>
     <link href="assets/styles.css" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="assets/JourneyApp-logo-1.png"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 </head>
 <body>
 <div id="loader" class="loader-overlay">
@@ -31,20 +32,28 @@
         </div>
         <hr>
     </div>
-    <div class=button-group>
-        <a href="new-journey.html">
-            <button type="button" class="button" id="add-journey">Add Journey</button>
-        </a>
-        <a href="full-stats.html">
-            <button type="button" class="button" id="full-stats">Full Statistics</button>
-        </a>
-        <a href="your-journeys.html">
-            <button type="button" class="button" id="your-journeys">Your Journeys</button>
-        </a>
-        <a href="settings.html">
-            <button type="button" class="button" id="settings">Settings</button>
-        </a>
-    </div>
+</div>
+<div id="nav-bar">
+    <a href="home.html" class="nav-item" id="nav-home">
+        <span class="material-symbols-outlined">home</span>
+        <span class="label">Home</span>
+    </a>
+    <a href="new-journey.html" class="nav-item" id="nav-add">
+        <span class="material-symbols-outlined">add_circle</span>
+        <span class="label">Add</span>
+    </a>
+    <a href="your-journeys.html" class="nav-item" id="nav-journeys">
+        <span class="material-symbols-outlined">directions_car</span>
+        <span class="label">Journeys</span>
+    </a>
+    <a href="full-stats.html" class="nav-item" id="nav-stats">
+        <span class="material-symbols-outlined">query_stats</span>
+        <span class="label">Stats</span>
+    </a>
+    <a href="settings.html" class="nav-item" id="nav-settings">
+        <span class="material-symbols-outlined">settings</span>
+        <span class="label">Settings</span>
+    </a>
 </div>
 <!-- Link to the JavaScript file -->
 <script type="module" src="home.js"></script>

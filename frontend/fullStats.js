@@ -7,6 +7,10 @@ const getStatsBtn = document.getElementById('getStats');
 // window loaded event listener ------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
     await SessionMaintenance.logBook("fullStats", "window.DOMContentLoaded", "Full Stats page loaded");
+
+    const currentPage = window.location.pathname.split("/").pop();
+    SessionMaintenance.highlightActivePage(currentPage);
+
     SessionMaintenance.hideLoader();
 });
 
