@@ -20,13 +20,20 @@
 
         <label for="password">Password</label>
         <input type="password" id="password" required>
+
+        <!-- reCAPTCHA widget -->
+        <div id="captcha-container" style="display: none;">
+            <div class="g-recaptcha" data-sitekey="6LeMocsrAAAAAGa0ER9K4NhRHVkZeMOv7Csfs3aQ"></div>
+        </div>
     </form>
     <div class=button-group>
         <button type="submit" id="submitLogin" class="button">Login</button>
-        <button type="submit" id="submitRegister" class="button">Register</button>
+        <button type="submit" id="submitRegister" class="button" style="display: none">Register</button>
     </div>
 </div>
 <!-- Link to the JavaScript file -->
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 <script type="module" src="index.js"></script>
+
 </body>
 </html>

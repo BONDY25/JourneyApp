@@ -1,13 +1,41 @@
 import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
 
-const submitLogin = document.getElementById('submitLogin');
-//const submitReg = document.getElementById('submitRegister');
+const usernameInput = document.getElementById("username");
+const submitLogin = document.getElementById("submitLogin");
+const submitReg = document.getElementById("submitRegister");
+const captchaContainer = document.getElementById("captcha-container");
 
 // window loaded event listener ------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
     await SessionMaintenance.logBook("login", "window.DOMContentLoaded", "login page loaded");
     SessionMaintenance.hideLoader();
+});
+
+// User input leave -------------------------------------------------------------------------
+usernameInput.addEventListener("blur", async () => {
+    const username = String(usernameInput.value).toLowerCase().trim();
+    if (!username) return;
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/getUsers/${username}`);
+
+        if (res.ok) {
+            // User exists -> show Login only
+            submitLogin.style.display = "block";
+            submitReg.style.display = "none";
+            captchaContainer.style.display = "none";
+        } else if (res.status === 404) {
+            // User not found -> show Register + Captcha
+            submitLogin.style.display = "none";
+            submitReg.style.display = "block";
+            captchaContainer.style.display = "block";
+        } else {
+            console.warn("Unexpected response when checking user:", res.status);
+        }
+    } catch (err) {
+        console.error("Error checking user:", err);
+    }
 });
 
 // Store defaults ---------------------------------------------------------------------
@@ -66,13 +94,20 @@ submitReg.addEventListener('click', async (e) => {
     const username = String(document.getElementById('username').value).toLowerCase();
     const password = String(document.getElementById('password').value);
 
+    // Get Captcha token
+    const captchaResponse = grecaptcha.getResponse();
+    if (!captchaResponse) {
+        alert("Please verify that you are not a robot.");
+        return;
+    }
+
     try {
         SessionMaintenance.showLoader();
         // send request to backend
         const res = await fetch(`${API_BASE_URL}/api/users`, {
             method: 'POST',
             headers: {'content-type': 'application/json'},
-            body: JSON.stringify({username, password})
+            body: JSON.stringify({username, password, captcha: captchaResponse})
         });
 
         // evaluate backend response
@@ -86,7 +121,6 @@ submitReg.addEventListener('click', async (e) => {
             localStorage.setItem('gallon', 'UK');
             localStorage.setItem('userFont', 'Lexend');
             localStorage.setItem('currency', '£');
-
 
             SessionMaintenance.startSession(username);
 

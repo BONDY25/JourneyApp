@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import bcryptjs from 'bcryptjs';
+import fetch from "node-fetch";
 
 dotenv.config();
 console.log("Mongo URI:", process.env.MONGO_URI); // test output
@@ -65,7 +66,20 @@ async function startServer() {
         // Insert User --------------------------------------------------------------------------------------------
         app.post('/api/users', async (req, res) => {
             try {
-                const {username, password} = req.body;
+                const {username, password, captcha} = req.body;
+
+                const secretKey = process.env.RECAPTCHA_SECRET;
+                const verifyRes = await fetch(
+                    `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captcha}`,
+                    {method: "POST"}
+                );
+                const verifyData = await verifyRes.json();
+
+                console.log("Captcha received:", captcha);
+
+                if (!verifyData.success) {
+                    return res.status(400).send("Captcha failed, try again.");
+                }
 
                 // check is fields are complete
                 if (!username || !password) {
@@ -88,6 +102,8 @@ async function startServer() {
                     dateCreated: new Date(),
                     tankVolume: tankVolume,
                     defFuelCost: 0.0,
+                    gallon: "UK",
+                    userFont: "Lexend",
                     currency: "£",
                 };
 
@@ -186,15 +202,15 @@ async function startServer() {
 
                 const result = await journeysCollection.aggregate([
                     {
-                        $match: { user: username }
+                        $match: {user: username}
                     },
                     {
                         // Normalize dateTime
                         $addFields: {
                             parsedDate: {
                                 $cond: [
-                                    { $eq: [{ $type: "$dateTime" }, "string"] },
-                                    { $dateFromString: { dateString: "$dateTime" } },
+                                    {$eq: [{$type: "$dateTime"}, "string"]},
+                                    {$dateFromString: {dateString: "$dateTime"}},
                                     "$dateTime"
                                 ]
                             }
@@ -202,26 +218,26 @@ async function startServer() {
                     },
                     {
                         $match: {
-                            parsedDate: { $gte: twentyEightDaysAgo }
+                            parsedDate: {$gte: twentyEightDaysAgo}
                         }
                     },
                     {
                         $group: {
                             _id: null,
                             seven: {
-                                $sum: { $cond: [{ $gte: ["$parsedDate", sevenDaysAgo] }, "$totalCost", 0] }
+                                $sum: {$cond: [{$gte: ["$parsedDate", sevenDaysAgo]}, "$totalCost", 0]}
                             },
                             fourteen: {
-                                $sum: { $cond: [{ $gte: ["$parsedDate", fourteenDaysAgo] }, "$totalCost", 0] }
+                                $sum: {$cond: [{$gte: ["$parsedDate", fourteenDaysAgo]}, "$totalCost", 0]}
                             },
-                            twentyEight: { $sum: "$totalCost" }
+                            twentyEight: {$sum: "$totalCost"}
                         }
                     }
                 ]).toArray();
 
-                const costs = result.length > 0 ? result[0] : { seven: 0, fourteen: 0, twentyEight: 0 };
+                const costs = result.length > 0 ? result[0] : {seven: 0, fourteen: 0, twentyEight: 0};
 
-                res.json({ cost: costs });
+                res.json({cost: costs});
             } catch (err) {
                 console.error("Error retrieving costs:", err);
                 res.status(500).send("Error retrieving costs");
@@ -301,9 +317,10 @@ async function startServer() {
                 }
 
                 const journeysData = await journeys.aggregate([
-                    { $match: { user: username } },
-                    { $addFields: { dateTimeCorrected: { $toDate: "$dateTime" } } },
-                    { $match: (() => {
+                    {$match: {user: username}},
+                    {$addFields: {dateTimeCorrected: {$toDate: "$dateTime"}}},
+                    {
+                        $match: (() => {
                             const filter = {};
                             if (start) filter.$gte = new Date(start);
                             if (end) {
@@ -311,8 +328,9 @@ async function startServer() {
                                 endDate.setHours(23, 59, 59, 999);
                                 filter.$lte = endDate;
                             }
-                            return Object.keys(filter).length ? { dateTimeCorrected: filter } : {};
-                        })() }
+                            return Object.keys(filter).length ? {dateTimeCorrected: filter} : {};
+                        })()
+                    }
                 ]).toArray();
 
                 console.log(journeysData);
@@ -416,19 +434,19 @@ async function startServer() {
         // Your Journeys Endpoint ----------------------------------------------------------------
         app.get('/api/getJourneys', async (req, res) => {
             try {
-                const { username } = req.query; // safer to get from query
+                const {username} = req.query; // safer to get from query
 
                 const journeys = await db.collection('journeys').aggregate([
                     {
-                        $match: { user: username }
+                        $match: {user: username}
                     },
                     {
                         $addFields: {
-                            dateTimeCorrected: { $toDate: "$dateTime" } // cast to Date
+                            dateTimeCorrected: {$toDate: "$dateTime"} // cast to Date
                         }
                     },
                     {
-                        $sort: { dateTimeCorrected: -1 } // newest first
+                        $sort: {dateTimeCorrected: -1} // newest first
                     }
                 ]).toArray();
 
@@ -454,6 +472,18 @@ async function startServer() {
             } catch (error) {
                 console.error("Error fetching journey:", error);
                 res.status(500).json({error: "Failed to fetch journey"});
+            }
+        });
+
+        // Get total journeys -------------------------------------------------------------
+        app.get('/api/getTotalJourneys/:username', async (req, res) => {
+            try {
+                const username = req.params.username.toLowerCase();
+                const count = await db.collection('journeys').countDocuments({user: username});
+                res.json({total: count});
+            } catch (error) {
+                console.error("Error fetching total journeys:", error);
+                res.status(500).json({error: "Failed to fetch total journeys"});
             }
         });
 
