@@ -1,7 +1,10 @@
-import { API_BASE_URL } from "./config.js";
+// ==========================================================================================================
+// -- Boilerplate --
+// ==========================================================================================================
+
+import {API_BASE_URL} from "./config.js";
 
 export default class SessionMaintenance {
-
 
     // Global Variables
     static debugMode = false;
@@ -9,6 +12,10 @@ export default class SessionMaintenance {
     static appName = "journeyApp";
     static sessionId = null;
     static username = null;
+
+    // ==========================================================================================================
+    // -- Operational Functions --
+    // ==========================================================================================================
 
     // Start Session Function -------------------------------------------
     static startSession(username) {
@@ -62,7 +69,7 @@ export default class SessionMaintenance {
         document.getElementById("loader").classList.remove("hidden");
     }
 
-    static hideLoader(){
+    static hideLoader() {
         document.getElementById("loader").classList.add("hidden");
     }
 

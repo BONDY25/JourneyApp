@@ -1,25 +1,13 @@
+// ==========================================================================================================
+// -- Boilerplate --
+// ==========================================================================================================
+
 import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
 
-// window loaded event listener ------------------------------------------------------------------------
-document.addEventListener("DOMContentLoaded", async () => {
-    await SessionMaintenance.logBook("yourJourneys", "window.DOMContentLoaded", "Home page loaded");
-
-    const currentPage = window.location.pathname.split("/").pop();
-    SessionMaintenance.highlightActivePage(currentPage);
-
-    SessionMaintenance.hideLoader();
-
-    const username = localStorage.getItem("username");
-    const tableBody = document.querySelector("#journeys-table tbody");
-
-    if (!username) {
-        tableBody.innerHTML = `<tr><td colspan="3">No username found</td></tr>`;
-        return;
-    }
-
-    await getJourneys(tableBody, username);
-});
+// ==========================================================================================================
+// -- Operational Functions --
+// ==========================================================================================================
 
 // Get Journeys --------------------------------------------------------------------
 async function getJourneys(tableBody, username) {
@@ -57,3 +45,27 @@ async function getJourneys(tableBody, username) {
         SessionMaintenance.hideLoader();
     }
 }
+
+// ==========================================================================================================
+// -- Event Listeners --
+// ==========================================================================================================
+
+// window loaded event listener ------------------------------------------------------------------------
+document.addEventListener("DOMContentLoaded", async () => {
+    await SessionMaintenance.logBook("yourJourneys", "window.DOMContentLoaded", "Home page loaded");
+
+    const currentPage = window.location.pathname.split("/").pop();
+    SessionMaintenance.highlightActivePage(currentPage);
+
+    SessionMaintenance.hideLoader();
+
+    const username = localStorage.getItem("username");
+    const tableBody = document.querySelector("#journeys-table tbody");
+
+    if (!username) {
+        tableBody.innerHTML = `<tr><td colspan="3">No username found</td></tr>`;
+        return;
+    }
+
+    await getJourneys(tableBody, username);
+});

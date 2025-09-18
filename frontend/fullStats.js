@@ -1,33 +1,26 @@
+// ==========================================================================================================
+// -- Boilerplate --
+// ==========================================================================================================
+
 import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
 
 const currency = localStorage.getItem('currency');
 const getStatsBtn = document.getElementById('getStats');
 
-// window loaded event listener ------------------------------------------------------------------------
-window.addEventListener('DOMContentLoaded', async () => {
-    await SessionMaintenance.logBook("fullStats", "window.DOMContentLoaded", "Full Stats page loaded");
+// ==========================================================================================================
+// -- Operational Functions --
+// ==========================================================================================================
 
-    const currentPage = window.location.pathname.split("/").pop();
-    SessionMaintenance.highlightActivePage(currentPage);
-
-    SessionMaintenance.hideLoader();
-});
-
-// Get Stats Button Click --------------------------------------------------------------------------
-getStatsBtn.addEventListener('click', async () => {
-    // Declare Variables
-    const username = localStorage.getItem('username').toLowerCase();
-    const start = document.getElementById('start').value;
-    const end = document.getElementById('end').value;
-
+// Get Stats -------------------------------------------------------------------------------------------
+async function getStats(username, start, end) {
     try {
         SessionMaintenance.showLoader();
         // Get Data Endpoint
-        await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", `Getting full stats: (${start}, ${end})`);
+        await SessionMaintenance.logBook("fullStats", "getStats", `Getting full stats: (${start}, ${end})`);
         const res = await fetch(`${API_BASE_URL}/api/stats/${username}?start=${start}&end=${end}`);
         const data = await res.json();
-        await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", `Full Stats retrieved: ${JSON.stringify(data, null, 2)}`);
+        await SessionMaintenance.logBook("fullStats", "getStats", `Full Stats retrieved: ${JSON.stringify(data, null, 2)}`);
 
         // Populate UI with Data
         document.getElementById('totalMiles').textContent = data.totalMiles.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -43,9 +36,35 @@ getStatsBtn.addEventListener('click', async () => {
         document.getElementById('avgTemp').textContent = data.avgTemp.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
         document.getElementById('avgTimeDriven').textContent = data.avgTimeDriven.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     } catch (err) {
-        await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", `Error fetching stats: ${err}`, true);
+        await SessionMaintenance.logBook("fullStats", "getStats", `Error fetching stats: ${err}`, true);
         alert("Failed to load stats");
     } finally {
         SessionMaintenance.hideLoader();
     }
+}
+
+// ==========================================================================================================
+// -- Event Listeners --
+// ==========================================================================================================
+
+// window loaded event listener ------------------------------------------------------------------------
+window.addEventListener('DOMContentLoaded', async () => {
+    await SessionMaintenance.logBook("fullStats", "window.DOMContentLoaded", "Full Stats page loaded");
+
+    const currentPage = window.location.pathname.split("/").pop();
+    SessionMaintenance.highlightActivePage(currentPage);
+
+    SessionMaintenance.hideLoader();
+});
+
+// Get Stats Button Click --------------------------------------------------------------------------
+getStatsBtn.addEventListener('click', async () => {
+    await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", "Full Stats page loaded");
+
+    // Declare Variables
+    const username = localStorage.getItem('username').toLowerCase();
+    const start = document.getElementById('start').value;
+    const end = document.getElementById('end').value;
+
+    await getStats(username, start, end);
 });

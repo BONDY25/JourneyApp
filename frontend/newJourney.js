@@ -1,32 +1,63 @@
+// ==========================================================================================================
+// -- Boilerplate --
+// ==========================================================================================================
+
 import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
-
-// window loaded event listener ------------------------------------------------------------------------
-window.addEventListener('DOMContentLoaded', async () => {
-    await SessionMaintenance.logBook("newJourney", "window.DOMContentLoaded", "New Journey page loaded");
-
-    const currentPage = window.location.pathname.split("/").pop();
-    SessionMaintenance.highlightActivePage(currentPage);
-
-    SessionMaintenance.hideLoader();
-
-    const costField = document.getElementById('cost');
-    if (costField) {
-        const storedCost = localStorage.getItem('fuelCost');
-        costField.value = storedCost !== null ? parseFloat(storedCost) : 0;
-    }
-    console.log("Fuel cost from localStorage:", localStorage.getItem('fuelCost'));
-});
-
-// Check Fields --------------------------------------------------------------
-function checkFields(fields) {
-    return fields && fields.length > 0;
-}
 
 // Get Submit button
 const submit = document.getElementById('submit');
 
-// Calculate values-----------------------------------------------
+
+// ==========================================================================================================
+// -- Operational Functions --
+// ==========================================================================================================
+
+// Check Fields --------------------------------------------------------------------------
+function checkFields(fields) {
+    return fields && fields.length > 0;
+}
+
+// Insert Journey ------------------------------------------------------------------------
+async function insertJourney(journeyData){
+    try {
+        SessionMaintenance.showLoader();
+
+        const res = await fetch(`${API_BASE_URL}/api/journeys`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(journeyData)
+        });
+
+        //Save fuel cost in case of change
+        console.log("DEBUG journeyData:", journeyData);
+        if (journeyData && journeyData.costPl !== undefined) {
+            localStorage.setItem('fuelCost', journeyData.costPl.toString());
+        } else {
+            console.warn("costPl missing from journeyData:", journeyData);
+        }
+
+        if (res.ok) {
+            await SessionMaintenance.logBook(
+                "newJourney",
+                "submit.click",
+                `Journey Submission Successful. ${JSON.stringify(journeyData, null, 2)}`
+            );
+            alert('Journey Saved!');
+            window.location.href = "home.html";
+        } else {
+            const err = await res.text();
+            await SessionMaintenance.logBook("newJourney", "submit.click", `Journey Submission failed. ${err}`);
+            alert(`Error: ${err}`);
+        }
+    } catch (error) {
+        await SessionMaintenance.logBook("newJourney", "submit.click", `Network Error: ${error}`, true);
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+}
+
+// Calculate values -----------------------------------------------
 async function calculateValues({timeUnit = 'minutes'} = {}) {
     await SessionMaintenance.logBook("newJourney", "calculateValues", "Calculating Values");
 
@@ -90,6 +121,27 @@ async function calculateValues({timeUnit = 'minutes'} = {}) {
     return output;
 }
 
+// ==========================================================================================================
+// -- Event Listeners --
+// ==========================================================================================================
+
+// window loaded event listener ------------------------------------------------------------------------
+window.addEventListener('DOMContentLoaded', async () => {
+    await SessionMaintenance.logBook("newJourney", "window.DOMContentLoaded", "New Journey page loaded");
+
+    const currentPage = window.location.pathname.split("/").pop();
+    SessionMaintenance.highlightActivePage(currentPage);
+
+    SessionMaintenance.hideLoader();
+
+    const costField = document.getElementById('cost');
+    if (costField) {
+        const storedCost = localStorage.getItem('fuelCost');
+        costField.value = storedCost !== null ? parseFloat(storedCost) : 0;
+    }
+    console.log("Fuel cost from localStorage:", localStorage.getItem('fuelCost'));
+});
+
 // Event Listener to submit form ---------------------------------------------------------------------
 submit.addEventListener('click', async (event) => {
     event.preventDefault(); // Stop form reload
@@ -98,44 +150,14 @@ submit.addEventListener('click', async (event) => {
     const journeyData = await calculateValues();
     const description = String(document.getElementById('description').value);
 
+    // Check if a description has been entered
     if (!checkFields(description)) {
         alert('Please enter a description');
         return;
     }
 
-    try {
-        SessionMaintenance.showLoader();
+    // Insert Journey
+    await insertJourney(journeyData);
 
-        const res = await fetch(`${API_BASE_URL}/api/journeys`, {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(journeyData)
-        });
-
-        //Save fuel cost in case of change
-        console.log("DEBUG journeyData:", journeyData);
-        if (journeyData && journeyData.costPl !== undefined) {
-            localStorage.setItem('fuelCost', journeyData.costPl.toString());
-        } else {
-            console.warn("costPl missing from journeyData:", journeyData);
-        }
-
-        if (res.ok) {
-            await SessionMaintenance.logBook(
-                "newJourney",
-                "submit.click",
-                `Journey Submission Successful. ${JSON.stringify(journeyData, null, 2)}`
-            );
-            alert('Journey Saved!');
-            window.location.href = "home.html";
-        } else {
-            const err = await res.text();
-            await SessionMaintenance.logBook("newJourney", "submit.click", `Journey Submission failed. ${err}`);
-            alert(`Error: ${err}`);
-        }
-    } catch (error) {
-        await SessionMaintenance.logBook("newJourney", "submit.click", `Network Error: ${error}`, true);
-    } finally {
-        SessionMaintenance.hideLoader();
-    }
 });
+

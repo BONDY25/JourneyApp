@@ -1,3 +1,7 @@
+// ==========================================================================================================
+// -- Boilerplate --
+// ==========================================================================================================
+
 import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
 
@@ -5,29 +9,9 @@ const editButton = document.getElementById("btnEdit");
 const currency = localStorage.getItem('currency');
 let journeyId = null;
 
-// window loaded event listener ------------------------------------------------------------------------
-window.addEventListener('DOMContentLoaded', async () => {
-    await SessionMaintenance.logBook("journeyDetails", "window.DOMContentLoaded", "journey page loaded");
-    SessionMaintenance.hideLoader();
-
-    // Get ID from URL
-    const params = new URLSearchParams(window.location.search);
-    journeyId = params.get("id");
-
-    // Log what we got
-    await SessionMaintenance.logBook("journeyDetails", "window.DOMContentLoaded", `Journey ID from URL: ${journeyId}`);
-
-    await getJourneys(journeyId);
-});
-
-// Edit button event listener -------------------------------------------------------------------------
-editButton.addEventListener("click", () => {
-    if (journeyId) {
-        window.location.href = `edit-journey.html?id=${journeyId}`;
-    } else {
-        alert("No journey ID available to edit.");
-    }
-});
+// ==========================================================================================================
+// -- Operational Functions --
+// ==========================================================================================================
 
 // Format Date -----------------------------------------------------------------------------------------
 function formatDateTime(value){
@@ -77,7 +61,7 @@ async function getJourneys(journeyId) {
         document.getElementById("DateTime").textContent = formatDateTime(journey.dateTime);
         document.getElementById("description").textContent = journey.description || "-";
         document.getElementById("distance").textContent = journey.distance ? `${formatNumber(journey.distance, 1)} mi` : "0 mi";
-        document.getElementById("timeDriven").textContent = `${currency}{journey.timeDriven} mins` || "-";
+        document.getElementById("timeDriven").textContent = `${journey.timeDriven} mins` || "-";
         document.getElementById("fuelUsedL").textContent = journey.fuelUsedL ? `${formatNumber(journey.fuelUsedL, 2)} L` : "0 L";
         document.getElementById("cost").textContent = journey.totalCost ? `${currency}${formatNumber(journey.totalCost, 2)}` : "£0.00";
         document.getElementById("mpg").textContent = journey.mpg ? `${formatNumber(journey.mpg, 1)}` : "0 mpg";
@@ -92,3 +76,31 @@ async function getJourneys(journeyId) {
         SessionMaintenance.hideLoader();
     }
 }
+
+// ==========================================================================================================
+// -- Event Listeners --
+// ==========================================================================================================
+
+// window loaded event listener ------------------------------------------------------------------------
+window.addEventListener('DOMContentLoaded', async () => {
+    await SessionMaintenance.logBook("journeyDetails", "window.DOMContentLoaded", "journey page loaded");
+    SessionMaintenance.hideLoader();
+
+    // Get ID from URL
+    const params = new URLSearchParams(window.location.search);
+    journeyId = params.get("id");
+
+    // Log what we got
+    await SessionMaintenance.logBook("journeyDetails", "window.DOMContentLoaded", `Journey ID from URL: ${journeyId}`);
+
+    await getJourneys(journeyId);
+});
+
+// Edit button event listener -------------------------------------------------------------------------
+editButton.addEventListener("click", () => {
+    if (journeyId) {
+        window.location.href = `edit-journey.html?id=${journeyId}`;
+    } else {
+        alert("No journey ID available to edit.");
+    }
+});

@@ -1,7 +1,40 @@
+// ==========================================================================================================
+// -- Boilerplate --
+// ==========================================================================================================
+
 import SessionMaintenance from "./sessionMaintenance.js";
 import {API_BASE_URL} from "./config.js";
 
 const fontSelect = document.getElementById('font-select');
+
+// ==========================================================================================================
+// -- Operational Functions --
+// ==========================================================================================================
+
+// Get total number of journeys ----------------------------------------------------------
+async function getTotalJourneys(username) {
+    const totalElem = document.getElementById('totalJourneys');
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/getTotalJourneys/${username}`);
+        if (!res.ok) throw new Error("Failed to fetch journeys");
+
+        const data = await res.json();
+        totalElem.textContent = data.total; // update DOM
+
+        await SessionMaintenance.logBook("settings", "getTotalJourneys", `Journey Total retrieved: ${data.total}`);
+
+        return data.total;
+    } catch (err) {
+        console.error("Error fetching total journeys:", err);
+        await SessionMaintenance.logBook("settings", "getTotalJourneys", `Network Error: ${err}`, true);
+        return 0;
+    }
+}
+
+// ==========================================================================================================
+// -- Event Listeners --
+// ==========================================================================================================
 
 // Font Select -----------------------------------------------------------------------
 fontSelect.addEventListener('change', (e) => {
@@ -110,24 +143,3 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 });
-
-// Get total number of journeys ----------------------------------------------------------
-async function getTotalJourneys(username) {
-    const totalElem = document.getElementById('totalJourneys');
-
-    try {
-        const res = await fetch(`${API_BASE_URL}/api/getTotalJourneys/${username}`);
-        if (!res.ok) throw new Error("Failed to fetch journeys");
-
-        const data = await res.json();
-        totalElem.textContent = data.total; // update DOM
-
-        await SessionMaintenance.logBook("settings", "getTotalJourneys", `Journey Total retrieved: ${data.total}`);
-
-        return data.total;
-    } catch (err) {
-        console.error("Error fetching total journeys:", err);
-        await SessionMaintenance.logBook("settings", "getTotalJourneys", `Network Error: ${err}`, true);
-        return 0;
-    }
-}

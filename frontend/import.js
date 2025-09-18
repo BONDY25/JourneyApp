@@ -1,3 +1,7 @@
+// ==========================================================================================================
+// -- Boilerplate --
+// ==========================================================================================================
+
 import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
 //import Papa from 'papaparse';
@@ -5,11 +9,9 @@ import { API_BASE_URL } from "./config.js";
 const fileInput = document.getElementById("csvFile");
 const importBtn = document.getElementById("importBtn");
 
-// window loaded event listener ------------------------------------------------------------------------
-window.addEventListener('DOMContentLoaded', async () => {
-    await SessionMaintenance.logBook("import", "window.DOMContentLoaded", "Import page loaded");
-    SessionMaintenance.hideLoader();
-});
+// ==========================================================================================================
+// -- Operational Functions --
+// ==========================================================================================================
 
 // Chunk Array helper method ------------------------------------------------------------------------------
 function chunkArray(arr, size) {
@@ -20,15 +22,8 @@ function chunkArray(arr, size) {
     return result;
 }
 
-// Import button Clicked -------------------------------------------------------------------
-importBtn.addEventListener('click', () => {
-
-    const file = fileInput.files[0];
-
-    if (!file) {
-        alert("Please choose a CSV file first.");
-        return;
-    }
+// Import Process -----------------------------------------------------------------------------------------
+function importJourneys(file){
 
     window.Papa.parse(file, {
         header: true, // CSV columns become object keys
@@ -77,4 +72,30 @@ importBtn.addEventListener('click', () => {
             }
         }
     });
+}
+
+// ==========================================================================================================
+// -- Event Listeners --
+// ==========================================================================================================
+
+// window loaded event listener ------------------------------------------------------------------------
+window.addEventListener('DOMContentLoaded', async () => {
+    await SessionMaintenance.logBook("import", "window.DOMContentLoaded", "Import page loaded");
+    SessionMaintenance.hideLoader();
+});
+
+// Import button Clicked -------------------------------------------------------------------
+importBtn.addEventListener('click',  () => {
+
+    // Open file dialog
+    const file = fileInput.files[0];
+
+    // Check file is there
+    if (!file) {
+        alert("Please choose a CSV file first.");
+        return;
+    }
+
+    // Import data
+    importJourneys(file);
 });

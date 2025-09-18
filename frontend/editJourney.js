@@ -1,24 +1,16 @@
+// ==========================================================================================================
+// -- Boilerplate --
+// ==========================================================================================================
+
 import {API_BASE_URL} from "./config.js";
 import SessionMaintenance from "./sessionMaintenance.js";
 
 const params = new URLSearchParams(window.location.search);
 const journeyId = params.get("id");
 
-// Page loaded -----------------------------------------------------------------------------
-document.addEventListener("DOMContentLoaded", async () => {
-    await SessionMaintenance.logBook("editJourney", "window.DOMContentLoaded", "Edit journey page loaded");
-    SessionMaintenance.hideLoader();
-
-    await loadJourney();
-
-    const form = document.getElementById("editJourneyForm");
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        await saveJourney();
-    });
-
-    document.getElementById("deleteBtn").addEventListener("click", deleteJourney);
-});
+// ==========================================================================================================
+// -- Operational Functions --
+// ==========================================================================================================
 
 // format date time --------------------------------------------------------------------------
 function formatDatetime(isoString){
@@ -156,3 +148,23 @@ async function deleteJourney() {
         SessionMaintenance.hideLoader();
     }
 }
+
+// ==========================================================================================================
+// -- Event Listeners --
+// ==========================================================================================================
+
+// Page loaded -----------------------------------------------------------------------------
+document.addEventListener("DOMContentLoaded", async () => {
+    await SessionMaintenance.logBook("editJourney", "window.DOMContentLoaded", "Edit journey page loaded");
+    SessionMaintenance.hideLoader();
+
+    await loadJourney();
+
+    const form = document.getElementById("editJourneyForm");
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await saveJourney();
+    });
+
+    document.getElementById("deleteBtn").addEventListener("click", deleteJourney);
+});
