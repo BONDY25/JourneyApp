@@ -7,8 +7,7 @@ I use a MongoDb Atlas NoSql Database to store each journey entry and then go fro
 
 ## Current "To Do"
 
-* Add delete function to journey details
-* Add edit function to journey details
+* Add fuel cost and condition feilds to edit journey page
 * Make view of stats easier to read? fields names on the left, field values on the right or table view?
 * Add Change password to user settings
 * Add summary stats for past 28 days on home page
