@@ -70,6 +70,40 @@ async function loadCosts(username) {
     }
 }
 
+// Load 28 day summary --------------------------------------------------------------------------------------------------
+async function load28DaySum(username) {
+    const start =  new Date();
+    const end =  new Date();
+    start.setDate(start.getDate() - 28);
+    end.setDate(end.getDate());
+
+    try {
+        SessionMaintenance.showLoader();
+        // Get Data Endpoint
+        await SessionMaintenance.logBook("fullStats", "getStats", `Getting full stats: (${start}, ${end})`);
+        const res = await fetch(`${API_BASE_URL}/api/stats/${username}?start=${start}&end=${end}`);
+        const data = await res.json();
+        const formattedTime = data.totalTime > 60 ? data.totalTime / 60 : data.totalTime;
+        const timeUnit = data.totalTime > 60 ? "Hours" : "Minutes";
+
+        await SessionMaintenance.logBook("fullStats", "getStats", `Full Stats retrieved: ${JSON.stringify(data, null, 2)}`);
+
+        // Populate UI with Data
+        document.getElementById('28Miles').textContent = data.totalMiles.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('28Time').textContent = `${formattedTime.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${timeUnit}`;
+        document.getElementById('28Fuel').textContent = data.totalFuel.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('28Cost').textContent = `${currency}${data.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('28Mpg').textContent = data.avgMpg.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    } catch (err) {
+        await SessionMaintenance.logBook("fullStats", "getStats", `Error fetching stats: ${err}`, true);
+        alert("Failed to load stats");
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+}
+
+
 // ==========================================================================================================
 // -- Event Listeners --
 // ==========================================================================================================
@@ -92,4 +126,5 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
     await loadCosts(username);
     await loadSummary(username);
+    await load28DaySum(username);
 });

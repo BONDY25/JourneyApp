@@ -368,7 +368,7 @@ async function startServer() {
 
                 // Calculate Averages
                 const avgTimeDriven = totalTime / journeysData.length;
-                const avgMpg = journeysData.reduce((sum, j) => +j.mpg, 0) / journeysData.length;
+                const avgMpg = journeysData.reduce((sum, j) => sum + (+j.mpg || 0), 0) / journeysData.length;
                 const avgSpeed = journeysData.reduce((sum, j) => sum + j.avgSpeed, 0) / journeysData.length;
                 const avgFuelPrice = journeysData.reduce((sum, j) => sum + j.costPl, 0) / journeysData.length;
                 const avgTemp = journeysData.reduce((sum, j) => sum + j.temp, 0) / journeysData.length;

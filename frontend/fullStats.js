@@ -20,11 +20,14 @@ async function getStats(username, start, end) {
         await SessionMaintenance.logBook("fullStats", "getStats", `Getting full stats: (${start}, ${end})`);
         const res = await fetch(`${API_BASE_URL}/api/stats/${username}?start=${start}&end=${end}`);
         const data = await res.json();
+        const formattedTime = data.totalTime > 60 ? data.totalTime / 60 : data.totalTime;
+        const timeUnit = data.totalTime > 60 ? "Hours" : "Minutes";
+
         await SessionMaintenance.logBook("fullStats", "getStats", `Full Stats retrieved: ${JSON.stringify(data, null, 2)}`);
 
         // Populate UI with Data
         document.getElementById('totalMiles').textContent = data.totalMiles.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('totalTime').textContent = data.totalTime.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('totalTime').textContent = `${formattedTime.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${timeUnit}`;
         document.getElementById('totalFuel').textContent = data.totalFuel.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         document.getElementById('totalCost').textContent = `${currency}${data.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
         document.getElementById('avgMilesPerTank').textContent = data.avgMilesPerTank.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });

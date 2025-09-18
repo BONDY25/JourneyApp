@@ -54,14 +54,16 @@ async function getJourneys(journeyId) {
         if (!response.ok) throw new Error("Failed to get journey details");
 
         const journey = await response.json();
+        const formattedTime = journey.timeDriven > 60 ? journey.timeDriven / 60 : journey.timeDriven;
+        const timeUnit = journey.timeDriven > 60 ? "Hours" : "Minutes";
+
         await SessionMaintenance.logBook("journeyDetails", "getJourney", `journey Data: ${JSON.stringify(journey)}`);
 
-
-// Populate Fields
+        // Populate Fields
         document.getElementById("DateTime").textContent = formatDateTime(journey.dateTime);
         document.getElementById("description").textContent = journey.description || "-";
         document.getElementById("distance").textContent = journey.distance ? `${formatNumber(journey.distance, 1)} mi` : "0 mi";
-        document.getElementById("timeDriven").textContent = `${journey.timeDriven} mins` || "-";
+        document.getElementById("timeDriven").textContent = `${formattedTime} ${timeUnit}` || "-";
         document.getElementById("fuelUsedL").textContent = journey.fuelUsedL ? `${formatNumber(journey.fuelUsedL, 2)} L` : "0 L";
         document.getElementById("cost").textContent = journey.totalCost ? `${currency}${formatNumber(journey.totalCost, 2)}` : "£0.00";
         document.getElementById("mpg").textContent = journey.mpg ? `${formatNumber(journey.mpg, 1)}` : "0 mpg";
