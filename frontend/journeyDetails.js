@@ -1,7 +1,9 @@
 import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
 
+const editButton = document.getElementById("btnEdit");
 const currency = localStorage.getItem('currency');
+let journeyId = null;
 
 // window loaded event listener ------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
@@ -10,12 +12,21 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // Get ID from URL
     const params = new URLSearchParams(window.location.search);
-    const journeyId = params.get("id");
+    journeyId = params.get("id");
 
     // Log what we got
     await SessionMaintenance.logBook("journeyDetails", "window.DOMContentLoaded", `Journey ID from URL: ${journeyId}`);
 
     await getJourneys(journeyId);
+});
+
+// Edit button event listener -------------------------------------------------------------------------
+editButton.addEventListener("click", () => {
+    if (journeyId) {
+        window.location.href = `edit-journey.html?id=${journeyId}`;
+    } else {
+        alert("No journey ID available to edit.");
+    }
 });
 
 // Format Date -----------------------------------------------------------------------------------------

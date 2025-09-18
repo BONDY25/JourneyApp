@@ -487,6 +487,43 @@ async function startServer() {
             }
         });
 
+        // Get single journey ---------------------------------------------------------------
+        app.get('/api/journeys/:id', async (req, res) => {
+            try{
+                const {id}=req.params;
+                const journey = await db.collection('journeys').findOne({_id: new ObjectId(id)});
+                if (!journey) return res.status(404).send('No journey found.');
+                res.json(journey);
+            } catch (err) {
+                res.status(500).send("Error retrieving journeys");
+            }
+        });
+
+        // Update journey -------------------------------------------------------------------
+        app.put('/api/journeys/:id', async (req, res) => {
+            try{
+                const {id} = req.params;
+                const updated = req.body;
+                const result = await db.collection('journeys').updateOne(
+                    {_id: new ObjectId(id)},
+                    {$set: updated},
+                );
+                res.json(result);
+            } catch (err){
+                res.status(500).send("Error updating journeys");
+            }
+        });
+
+        // Delete journey -------------------------------------------------------------------
+        app.delete('/api/journeys/:id', async (req, res) => {
+            try{
+                const {id} = req.params;
+                await db.collection('journeys').deleteOne({_id: new ObjectId(id)});
+                res.sendStatus(204);
+            } catch (err){
+                res.status(500).send("Error deleting journeys");
+            }
+        });
 
         app.listen(3000, () => {
             console.log('Server running at http://localhost:3000');
