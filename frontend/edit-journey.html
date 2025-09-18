@@ -26,6 +26,19 @@
         <label for="timedriven">Time Driving:</label>
         <input type="number" id="timedriven" name="timedriven" step="0.1" required>
 
+        <label for="temp">Temperature (°C)</label>
+        <input type="number" id="temp" step="0.1">
+
+        <label for="condition">Condition</label>
+        <select id="condition">
+            <option value="">Select</option>
+            <option value="dry">Dry</option>
+            <option value="wet">Wet</option>
+        </select>
+
+        <label for="cost">Cost per L(£)</label>
+        <input type="number" id="cost" step="0.01" required>
+
         <div class="button-group">
             <button type="submit" class="button">Save Changes</button>
             <button type="button" id="deleteBtn" class="danger button">Delete Journey</button>

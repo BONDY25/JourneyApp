@@ -34,6 +34,55 @@ function formatDatetime(isoString){
     return `${yyyy}-${MM}-${dd}T${hh}:${mm}` || "";
 }
 
+//Calculate Values ----------------------------------------------------------------------------
+async function reCalculateValues({timeUnit = 'minutes'} = {}) {
+    await SessionMaintenance.logBook("editJourney", "calculateValues", "Calculating Values");
+
+    const tankVolume = Number(localStorage.getItem('tankVolume')) || 64;
+    const dateTime = document.getElementById("datetime").value || "";
+    const distance = document.getElementById("distance").value || 0;
+    const mpg = document.getElementById("mpg").value || 0;
+    const timeDriven = document.getElementById("timedriven").value || 0;
+    const costPerLitre = document.getElementById("cost").value || 0;
+    const condition = document.getElementById("condition").value || "Dry";
+    const temp = document.getElementById("temp").value  || 0;
+
+    // Calculate Helpers
+    const gallon = localStorage.getItem('gallon');
+    const hours = timeUnit === 'minutes' ? (timeDriven / 60) : timeDriven;
+    const safeHours = hours > 0 ? hours : 1; // avoid division by zero
+    const GALLON_L = (gallon === 'US') ? 3.79541 : 4.54609;
+    const milesPerLitre = mpg > 0 ? (mpg / GALLON_L) : 1; // avoid division by zero
+
+    // Calculate Values
+    const avgSpeed = distance / safeHours;
+    const fuelUsedL = distance / milesPerLitre;
+    const costPerMile = costPerLitre / milesPerLitre;
+    const totalCost = costPerMile * distance;
+    const percOfTank = tankVolume > 0 ? (fuelUsedL / tankVolume) : 0;
+
+    const round = (n, dp = 3) => isNaN(n) ? 0 : Number(Number(n).toFixed(dp));
+
+    const output = {
+        dateTime,
+        distance: round(distance, 2),
+        mpg: round(mpg, 2),
+        timeDriven: round(timeDriven, 2),
+        temp: round(temp, 1),
+        condition,
+        costPl: round(costPerLitre, 2),
+        avgSpeed: round(avgSpeed, 2),
+        totalCost: round(totalCost, 2),
+        costPerMile: round(costPerMile, 2),
+        fuelUsedL: round(fuelUsedL, 2),
+        percOfTank: round(percOfTank, 4),
+    }
+
+    await SessionMaintenance.logBook("editJourney", "calculateValues", `Values Calculated: ${JSON.stringify(output, null, 2)}`);
+
+    return output;
+}
+
 // Load Journey -----------------------------------------------------------------------------
 async function loadJourney() {
     try {
@@ -46,6 +95,9 @@ async function loadJourney() {
         document.getElementById("distance").value = journey.distance || "";
         document.getElementById("mpg").value = journey.mpg || "";
         document.getElementById("timedriven").value = journey.timeDriven || "";
+        document.getElementById("temp").value = journey.temp || "";
+        document.getElementById("condition").value = journey.condition || "";
+        document.getElementById("cost").value = journey.costPl || "";
     } catch (err) {
         await SessionMaintenance.logBook("editJourney", "loadJourney", `Error getting journey ${err}`, true);
     } finally {
@@ -55,12 +107,8 @@ async function loadJourney() {
 
 // Save Journey -----------------------------------------------------------------------------
 async function saveJourney() {
-    const updated = {
-        dateTime: document.getElementById("datetime").value,
-        distance: document.getElementById("distance").value,
-        mpg: document.getElementById("mpg").value,
-        timeDriven: document.getElementById("timedriven").value,
-    };
+
+    const updated = await reCalculateValues();
 
     try {
         SessionMaintenance.showLoader();
@@ -72,6 +120,7 @@ async function saveJourney() {
 
         if (res.ok) {
             alert("Journey updated successfully!");
+            await SessionMaintenance.logBook("saveJourney", "saveJourney", `Journey Saved successfully! ${JSON.stringify(updated)}`);
             window.location.href = "your-journeys.html";
         } else {
             throw new Error("Update failed");
