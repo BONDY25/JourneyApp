@@ -1,5 +1,5 @@
 import SessionMaintenance from "./sessionMaintenance.js";
-import { API_BASE_URL } from "./config.js";
+import {API_BASE_URL} from "./config.js";
 
 const fontSelect = document.getElementById('font-select');
 
@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         SessionMaintenance.hideLoader();
     }
 
-    // Handle save function
+    // Handle save function -----------------------------------------------------------------------------------------
     document.getElementById('settingsForm').addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -64,15 +64,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!gallon || gallon.trim() === "") gallon = "UK";
         const userFont = document.getElementById('font-select').value || "Lexend";
         const currency = document.getElementById('currency-select').value || "£";
+        const newPassword = document.getElementById('new-password').value || "";
 
-        console.log("Saving settings:", {tankVolume, defFuelCost: fuelCost, gallon, userFont, currency});
+        // Build Payload
+        const payLoad = {
+            tankVolume,
+            defFuelCost: fuelCost,
+            gallon,
+            userFont,
+            currency,
+        };
+
+        if (newPassword && newPassword.trim() !== "") {
+            payLoad.newPassword = newPassword;
+        }
 
         try {
             SessionMaintenance.showLoader();
             const res = await fetch(`${API_BASE_URL}/api/saveUsers/${username}`, {
                 method: 'PUT',
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({tankVolume, defFuelCost: fuelCost, gallon, userFont, currency}),
+                body: JSON.stringify(payLoad),
             });
 
             // Update Local storage
@@ -84,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             localStorage.setItem('currency', currency);
 
             if (res.ok) {
-                await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Settings saved successfully");
+                await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", `Settings saved successfully {${JSON.stringify(payLoad)}}`);
                 alert("Settings saved successfully");
             } else {
                 const err = await res.text();

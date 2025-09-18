@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Journey App - Settings</title>
     <link href="assets/styles.css" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="assets/JourneyApp-logo-1.png"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 </head>
 <body>
 <div id="loader" class="loader-overlay">
@@ -18,18 +18,22 @@
         <p>Username: <span id="username">Username</span></p>
         <p>Total Journeys: <span id="totalJourneys">0</span></p>
         <form id="settingsForm">
+            <!-- Tank Volume -->
             <label for="tankVolume">Default Tank Volume (L):</label>
             <input type="number" id="tankVolume" step="0.1" min="0"/>
 
+            <!-- Fuel Cost -->
             <label for="fuelCost">Default Fuel Cost (£/L):</label>
             <input type="number" id="fuelCost" step="0.01" min="0"/>
 
+            <!-- Gallon -->
             <label for="gallon-select">Gallon (US/UK):</label>
             <select id="gallon-select">
                 <option value="UK">UK</option>
                 <option value="US">US</option>
             </select>
 
+            <!-- Font -->
             <label for="font-select">Choose Font:</label>
             <select id="font-select">
                 <option value="Lexend">Normal</option>
@@ -39,12 +43,17 @@
                 <option value="Monsieur La Doulaise">Fancy</option>
             </select>
 
+            <!-- Currency -->
             <label for="currency-select">Choose Currency:</label>
             <select id="currency-select">
                 <option value="£">£</option>
                 <option value="$">$</option>
                 <option value="€">€</option>
             </select>
+
+            <!-- New Password -->
+            <label for="new-password">Update Password</label>
+            <input type="password" id="new-password"/>
 
             <!-- <label for="theme-select">Choose Theme:</label>
              <select id="theme-select">

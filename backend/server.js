@@ -1,15 +1,14 @@
 import dotenv from 'dotenv';
 import bcryptjs from 'bcryptjs';
 import fetch from "node-fetch";
-
-dotenv.config();
-console.log("Mongo URI:", process.env.MONGO_URI); // test output
-
 import express from 'express';
 import cors from 'cors';
 import {MongoClient, ObjectId} from 'mongodb';
 import path from 'path';
 import {fileURLToPath} from 'url';
+
+dotenv.config();
+console.log("Mongo URI:", process.env.MONGO_URI); // test output
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -415,18 +414,31 @@ async function startServer() {
         // Save User Endpoint -----------------------------------------------------------------
         app.put('/api/saveUsers/:username', async (req, res) => {
             const username = req.params.username.toLowerCase();
-            const {tankVolume, defFuelCost, gallon, userFont, currency} = req.body;
+            const {tankVolume, defFuelCost, gallon, userFont, currency, newPassword} = req.body;
 
             try {
                 const db = client.db('journeyAppDb');
+                const updateFields = {tankVolume, defFuelCost, gallon, userFont, currency};
+
+                // Add Password if provided
+                if (newPassword && newPassword.trim() !== "") {
+                    updateFields.password = await bcryptjs.hash(newPassword, 10);
+                }
+
+                console.log(`Payload received: ${JSON.stringify(updateFields)}`);
+
                 const result = await db.collection('users').updateOne(
                     {username},
-                    {$set: {tankVolume, defFuelCost, gallon, userFont, currency}}
+                    {$set: updateFields}
                 );
-                if (result.matchedCount === 0) return res.status(404).send('No user found.');
-                res.send("Successfully updated");
+
+                if (result.matchedCount === 0) {
+                    return res.status(404).send('No user found.');
+                }
+
+                res.send("Successfully updated user");
             } catch (err) {
-                console.error("Error updating settings user:", err);
+                console.error("Error updating user:", err);
                 res.status(500).send("Error updating user");
             }
         });
@@ -456,7 +468,6 @@ async function startServer() {
                 res.status(500).send("Error retrieving journeys");
             }
         });
-
 
         // Journey Details Endpoint ------------------------------------------------------------------
         app.get("/api/getJourney/:id", async (req, res) => {
@@ -489,8 +500,8 @@ async function startServer() {
 
         // Get single journey ---------------------------------------------------------------
         app.get('/api/journeys/:id', async (req, res) => {
-            try{
-                const {id}=req.params;
+            try {
+                const {id} = req.params;
                 const journey = await db.collection('journeys').findOne({_id: new ObjectId(id)});
                 if (!journey) return res.status(404).send('No journey found.');
                 res.json(journey);
@@ -501,7 +512,7 @@ async function startServer() {
 
         // Update journey -------------------------------------------------------------------
         app.put('/api/journeys/:id', async (req, res) => {
-            try{
+            try {
                 const {id} = req.params;
                 const updated = req.body;
                 const result = await db.collection('journeys').updateOne(
@@ -509,18 +520,18 @@ async function startServer() {
                     {$set: updated},
                 );
                 res.json(result);
-            } catch (err){
+            } catch (err) {
                 res.status(500).send("Error updating journeys");
             }
         });
 
         // Delete journey -------------------------------------------------------------------
         app.delete('/api/journeys/:id', async (req, res) => {
-            try{
+            try {
                 const {id} = req.params;
                 await db.collection('journeys').deleteOne({_id: new ObjectId(id)});
                 res.sendStatus(204);
-            } catch (err){
+            } catch (err) {
                 res.status(500).send("Error deleting journeys");
             }
         });
