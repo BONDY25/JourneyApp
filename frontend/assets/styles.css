@@ -169,7 +169,7 @@ form {
     gap: 10px;
 
     /* Matches accent theme */
-    background-color: #d95000;
+    background-color: var(--accent-color);
     color: black;
 
     /* Padding & rounded look */
@@ -187,6 +187,18 @@ form input, form select, form button {
     border-radius: 5px;
     border: none;
     font-size: 1em;
+}
+
+.numbers p:nth-child(odd) {
+    background-color: #ff7326;
+        border-radius: 6px;
+        padding: 4px 6px;
+}
+
+.numbers p:nth-child(even) {
+    background-color: #cc4b00;
+    border-radius: 6px;
+    padding: 4px 6px;
 }
 
 /* --------------------------------------------------------------------------- */
@@ -268,8 +280,8 @@ form input, form select, form button {
     left: 0;
     right: 0;
     height: 60px;
-    background: #d95000;
-    border-top: 1px solid #d95000;
+    background: var(--accent-color);
+    border-top: 1px solid var(--accent-color);
     display: flex;
     justify-content: space-around;
     align-items: center;
