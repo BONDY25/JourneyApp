@@ -303,15 +303,15 @@ form input, form select, form button {
 }
 
 .nav-item:hover {
-    color: #ffffff; /* highlight on hover */
+    color: white; /* highlight on hover */
 }
 
 .nav-item.active {
-    color: #ffffff; /* active blue, pick your color */
+    color: white; /* active blue, pick your color */
 }
 
 .nav-item.active .material-symbols-outlined {
-    color: #ffffff;
+    color: white;
 }
 
 

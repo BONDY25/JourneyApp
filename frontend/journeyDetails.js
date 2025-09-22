@@ -63,7 +63,7 @@ async function getJourneys(journeyId) {
         document.getElementById("DateTime").textContent = formatDateTime(journey.dateTime);
         document.getElementById("description").textContent = journey.description || "-";
         document.getElementById("distance").textContent = journey.distance ? `${formatNumber(journey.distance, 1)} mi` : "0 mi";
-        document.getElementById("timeDriven").textContent = `${formattedTime} ${timeUnit}` || "-";
+        document.getElementById("timeDriven").textContent = `${formatNumber(formattedTime, 2)} ${timeUnit}` || "-";
         document.getElementById("fuelUsedL").textContent = journey.fuelUsedL ? `${formatNumber(journey.fuelUsedL, 2)} L` : "0 L";
         document.getElementById("cost").textContent = journey.totalCost ? `${currency}${formatNumber(journey.totalCost, 2)}` : "£0.00";
         document.getElementById("mpg").textContent = journey.mpg ? `${formatNumber(journey.mpg, 1)}` : "0 mpg";

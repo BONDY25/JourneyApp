@@ -3,11 +3,10 @@
 // ==========================================================================================================
 
 import SessionMaintenance from "./sessionMaintenance.js";
-import { API_BASE_URL } from "./config.js";
+import {API_BASE_URL} from "./config.js";
 
 // Get Submit button
 const submit = document.getElementById('submit');
-
 
 // ==========================================================================================================
 // -- Operational Functions --
@@ -139,6 +138,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         const storedCost = localStorage.getItem('fuelCost');
         costField.value = storedCost !== null ? parseFloat(storedCost) : 0;
     }
+
     console.log("Fuel cost from localStorage:", localStorage.getItem('fuelCost'));
 });
 
