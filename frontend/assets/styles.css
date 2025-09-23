@@ -33,7 +33,7 @@ body {
     align-items: flex-start;
 
     /* Ensure body fills full viewport height */
-    min-height: 100vh;
+    min-height: 100%;
 
     /* Make sure padding/border count in box size */
     box-sizing: border-box;
@@ -299,12 +299,14 @@ form input, form select, form button {
     color: #000000;
     text-decoration: none;
     font-size: 12px;
+    margin: 5px;
+    height: 75%
 }
 
 .nav-item .material-symbols-outlined {
     display: block;
     font-size: 24px;
-    margin-bottom: 2px;
+    margin-bottom: 5px;
 }
 
 .nav-item:hover {
