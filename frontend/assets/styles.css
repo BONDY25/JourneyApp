@@ -20,8 +20,6 @@
 /* --------------------------------------------------------------------------- */
 body {
     /* Remove default margin from browser */
-    margin: 0;
-
     /* Background and text styling */
     background-color: var(--bg-color);
     color: var(--text-color);
@@ -39,12 +37,19 @@ body {
 
     /* Make sure padding/border count in box size */
     box-sizing: border-box;
+    height: 100%;
+    margin: 0;
+    padding: env(safe-area-inset-top, 8px)
+    env(safe-area-inset-right, 8px)
+    env(safe-area-inset-bottom, 8px)
+    env(safe-area-inset-left, 8px);
 }
 
 /* Constrain app width for mobile-first look */
 #app {
     width: 100%;
     max-width: 500px; /* Keeps content centered, not too wide on desktop */
+    margin-bottom: 20%;
 }
 
 /* --------------------------------------------------------------------------- */
@@ -54,7 +59,7 @@ body {
 /* Center titles and give spacing below */
 h1 {
     text-align: center;
-    margin-bottom: 1rem;
+    margin: 10% 10px 1rem;
 }
 
 p {
@@ -279,7 +284,7 @@ form input, form select, form button {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 60px;
+    height: 80px;
     background: var(--accent-color);
     border-top: 1px solid var(--accent-color);
     display: flex;
@@ -314,12 +319,3 @@ form input, form select, form button {
     color: white;
 }
 
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: env(safe-area-inset-top, 8px)
-    env(safe-area-inset-right, 8px)
-    env(safe-area-inset-bottom, 8px)
-    env(safe-area-inset-left, 8px);
-    box-sizing: border-box;
-}
