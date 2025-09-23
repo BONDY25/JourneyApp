@@ -65,6 +65,12 @@ This will show the details of a journey with calculated values based on the user
 
 <img width="380" height="823" alt="image" src="https://github.com/user-attachments/assets/32397103-f463-4976-95ea-619a1e807bb8" />
 
+### Edit Journey
+
+This will allow users to change any details for a journey or delete a journey if required.
+
+<img width="380" height="823" alt="image" src="https://github.com/user-attachments/assets/ddd4debd-6c54-450e-b135-94b769c91356" />
+
 ### ⚙️ Settings Page
 
 This will allow the user to set default tank volume, fuel cost per litre, dark mode/light mode and maybe other settings.
