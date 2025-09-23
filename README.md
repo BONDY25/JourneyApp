@@ -65,7 +65,7 @@ This will show the details of a journey with calculated values based on the user
 
 <img width="380" height="823" alt="image" src="https://github.com/user-attachments/assets/32397103-f463-4976-95ea-619a1e807bb8" />
 
-### Edit Journey
+### ✍️ Edit Journey
 
 This will allow users to change any details for a journey or delete a journey if required.
 
