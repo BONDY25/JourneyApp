@@ -7,7 +7,7 @@ I use a MongoDb Atlas NoSql Database to store each journey entry and then go fro
 
 ## Current "To Do"
 
-* ...
+* Fix reCAPTCHA on android app
 
 ### Logo
 
