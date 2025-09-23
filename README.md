@@ -5,6 +5,8 @@ This app is very much still under development and I am very much learning as I g
 The Journey app is a replacement for a Google sheet I use to track my fuel consumption and costs as I drive from point A to point B in my life. Using various formulas and my expert excel knowledge I was able to better visualise how much it cost to drive my car. Unfortunately though, filling out a Google sheet is quite annoying, so I decided to make it into an app.  
 I use a MongoDb Atlas NoSql Database to store each journey entry and then go from there…
 
+Repo for the android app here https://github.com/BONDY25/JourneyAppAndroid
+
 ## Current "To Do"
 
 * Fix reCAPTCHA on android app
