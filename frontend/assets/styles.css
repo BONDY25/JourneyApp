@@ -49,6 +49,7 @@ body {
 #app {
     width: 100%;
     max-width: 500px; /* Keeps content centered, not too wide on desktop */
+    min-height: 100%;
     margin-bottom: 20%;
     height: 100%;
 }
