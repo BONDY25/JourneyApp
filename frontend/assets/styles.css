@@ -314,4 +314,12 @@ form input, form select, form button {
     color: white;
 }
 
-
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: env(safe-area-inset-top, 8px)
+    env(safe-area-inset-right, 8px)
+    env(safe-area-inset-bottom, 8px)
+    env(safe-area-inset-left, 8px);
+    box-sizing: border-box;
+}
