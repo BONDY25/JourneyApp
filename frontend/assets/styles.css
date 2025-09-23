@@ -50,6 +50,7 @@ body {
     width: 100%;
     max-width: 500px; /* Keeps content centered, not too wide on desktop */
     margin-bottom: 20%;
+    height: 100%;
 }
 
 /* --------------------------------------------------------------------------- */
