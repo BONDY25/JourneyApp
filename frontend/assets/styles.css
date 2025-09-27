@@ -12,6 +12,8 @@
     --card-text: #000; /* Black text for cards */
     --button-bg: #00d916; /* Bright green button background */
     --button-text: #000000; /* Black button text */
+    --stat-color-1: #be4702;
+    --stat-color-2: #ff5d00;
     --default-font: 'Lexend', sans-serif;
 }
 
@@ -51,8 +53,7 @@ body {
     max-width: 500px; /* Keeps content centered, not too wide on desktop */
     min-height: 100%;
     margin-bottom: 20%;
-    height: 1080px;
-
+    height: 1440px;
 }
 
 /* --------------------------------------------------------------------------- */
@@ -63,6 +64,7 @@ body {
 h1 {
     text-align: center;
     margin: 10% 10px 1rem;
+    color: var(--text-color);
 }
 
 p {
@@ -198,13 +200,13 @@ form input, form select, form button {
 }
 
 .numbers p:nth-child(odd) {
-    background-color: #ff7326;
+    background-color: var(--stat-color-1);
         border-radius: 6px;
         padding: 4px 6px;
 }
 
 .numbers p:nth-child(even) {
-    background-color: #cc4b00;
+    background-color: var(--stat-color-2);
     border-radius: 6px;
     padding: 4px 6px;
 }

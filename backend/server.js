@@ -150,44 +150,49 @@ async function startServer() {
 
         // Get user totals ---------------------------------------------------------------------------------
         app.get('/api/summary/:username', async (req, res) => {
-
             const username = req.params.username;
 
             try {
-                // Get all user journey data
                 const summary = await db.collection('journeys').aggregate([
-                    {$match: {user: username}},
+                    { $match: { user: username } },
                     {
-                        // Calculate summary
                         $group: {
                             _id: null,
-                            totalMiles: {$sum: "$distance"},
-                            totalTime: {$sum: "$timeDriven"},
-                            totalFuel: {$sum: "$fuelUsedL"},
-                            totalCost: {$sum: "$totalCost"},
-                            avgMpg: {$avg: "$mpg"}
+                            totalMiles: { $sum: { $toDouble: "$distance" } },
+                            totalTime: { $sum: { $toDouble: "$timeDriven" } },
+                            totalFuel: { $sum: { $toDouble: "$fuelUsedL" } },
+                            totalCost: { $sum: { $toDouble: "$totalCost" } },
+                            avgMpg: { $avg: { $toDouble: "$mpg" } },
+                            longestDistance: { $max: { $toDouble: "$distance" } },
+                            longestTime: { $max: { $toDouble: "$timeDriven" } },
+                            bestMpg: { $max: { $toDouble: "$mpg" } }
                         }
                     }
                 ]).toArray();
 
-                // Handle No data
                 if (summary.length === 0) {
                     return res.json({
                         totalMiles: 0,
                         totalTime: 0,
                         totalFuel: 0,
                         totalCost: 0,
-                        avgMpg: 0
+                        avgMpg: 0,
+                        longestDistance: 0,
+                        longestTime: 0,
+                        bestMpg: 0
                     });
                 }
 
-                // Return results
-                res.json(summary[0]);
+                // Convert Decimal128 → JS numbers (just in case)
+                const cleanSummary = Object.fromEntries(
+                    Object.entries(summary[0]).map(([key, val]) => [key, Number(val)])
+                );
+
+                res.json(cleanSummary);
             } catch (err) {
                 console.error(err);
-                res.status(500).send('Error retrieving summary');
+                res.status(500).send("Error retrieving summary");
             }
-
         });
 
         // Cost Breakdown --------------------------------------------------------------------------------
@@ -207,6 +212,15 @@ async function startServer() {
                 const twentyEightDaysAgo = new Date(now);
                 twentyEightDaysAgo.setDate(now.getDate() - 28);
 
+                const nintyDaysAgo = new Date(now);
+                nintyDaysAgo.setDate(now.getDate() - 90);
+
+                const sixMonthsAgo = new Date(now);
+                sixMonthsAgo.setDate(now.getDate() - 180);
+
+                const threeSixFiveDaysAgo = new Date(now);
+                threeSixFiveDaysAgo.setDate(now.getDate() - 365);
+
                 const result = await journeysCollection.aggregate([
                     {
                         $match: {user: username}
@@ -225,7 +239,7 @@ async function startServer() {
                     },
                     {
                         $match: {
-                            parsedDate: {$gte: twentyEightDaysAgo}
+                            parsedDate: {$gte: threeSixFiveDaysAgo}
                         }
                     },
                     {
@@ -237,7 +251,18 @@ async function startServer() {
                             fourteen: {
                                 $sum: {$cond: [{$gte: ["$parsedDate", fourteenDaysAgo]}, "$totalCost", 0]}
                             },
-                            twentyEight: {$sum: "$totalCost"}
+                            twentyEight: {
+                                $sum: {$cond: [{$gte: ["$parsedDate", twentyEightDaysAgo]}, "$totalCost", 0]}
+                            },
+                            ninty:{
+                                $sum: {$cond: [{$gte: ["$parsedDate", nintyDaysAgo]}, "$totalCost", 0]}
+                            },
+                            sixMonth: {
+                                $sum: {$cond: [{$gte: ["$parsedDate", sixMonthsAgo]}, "$totalCost", 0]}
+                            },
+                            threeSixFive: {
+                                $sum: {$cond: [{$gte: ["$parsedDate", threeSixFiveDaysAgo]}, "$totalCost", 0]}
+                            }
                         }
                     }
                 ]).toArray();

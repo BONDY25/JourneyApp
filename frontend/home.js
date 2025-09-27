@@ -20,22 +20,27 @@ async function loadSummary(username) {
         const formattedTime = summary.totalTime > 60 ? summary.totalTime / 60 : summary.totalTime;
         const timeUnit = summary.totalTime > 60 ? "Hours" : "Minutes";
 
+        // Total Miles
         document.getElementById('totalMiles').textContent = summary.totalMiles.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         });
+        // Total Time
         document.getElementById('totalTime').textContent = `${formattedTime.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         })} ${timeUnit}`;
+        // Total Fuel
         document.getElementById('totalFuel').textContent = summary.totalFuel.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         }) + " L";
+        // Total Cost
         document.getElementById('totalCost').textContent = currency + summary.totalCost.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
+        // Average MPG
         document.getElementById('avgMpg').textContent = summary.avgMpg.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
@@ -44,6 +49,63 @@ async function loadSummary(username) {
         await SessionMaintenance.logBook("home", "loadSummary", `Summary Loaded: ${summary}`);
     } catch (err) {
         console.error("error loading summary:", err);
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+}
+
+// Load Insights -----------------------------------------------------------------------------------------------
+async function loadInsights(username) {
+    try {
+        SessionMaintenance.showLoader();
+
+        // get summary for totals
+        const res = await fetch(`${API_BASE_URL}/api/summary/${username}`);
+        if (!res.ok) throw new Error("Failed to fetch summary");
+        const summary = await res.json();
+
+        const tankVolume = localStorage.getItem('tankVolume') || 63;
+
+        // Times around the world
+        document.getElementById('aroundWorld').textContent = (summary.totalMiles / 29901).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        // Years Driving
+        document.getElementById('yearsDriven').textContent = (summary.totalTime / 525600).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        // Longest Distance
+        document.getElementById('longestDistance').textContent = `${summary.longestDistance.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })} Miles`;
+
+        // Longest Time
+        document.getElementById('longestTime').textContent = `${summary.longestTime.toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        })} Minutes`;
+
+        // Best Journey
+        document.getElementById('bestJourney').textContent = `${summary.bestMpg.toLocaleString(undefined, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+        })} MPG`;
+
+
+        // Tanks Used
+        document.getElementById('tanksUsed').textContent = (summary.totalFuel / tankVolume).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        await SessionMaintenance.logBook("home", "loadInsights", `Summary Loaded: ${summary}`);
+    } catch (err) {
+        console.error("error loading insights:", err);
     } finally {
         SessionMaintenance.hideLoader();
     }
@@ -58,9 +120,30 @@ async function loadCosts(username) {
 
         const data = await res.json();
 
-        document.getElementById("seven").textContent = currency + data.cost.seven.toFixed(2);
-        document.getElementById("fourteen").textContent = currency + data.cost.fourteen.toFixed(2);
-        document.getElementById("twentyEight").textContent = currency + data.cost.twentyEight.toFixed(2)
+        document.getElementById("seven").textContent = currency + data.cost.seven.toLocaleString(undefined,{
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById("fourteen").textContent = currency + data.cost.fourteen.toLocaleString(undefined,{
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById("twentyEight").textContent = currency + data.cost.twentyEight.toLocaleString(undefined,{
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById("ninty").textContent = currency + data.cost.ninty.toLocaleString(undefined,{
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById("sixMonth").textContent = currency + data.cost.sixMonth.toLocaleString(undefined,{
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById("threeSixFive").textContent = currency + data.cost.threeSixFive.toLocaleString(undefined,{
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
 
         await SessionMaintenance.logBook("home", "loadCosts", `Costs Loaded: ${data}`);
     } catch (err) {
@@ -93,7 +176,7 @@ async function load28DaySum(username) {
         document.getElementById('28Time').textContent = `${formattedTime.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${timeUnit}`;
         document.getElementById('28Fuel').textContent = data.totalFuel.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         document.getElementById('28Cost').textContent = `${currency}${data.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        document.getElementById('28Mpg').textContent = data.avgMpg.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('28Mpg').textContent = data.avgMpg.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
     } catch (err) {
         await SessionMaintenance.logBook("fullStats", "getStats", `Error fetching stats: ${err}`, true);
@@ -127,4 +210,5 @@ window.addEventListener('DOMContentLoaded', async () => {
     await loadCosts(username);
     await loadSummary(username);
     await load28DaySum(username);
+    await loadInsights(username);
 });

@@ -73,7 +73,7 @@ async function registerUser(username, password){
 
             // save username and open home page
             localStorage.setItem('username', username);
-            localStorage.setItem('tankVolume', '64');
+            localStorage.setItem('tankVolume', '63');
             localStorage.setItem('fuelCost', '1.4');
             localStorage.setItem('gallon', 'UK');
             localStorage.setItem('userFont', 'Lexend');
