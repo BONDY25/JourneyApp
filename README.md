@@ -9,7 +9,7 @@ Repo for the android app here https://github.com/BONDY25/JourneyAppAndroid
 
 ## Current "To Do"
 
-* Fix reCAPTCHA on android app
+...
 
 ### Logo
 
