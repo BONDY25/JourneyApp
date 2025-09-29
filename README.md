@@ -11,7 +11,9 @@ Repo for the android app here https://github.com/BONDY25/JourneyAppAndroid
 
 ## Current "To Do"
 
-...
+* Add Budget Tracking Feature
+* Add user themes Light/dark/etc...
+* Add mileage/time targets/limits
 
 ### Logo
 
