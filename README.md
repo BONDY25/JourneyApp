@@ -14,6 +14,8 @@ Repo for the android app here https://github.com/BONDY25/JourneyAppAndroid
 * Add Budget Tracking Feature
 * Add user themes Light/dark/etc...
 * Add mileage/time targets/limits
+* Add ability to create graphical representations of stats, e.g. line graph, bar charts.
+* Add Ability to export data to CSV
 
 ### Logo
 
