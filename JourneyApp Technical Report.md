@@ -687,3 +687,302 @@ window.addEventListener('DOMContentLoaded', async () => {
 * **Error Handling**: Provides console errors for developers and user-facing alerts for critical failures.
 
 ---
+
+## New Journey Page
+
+The New Journey page allows the user to record details of a completed journey. The form collects information such as a journey description, date and time, distance travelled, fuel efficiency (MPG), time driven, external temperature, driving conditions (dry or wet), and the cost of fuel per litre.
+
+Once the form is submitted, the application automatically calculates additional fields such as fuel used, average speed, total cost, cost per mile, and percentage of tank consumed. These calculations ensure that every journey entry is stored with both raw inputs and derived statistics, providing richer insights.
+
+The completed journey record is then saved to the database under the logged-in user’s account. This allows the data to contribute to the overall statistics shown in the app and to be retrieved later for summaries, cost breakdowns, and reporting features.
+
+## New Journey Page \- Design
+
+**Document setup**
+
+* The page starts with `<!DOCTYPE html>` to declare the document type as HTML5.  
+* The root `<html>` element specifies the language as English (`lang="en"`).  
+* Inside the `<head>`, the metadata is defined:  
+  * `<meta charset="utf-8"/>` ensures proper character encoding (UTF-8).  
+  * `<meta name="viewport"...>` makes the page responsive for mobile devices.  
+  * `<title>` sets the page title shown in the browser tab.  
+  * External stylesheets are linked:  
+    * `assets/styles.css` for custom app styling.  
+    * A Google Fonts link for **Material Symbols**, providing the icon set used in the navigation bar.
+
+**Loader overlay**
+
+* A `<div id="loader" class="loader-overlay">` contains a `<div class="spinner">`.  
+* This provides a **loading screen/spinner** to indicate when data is being processed or fetched, improving user experience.
+
+**Main application container**
+
+* The `<div id="app" class="app">` acts as the main wrapper for page content.  
+* A heading `<h1>Add Journey</h1>` labels the page’s purpose.
+
+**Journey input form** (`<form id="journey-form">`)  
+ This form collects details of a user’s journey. It uses semantic `<label>` and `<input>` pairs to ensure accessibility.
+
+* **Description**: Text input with placeholder (`e.g. To the shops`).  
+* **Date & Time**: `datetime-local` input allows choosing both date and time.  
+* **Distance (miles)**: Numeric input with decimal precision (`step="0.1"`).  
+* **MPG**: Numeric input for fuel efficiency, also allowing decimal precision.  
+* **Time Driven**: Text input for journey duration (e.g. “35 minutes”).  
+* **Temperature (°C)**: Numeric input with decimal step, optional field.  
+* **Condition**: A `<select>` dropdown with options for `dry` and `wet` conditions.  
+* **Cost per Litre (£)**: Numeric input with `step="0.01"` to support two decimal places for currency values.  
+* **Submit Button**: A styled button (`class="button"`) to add the journey.
+
+**Navigation bar** (`<div id="nav-bar">`)
+
+* Provides links to different sections of the app.  
+* Each `<a>` link contains:  
+  * A Material Symbol icon (e.g. `home`, `add_circle`, `directions_car`, `query_stats`, `settings`).  
+  * A label for clarity (e.g. “Home”, “Add”, “Journeys”).  
+* This ensures consistent navigation across the app.
+
+**JavaScript link**
+
+* At the bottom of the body, a script tag loads `newJourney.js` as a **JavaScript module** (`type="module"`).  
+* This script handles the logic for submitting journeys, validating inputs, and interacting with the backend API.
+
+## New Journey Page \- JavaScript
+
+### **Boilerplate / Imports**
+
+``` js
+`import SessionMaintenance from "./sessionMaintenance.js";`  
+`import {API_BASE_URL} from "./config.js";`
+```
+
+* Imports **session management utilities** and the **API base URL** from config.  
+* A reference to the **submit button** is also retrieved:
+
+`const submit = document.getElementById('submit');`
+
+### **Operational Functions**
+
+#### **`checkFields(fields)`**
+
+* Simple validation helper.  
+* Returns `true` if the field(s) passed in are non-empty.
+
+``` js
+// Check Fields --------------------------------------------------------------------------
+function checkFields(fields) {
+    return fields && fields.length > 0;
+}
+```
+
+#### **`insertJourney(journeyData)`**
+
+* Handles **submitting a new journey** to the backend.  
+* Steps:  
+  1. Shows the loader spinner.  
+  2. Sends a **POST request** to the API (`/api/journeys`) with the journey data in JSON.  
+  3. Saves the `fuelCost` to `localStorage` if it’s included (so it can be pre-filled next time).  
+  4. If submission is successful:  
+     * Logs the event.  
+     * Shows an alert ("Journey Saved\!").  
+     * Redirects the user back to `home.html`.  
+  5. If it fails:  
+     * Reads error text from the response.  
+     * Logs the failure and alerts the user.  
+  6. Always hides the loader afterwards.
+ 
+``` js
+// Insert Journey ------------------------------------------------------------------------
+async function insertJourney(journeyData){
+    try {
+        SessionMaintenance.showLoader();
+
+        const res = await fetch(`${API_BASE_URL}/api/journeys`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(journeyData)
+        });
+
+        //Save fuel cost in case of change
+        console.log("DEBUG journeyData:", journeyData);
+        if (journeyData && journeyData.costPl !== undefined) {
+            localStorage.setItem('fuelCost', journeyData.costPl.toString());
+        } else {
+            console.warn("costPl missing from journeyData:", journeyData);
+        }
+
+        if (res.ok) {
+            await SessionMaintenance.logBook(
+                "newJourney",
+                "submit.click",
+                `Journey Submission Successful. ${JSON.stringify(journeyData, null, 2)}`
+            );
+            alert('Journey Saved!');
+            window.location.href = "home.html";
+        } else {
+            const err = await res.text();
+            await SessionMaintenance.logBook("newJourney", "submit.click", `Journey Submission failed. ${err}`);
+            alert(`Error: ${err}`);
+        }
+    } catch (error) {
+        await SessionMaintenance.logBook("newJourney", "submit.click", `Network Error: ${error}`, true);
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+}
+```
+
+#### **`calculateValues({timeUnit = 'minutes'} = {})`**
+
+* Core **calculation function**.  
+* Logs that calculations are starting, then:  
+  1. Gets default values like **tank volume** and **gallon unit** from `localStorage`.  
+  2. Retrieves values from the form safely (helper function `getValue` ensures empty fields don’t crash things).  
+  3. Performs calculations:  
+     * **Average speed** \= distance ÷ hours driven  
+     * **Fuel used (litres)** \= distance ÷ miles-per-litre  
+     * **Cost per mile** and **total cost** based on cost per litre  
+     * **Percentage of tank used** \= fuel used ÷ tank size  
+  4. Packages everything into an **output object** with values rounded appropriately.  
+  5. Logs the calculated values and returns the object.
+
+This ensures the backend receives *complete, calculated journey details*.
+
+``` js
+// Calculate values -----------------------------------------------
+async function calculateValues({timeUnit = 'minutes'} = {}) {
+    await SessionMaintenance.logBook("newJourney", "calculateValues", "Calculating Values");
+
+    // Get tank volume from user defaults
+    const tankVolume = Number(localStorage.getItem('tankVolume')) || 64;
+
+    // Get Elements safely
+    const getValue = (id, type = 'string') => {
+        const el = document.getElementById(id);
+        if (!el || el.value === '') return type === 'number' ? 0 : '';
+        return type === 'number' ? Number(el.value) : String(el.value);
+    };
+
+    const description = getValue('description');
+    const dateTimeRaw = getValue('datetime');
+    const dateTime = dateTimeRaw ? new Date(dateTimeRaw) : new Date();
+    const mpg = getValue('mpg', 'number');
+    const distance = getValue('distance', 'number');
+    const timeDriven = getValue('timeDriven', 'number');
+    const temp = getValue('temp', 'number');
+    const condition = getValue('condition');
+    const costPerLitre = getValue('cost', 'number');
+
+    // Calculate Helpers
+    const gallon = localStorage.getItem('gallon');
+    const hours = timeUnit === 'minutes' ? (timeDriven / 60) : timeDriven;
+    const safeHours = hours > 0 ? hours : 1; // avoid division by zero
+    const GALLON_L = (gallon === 'US') ? 3.79541 : 4.54609;
+    const milesPerLitre = mpg > 0 ? (mpg / GALLON_L) : 1; // avoid division by zero
+
+    // Calculate Values
+    const avgSpeed = distance / safeHours;
+    const fuelUsedL = distance / milesPerLitre;
+    const costPerMile = costPerLitre / milesPerLitre;
+    const totalCost = costPerMile * distance;
+    const percOfTank = tankVolume > 0 ? (fuelUsedL / tankVolume) : 0;
+
+    const user = localStorage.getItem('username') || 'unknown';
+    const round = (n, dp = 3) => isNaN(n) ? 0 : Number(Number(n).toFixed(dp));
+
+    // Construct Output
+    const output = {
+        user,
+        description,
+        dateTime,
+        distance: round(distance, 2),
+        mpg: round(mpg, 2),
+        timeDriven: round(timeDriven, 2),
+        temp: round(temp, 1),
+        condition,
+        costPl: round(costPerLitre, 2),
+        avgSpeed: round(avgSpeed, 2),
+        totalCost: round(totalCost, 2),
+        costPerMile: round(costPerMile, 2),
+        fuelUsedL: round(fuelUsedL, 2),
+        percOfTank: round(percOfTank, 4),
+    };
+
+    await SessionMaintenance.logBook("newJourney", "calculateValues", `Values Calculated: ${JSON.stringify(output, null, 2)}`);
+
+    return output;
+}
+```
+
+### **Event Listeners**
+
+#### **`DOMContentLoaded`**
+
+When the page finishes loading:
+
+* Logs that the page is ready.  
+* Highlights the correct **nav bar item**.  
+* Hides the loader (so UI shows).  
+* Pre-fills the **fuel cost field** with the last used value from `localStorage`.  
+* Logs the stored cost for debugging.
+
+``` js
+// window loaded event listener ------------------------------------------------------------------------
+window.addEventListener('DOMContentLoaded', async () => {
+    await SessionMaintenance.logBook("newJourney", "window.DOMContentLoaded", "New Journey page loaded");
+
+    const currentPage = window.location.pathname.split("/").pop();
+    SessionMaintenance.highlightActivePage(currentPage);
+
+    SessionMaintenance.hideLoader();
+
+    const costField = document.getElementById('cost');
+    if (costField) {
+        const storedCost = localStorage.getItem('fuelCost');
+        costField.value = storedCost !== null ? parseFloat(storedCost) : 0;
+    }
+
+    console.log("Fuel cost from localStorage:", localStorage.getItem('fuelCost'));
+});
+```
+
+#### **`submit.addEventListener('click')`**
+
+* Runs when the user clicks the **Add Journey** button.  
+* Steps:  
+  1. Prevents the form’s default reload behaviour.  
+  2. Logs the submission attempt.  
+  3. Calls `calculateValues()` to build a full `journeyData` object.  
+  4. Validates that a **description** has been entered. If not → alert.  
+  5. Calls `insertJourney()` with the calculated data to save it.
+ 
+``` js
+// Event Listener to submit form ---------------------------------------------------------------------
+submit.addEventListener('click', async (event) => {
+    event.preventDefault(); // Stop form reload
+    await SessionMaintenance.logBook("newJourney", "submit.click", "Journey Submission attempted.");
+
+    const journeyData = await calculateValues();
+    const description = String(document.getElementById('description').value);
+
+    // Check if a description has been entered
+    if (!checkFields(description)) {
+        alert('Please enter a description');
+        return;
+    }
+
+    // Insert Journey
+    await insertJourney(journeyData);
+
+});
+```
+
+### **Overall Flow**
+
+* When the user opens the page, the cost field is pre-filled.  
+* When they submit:  
+  * The form values are collected.  
+  * All derived values (cost, fuel, speed, etc.) are calculated.  
+  * A full journey record is **sent to the backend API**.  
+  * On success: stored, logged, and redirected to Home.
+
+---
