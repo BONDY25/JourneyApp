@@ -2521,3 +2521,198 @@ The `SessionMaintenance` class provides a **centralized utility system** for:
  `SessionMaintenance.js` is a **foundational class** for the Journey App that ensures consistent session tracking, logging, and UI feedback, making it easier to maintain, debug, and monitor application behavior.
 
 ---
+
+## CSS Design
+
+The CSS file defines the visual styling and layout for the Journey App web interface. It uses **CSS variables**, responsive design principles, and modular styles to create a consistent, mobile-first user experience. The stylesheet covers **global styles, typography, forms, tables, buttons, loaders, statistics cards, and the navigation bar**.
+
+1\. Font Imports  
+`@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Code...&display=swap');`
+
+* Imports multiple fonts from Google Fonts.  
+* Fonts include `Lexend`, `Roboto Condensed`, `Permanent Marker`, `Google Sans Code`, and `Monsieur La Doulaise`.  
+* These fonts are used throughout the app to provide readability, code-like styling, and aesthetic options.
+
+2\. Root Variables  
+
+``` css
+:root {
+    --bg-color: #3a3a3a;
+    --accent-color: #d95000;
+    --text-color: white;
+    --card-bg: #fff; 
+    --card-text: #000;
+    --button-bg: #00d916; 
+    --button-text: #000000;  
+    --stat-color-1: #be4702;  
+    --stat-color-2: #ff5d00;
+    --default-font: 'Lexend', sans-serif;
+}
+```
+
+* Defines reusable variables for colors, fonts, and interface elements.  
+* Promotes **consistency** across the application and simplifies theme changes.
+
+3\. Global Styles  
+
+``` css
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: var(--default-font);
+    display: flex;
+    justify-content: center; 
+    align-items: flex-start;
+    min-height: 100%;
+    box-sizing: border-box;
+    margin: 0;
+    padding: env(safe-area-inset, 8px);  
+}
+```
+
+* Sets the global background, text color, and font.  
+* Uses **flexbox** for centering content horizontally while aligning to the top vertically.  
+* Ensures safe-area padding for mobile devices with notches.  
+* `box-sizing: border-box` ensures consistent sizing with padding and borders included.
+
+``` css
+#app {
+    width: 100%; 
+    max-width: 500px; 
+    min-height: 100%; 
+    margin-bottom: 20%;
+    height: 1440px;
+}
+```
+
+* Constrains app content to **mobile-first layout**.  
+* Keeps content centered on larger screens without excessive width.
+
+4\. Typography and Text Containers  
+
+``` css
+h1 {
+    text-align: center;  
+    margin: 10% 10px 1rem; 
+}  
+p {
+    margin: 0.3rem 0;  
+    font-size: 1rem;  
+}
+hr {
+    border: none; 
+    border-top: 1px solid rgba(255, 255, 255, 0.3); 
+    margin: 1rem 0;
+}
+```
+
+* Centers headings, ensures consistent spacing, and provides light horizontal rules.
+
+5\. Statistics Cards  
+
+``` css
+.stats {  
+    background-color: var(--accent-color); 
+    color: var(--card-text); 
+    border-radius: 10px; 
+    padding: 1rem;
+    margin-bottom: 1rem; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);  
+}  
+.numbers p:nth-child(odd) { background-color: var(--stat-color-1); ... }  
+.numbers p:nth-child(even) { background-color: var(--stat-color-2); ... }
+```
+
+* Defines colored statistic cards with rounded corners and soft shadows.  
+* Alternates row colors for numeric stats to improve readability.
+
+6\. Buttons  
+
+``` css
+.button-group { display: flex; flex-direction: column; gap: 1rem; }  
+.button { background-color: var(--button-bg); ... cursor: pointer; }  
+.button:hover { background-color: #000; color: white; }
+```
+
+* Provides uniform styling for buttons.  
+* Includes **hover effects** for interactivity.  
+* `#import-button` styles a floating import button separately.
+
+7\. Forms  
+
+``` css
+form {
+    display: flex;  
+    flex-direction: column;  
+    gap: 10px;  
+    background-color: var(--accent-color);  
+    padding: 20px;  
+    border-radius: 10px; 
+    max-width: 90%;
+    margin: 20px auto;
+}
+form input, form select, form button { padding: 10px; border-radius: 5px; }
+```
+
+* Forms are vertically stacked with consistent spacing.  
+* Inputs, selects, and buttons share padding and rounded corners.
+
+8\. Tables  
+
+``` css
+#journeys-table { width: 100%; border-collapse: collapse; } 
+#journeys-table th, td { padding: 0.75rem; text-align: left; }  
+#journeys-table tr:nth-child(even) { background-color: rgba(0,0,0,0.05); }
+#journeys-table tr:hover { background-color: rgba(0,0,0,0.15); cursor: pointer; }
+```
+
+* Styles the journeys table for clarity.  
+* Alternates row colors and adds hover highlighting.
+
+9\. Loading Spinner  
+
+``` css
+.loader-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); display: flex; justify-content:center; align-items:center; z-index:9999; }
+.loader-overlay.hidden { display: none; } 
+.spinner { width: 60px; height: 60px; border: 6px solid #ddd; border-top: 6px solid #4CAF50; border-radius: 50%; animation: spin 1s linear infinite; }  
+@keyframes spin { 100% { transform: rotate(360deg); } }
+```
+
+* Full-screen overlay with a **loading spinner**.  
+* Spinner is animated with a **CSS keyframes rotation**.
+
+10\. Navigation Bar  
+
+``` css
+#nav-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 80px; display: flex; justify-content: space-around; align-items: center; }  
+.nav-item { text-align: center; flex: 1; font-size: 12px; }  
+.nav-item.active { color: white; }
+```
+
+* Fixed bottom navigation bar with **flexbox layout**.  
+* Each nav-item includes icon and label.  
+* Active page is highlighted for visual feedback.
+
+11\. Responsiveness  
+
+``` css
+@media (max-width: 400px) {
+    p { font-size: 0.9rem; }
+    .button { font-size: 0.95rem; }
+}
+```
+
+* Ensures text and buttons remain readable on small screens.  
+* Adopts a **mobile-first design approach**.
+
+Summary
+
+The CSS file establishes a **consistent, visually appealing, and responsive design** for the Journey App. Key features include:
+
+* Use of **CSS variables** for easy theming.  
+* **Mobile-first layout** with content constraints and safe-area support.  
+* Distinct styling for **buttons, forms, tables, statistics cards, and navigation bar**.  
+* Visual feedback through **hover effects, active states, and loading spinner animations**.  
+* Full support for **responsive adjustments** on small devices.
+
+---
