@@ -353,3 +353,337 @@ submitReg.addEventListener('click', async (e) => {
   * Errors are surfaced directly via alerts for clarity.
 
 ---
+
+## Home Page
+
+The Home page is the first page a user sees after logging in or registering. It provides a quick overview of their driving and fuel usage data. At the top, the user is presented with total summary statistics, including their total mileage, total travel time, total fuel used, overall costs, and average miles per gallon (MPG).
+
+In addition to the lifetime totals, the Home page also displays a 28-day summary showing recent mileage, time spent driving, fuel consumption, costs, and fuel efficiency. This allows the user to monitor short-term trends in their usage.
+
+The page also includes a cost breakdown for the past 7, 14, and 28 days, giving users a clear picture of how their fuel expenses are changing over time.
+
+Together, these elements make the Home page a dashboard-style landing screen, designed to give the user a quick but detailed snapshot of their driving habits and costs without needing to dig into the full statistics page.
+
+## Home Page \- Design
+
+The home page serves as the main dashboard of the WebApp, displaying journey statistics and providing navigation to other sections. It is implemented using **HTML5** markup with a layout designed for clarity, responsiveness, and mobile accessibility.
+
+#### **Document Head**
+
+* `<!DOCTYPE html>` declares the document as an HTML5 file.  
+* `<html lang="en">` specifies the document language for accessibility.  
+* `<head>` section metadata:  
+  * `<meta charset="utf-8"/>` ensures proper text encoding.  
+  * `<meta name="viewport" content="width=device-width, initial-scale=1.0"/>` optimises scaling for mobile devices.  
+  * `<title>Journey App - Home</title>` sets the browser tab title.  
+  * `<link href="assets/styles.css" rel="stylesheet"/>` links the external stylesheet.  
+  * `<link rel="icon" type="image/png" href="assets/JourneyApp-logo-1.png"/>` sets the favicon.  
+  * `<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>` loads Google’s Material Symbols icon font for navigation icons.
+
+#### **Body Content**
+
+**Loader Overlay**
+
+``` html
+<div id="loader" class="loader-overlay">
+    <div class="spinner"></div>
+</div>
+```
+
+* A visual loader used during asynchronous data retrieval or page transitions.  
+  * The spinner is styled with CSS to provide feedback while the page is processing.
+
+**Main Application Container**
+
+ `<div id="app" class="app">...</div>`
+
+* Contains the page title and primary dashboard statistics.  
+  * **Header and Divider**: `<h1>Journey App</h1>` with `<hr>` for separation.
+
+**Statistics Section (`#stats`)**
+
+* Structured into three subsections, each styled with `class="stats numbers"`:  
+  * **Summary Statistics (`#sum-stats`)**  
+     Displays overall totals:  
+    * Total Miles, Total Time, Total Fuel Used, Total Cost, and Average MPG.  
+      * Each value is dynamically updated inside a `<span>` element with an `id`.
+
+    * **28-Day Statistics (`id="Past 28 days"`)**  
+       Provides recent performance metrics over the last 28 days.  
+      * Includes Miles, Time, Fuel, Cost, and MPG.  
+      * Allows users to compare recent driving habits with overall performance.
+
+    * **Costing Statistics (`#detail-stats`)**  
+       Focuses on cost-related metrics over different timescales:  
+      * Last 7 days, 14 days, and 28 days.  
+      * Provides insight into fuel expenditure trends.
+
+#### **Navigation Bar**
+
+`<div id="nav-bar">...</div>`
+
+* Positioned at the bottom of the page for mobile accessibility.  
+* Each **navigation item** (`<a class="nav-item">`) consists of:  
+  * A **Material Symbols icon** (`<span class="material-symbols-outlined">`).  
+  * A **label** (`<span class="label">`).
+
+Navigation links include:
+
+* **Home** (`home.html`)  
+* **Add** (new journey entry, `new-journey.html`)  
+* **Journeys** (`your-journeys.html`)  
+* **Stats** (`full-stats.html`)  
+* **Settings** (`settings.html`)
+
+This provides clear, icon-driven navigation for quick access to key features.
+
+#### **External Script**
+
+`<script type="module" src="home.js"></script>`
+
+* Loads the JavaScript module (`home.js`) that controls the home page’s dynamic behaviour.  
+* Likely handles data retrieval, calculations, and updating of statistics within the DOM.
+
+### **Key Features**
+
+* **Dashboard Layout**: Presents both cumulative and recent driving statistics in a structured format.  
+* **Dynamic Content**: Placeholder `<span>` elements with IDs allow JavaScript to update statistics in real time.  
+* **Mobile-Friendly Navigation**: Bottom navigation bar with icons and labels ensures usability on smaller screens.  
+* **User Feedback**: Loader overlay prevents confusion during background operations.
+
+## Home Page \- JavaScript
+
+The `home.js` module provides the client-side logic for the **Home Page dashboard**. It retrieves user-specific statistics from the backend API, updates the UI with calculated values, and ensures the session is valid. The module uses modern **ES6 features**, including imports and asynchronous operations (`async/await`).
+
+#### **Imports and Configuration**
+
+``` js
+import SessionMaintenance from "./sessionMaintenance.js";
+import {API_BASE_URL} from "./config.js";
+
+const currency = localStorage.getItem('currency');
+```
+
+* **SessionMaintenance**: Utility module that handles session persistence, logging, highlighting navigation, and loader display.  
+* **API\_BASE\_URL**: Imported configuration constant that defines the backend API root endpoint.  
+* **currency**: Retrieved from `localStorage` to display costs with the correct currency symbol throughout the dashboard.
+
+#### **Operational Functions**
+
+1. **`loadSummary(username)`**
+
+   * Fetches overall journey statistics from `/api/summary/{username}`.  
+   * Parses totals for miles, time, fuel used, cost, and average MPG.  
+   * Formats **time** into minutes or hours depending on duration.  
+   * Updates UI by populating `<span>` elements (`totalMiles`, `totalTime`, `totalFuel`, `totalCost`, `avgMpg`).  
+   * Logs the event with `SessionMaintenance.logBook()`.
+  
+``` js
+// Load summary --------------------------------------------------------------------------------------
+async function loadSummary(username) {
+    try {
+        SessionMaintenance.showLoader();
+        const res = await fetch(`${API_BASE_URL}/api/summary/${username}`);
+        const summary = await res.json();
+        const formattedTime = summary.totalTime > 60 ? summary.totalTime / 60 : summary.totalTime;
+        const timeUnit = summary.totalTime > 60 ? "Hours" : "Minutes";
+
+        // Total Miles
+        document.getElementById('totalMiles').textContent = summary.totalMiles.toLocaleString(undefined, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+        });
+        // Total Time
+        document.getElementById('totalTime').textContent = `${formattedTime.toLocaleString(undefined, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+        })} ${timeUnit}`;
+        // Total Fuel
+        document.getElementById('totalFuel').textContent = summary.totalFuel.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }) + " L";
+        // Total Cost
+        document.getElementById('totalCost').textContent = currency + summary.totalCost.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        // Average MPG
+        document.getElementById('avgMpg').textContent = summary.avgMpg.toLocaleString(undefined, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+        });
+
+        await SessionMaintenance.logBook("home", "loadSummary", `Summary Loaded: ${summary}`);
+    } catch (err) {
+        console.error("error loading summary:", err);
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+}
+```
+
+2. **`loadCosts(username)`**
+
+   * Retrieves cost breakdown from `/api/costs/{username}`.  
+   * Extracts costs for the last **7, 14, and 28 days**.  
+   * Updates UI elements (`seven`, `fourteen`, `twentyEight`).  
+   * Displays values with two decimal places and the correct currency symbol.  
+   * Errors are logged to the console if the API request fails.
+  
+``` js
+// Load Insights -----------------------------------------------------------------------------------------------
+async function loadInsights(username) {
+    try {
+        SessionMaintenance.showLoader();
+
+        // get summary for totals
+        const res = await fetch(`${API_BASE_URL}/api/summary/${username}`);
+        if (!res.ok) throw new Error("Failed to fetch summary");
+        const summary = await res.json();
+
+        const tankVolume = localStorage.getItem('tankVolume') || 63;
+
+        // Times around the world
+        document.getElementById('aroundWorld').textContent = (summary.totalMiles / 29901).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        // Years Driving
+        document.getElementById('yearsDriven').textContent = (summary.totalTime / 525600).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        // Longest Distance
+        document.getElementById('longestDistance').textContent = `${summary.longestDistance.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })} Miles`;
+
+        // Longest Time
+        document.getElementById('longestTime').textContent = `${summary.longestTime.toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        })} Minutes`;
+
+        // Best Journey
+        document.getElementById('bestJourney').textContent = `${summary.bestMpg.toLocaleString(undefined, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+        })} MPG`;
+
+
+        // Tanks Used
+        document.getElementById('tanksUsed').textContent = (summary.totalFuel / tankVolume).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        await SessionMaintenance.logBook("home", "loadInsights", `Summary Loaded: ${summary}`);
+    } catch (err) {
+        console.error("error loading insights:", err);
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+}
+```
+
+3. **`load28DaySum(username)`**
+
+   * Calculates a date range (current day minus 28 days to today).  
+   * Requests stats from `/api/stats/{username}?start=...&end=...`.  
+   * Logs both the request and the returned dataset.  
+   * Formats the time into minutes or hours, depending on the total.  
+   * Updates UI elements (`28Miles`, `28Time`, `28Fuel`, `28Cost`, `28Mpg`).  
+   * If an error occurs, logs the failure and alerts the user with *“Failed to load stats”*.
+  
+``` js
+// Load Costs -------------------------------------------------------------------------------------
+async function loadCosts(username) {
+    try {
+        SessionMaintenance.showLoader();
+        const res = await fetch(`${API_BASE_URL}/api/costs/${username}`);
+        if (!res.ok) throw new Error("Failed to fetch costs");
+
+        const data = await res.json();
+
+        document.getElementById("seven").textContent = currency + data.cost.seven.toLocaleString(undefined,{
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById("fourteen").textContent = currency + data.cost.fourteen.toLocaleString(undefined,{
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById("twentyEight").textContent = currency + data.cost.twentyEight.toLocaleString(undefined,{
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById("ninty").textContent = currency + data.cost.ninty.toLocaleString(undefined,{
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById("sixMonth").textContent = currency + data.cost.sixMonth.toLocaleString(undefined,{
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById("threeSixFive").textContent = currency + data.cost.threeSixFive.toLocaleString(undefined,{
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+
+        await SessionMaintenance.logBook("home", "loadCosts", `Costs Loaded: ${data}`);
+    } catch (err) {
+        console.error("Error loading Costs:", err);
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+}
+```
+
+#### **Event Listeners**
+
+1. **`window.addEventListener('DOMContentLoaded', …)`**
+
+   * Triggers once the DOM has fully loaded.  
+   * Logs the page load event.  
+   * Highlights the active navigation item using `SessionMaintenance.highlightActivePage()`.  
+   * Retrieves the stored username from `localStorage`.  
+     * If no username is found, alerts the user to log in and redirects to `index.html`.  
+   * If authenticated, calls `loadCosts()`, `loadSummary()`, and `load28DaySum()` sequentially to populate the dashboard.
+  
+``` js
+// window loaded event listener ------------------------------------------------------------------------
+window.addEventListener('DOMContentLoaded', async () => {
+    await SessionMaintenance.logBook("home", "window.DOMContentLoaded", "Home page loaded");
+
+    const currentPage = window.location.pathname.split("/").pop();
+    SessionMaintenance.highlightActivePage(currentPage);
+
+    const username = localStorage.getItem('username').toLowerCase();
+    console.log(username);
+    console.log(localStorage.getItem('tankVolume'));
+    console.log(localStorage.getItem('fuelCost'));
+    if (!username) {
+        alert('Please Login');
+        window.location.href = "index.html";
+        return;
+    }
+    await loadCosts(username);
+    await loadSummary(username);
+    await load28DaySum(username);
+    await loadInsights(username);
+});
+```
+
+#### **Key Features**
+
+* **Dynamic Data Binding**: Updates statistics directly into predefined `<span>` elements on the home page.  
+* **Session Validation**: Ensures only logged-in users can view the page; otherwise, redirects to the login page.  
+* **Responsive Feedback**: Loader overlay (`SessionMaintenance.showLoader()` / `hideLoader()`) gives visual feedback during API requests.  
+* **Data Logging**: Important events and API results are recorded via `SessionMaintenance.logBook()` for auditing and debugging.  
+* **Error Handling**: Provides console errors for developers and user-facing alerts for critical failures.
+
+---
