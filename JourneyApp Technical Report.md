@@ -986,3 +986,169 @@ submit.addEventListener('click', async (event) => {
   * On success: stored, logged, and redirected to Home.
 
 ---
+
+## Full Stats Page
+
+This page allows the user to enter a start and end date and retrieve a summary of data similar to the data shown on the home screen.
+
+## Full Stats Page \- Design
+
+**Document Setup**
+
+* The page starts with `<!DOCTYPE html>` to declare HTML5.  
+* The `<html>` element specifies the language as English (`lang="en"`).  
+* `<head>` contains metadata and resources:  
+  * `<meta charset="utf-8"/>` ensures UTF-8 encoding for all text.  
+  * `<meta name="viewport"...>` makes the page responsive on mobile devices.  
+  * `<title>` sets the page title as "Journey App \- Full Stats".  
+  * `assets/styles.css` is linked for custom styling.  
+  * The page icon (`favicon`) is defined via `<link rel="icon">`.  
+  * Google Fonts is used to include **Material Symbols**, providing icons for navigation.
+
+**Loader Overlay**
+
+* `<div id="loader" class="loader-overlay">` contains a `<div class="spinner">`.  
+* Displays a **loading spinner** while the page is fetching statistics or performing calculations.
+
+**Main Application Container**
+
+* `<div id="app" class="app">` wraps the primary page content.  
+* A heading `<h1>Full Statistics</h1>` clearly identifies the page.
+
+**Statistics Parameters Form** (`<div id="prams" class="stats">`)
+
+* Contains a simple form for selecting a **start date** and **end date**.  
+* Inputs are `<input type="date">`, allowing users to pick a range for which statistics are displayed.  
+* A **"Get Stats" button** triggers data retrieval and updates the statistics shown.
+
+**Summary Statistics Section** (`<div id="sum-stats" class="stats numbers">`)
+
+* Displays calculated statistics for the selected period.  
+* Each statistic is a `<p>` element with a `<span>` for the dynamic value. Key statistics include:  
+  * Total miles, total time driven, total fuel used, total cost.  
+  * Average miles per tank, MPG, speed, fuel price, temperature, time driven, and cost per mile/day.  
+* This allows users to quickly view both cumulative and average metrics for all journeys in the selected period.
+
+**Navigation Bar** (`<div id="nav-bar">`)
+
+* Provides links to main sections of the app.  
+* Each `<a>` element contains a **Material Symbol icon** and a **text label**.  
+* Ensures consistent, user-friendly navigation across the app:  
+  * Home, Add Journey, Your Journeys, Full Stats (active page), Settings.
+
+**JavaScript Module Link**
+
+* At the bottom of the body, `<script type="module" src="fullStats.js"></script>` loads the JS file.  
+* This script handles retrieving, calculating, and populating all statistics dynamically, based on the selected date range.
+
+## Full Stats Page \- JavaScript
+
+**Imports and Initialization**
+
+* The module imports `SessionMaintenance` for session logging, loader management, and UI utilities.  
+* The `API_BASE_URL` constant is imported from the configuration file, providing the endpoint for all API requests.  
+* `currency` is retrieved from `localStorage` to display costs consistently in the user’s preferred currency.  
+* The **Get Stats button** element is stored in `getStatsBtn` for later event binding.
+
+``` js
+import SessionMaintenance from "./sessionMaintenance.js";
+import { API_BASE_URL } from "./config.js";
+
+const currency = localStorage.getItem('currency');
+const getStatsBtn = document.getElementById('getStats');
+```
+
+**Operational Functions**
+
+ **`getStats(username, start, end)`**
+
+* Core function to retrieve and display journey statistics for a specific user over a given date range.  
+* **Loader management:** Activates a loading spinner via `SessionMaintenance.showLoader()` to indicate processing.  
+* **Logging:** Records the request and results using `SessionMaintenance.logBook()`, providing traceability for debugging and auditing.  
+* **Fetch request:** Sends a GET request to the API endpoint `/api/stats/<username>` with query parameters for `start` and `end` dates.  
+* **Response processing:**  
+  * Converts the total time from minutes to hours if over 60 minutes.  
+  * Dynamically populates the HTML `<span>` elements with the retrieved data, including:  
+    * Total miles, time driven, fuel used, total cost.  
+    * Average miles per tank, MPG, speed, cost per day, cost per mile, fuel price, temperature, and time driven.  
+  * All numerical values are formatted for readability with fixed decimal places using `toLocaleString`.  
+* **Error handling:** Logs errors via `logBook` and shows an alert if the API request fails.  
+* **Loader deactivation:** Ensures the spinner is hidden after the operation finishes.
+
+``` js
+// Get Stats -------------------------------------------------------------------------------------------
+async function getStats(username, start, end) {
+    try {
+        SessionMaintenance.showLoader();
+        // Get Data Endpoint
+        await SessionMaintenance.logBook("fullStats", "getStats", `Getting full stats: (${start}, ${end})`);
+        const res = await fetch(`${API_BASE_URL}/api/stats/${username}?start=${start}&end=${end}`);
+        const data = await res.json();
+        const formattedTime = data.totalTime > 60 ? data.totalTime / 60 : data.totalTime;
+        const timeUnit = data.totalTime > 60 ? "Hours" : "Minutes";
+
+        await SessionMaintenance.logBook("fullStats", "getStats", `Full Stats retrieved: ${JSON.stringify(data, null, 2)}`);
+
+        // Populate UI with Data
+        document.getElementById('totalMiles').textContent = data.totalMiles.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('totalTime').textContent = `${formattedTime.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${timeUnit}`;
+        document.getElementById('totalFuel').textContent = data.totalFuel.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('totalCost').textContent = `${currency}${data.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('avgMilesPerTank').textContent = data.avgMilesPerTank.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('avgMpg').textContent = data.avgMpg.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('avgSpeed').textContent = data.avgSpeed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('avgCostPerDay').textContent = `${currency}${data.avgCostPerDay.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('avgCostPerMile').textContent = `${currency}${data.avgCostPerMile.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('avgFuelPrice').textContent = `${currency}${data.avgFuelPrice.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('avgTemp').textContent = data.avgTemp.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+        document.getElementById('avgTimeDriven').textContent = data.avgTimeDriven.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    } catch (err) {
+        await SessionMaintenance.logBook("fullStats", "getStats", `Error fetching stats: ${err}`, true);
+        alert("Failed to load stats");
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+}
+```
+
+**Event Listeners**
+
+* **`DOMContentLoaded`**  
+  * Fires when the page finishes loading.  
+  * Logs the page load event.  
+  * Highlights the current page in the navigation bar for user feedback.  
+  * Hides the loader overlay.
+ 
+``` js
+// window loaded event listener ------------------------------------------------------------------------
+window.addEventListener('DOMContentLoaded', async () => {
+    await SessionMaintenance.logBook("fullStats", "window.DOMContentLoaded", "Full Stats page loaded");
+
+    const currentPage = window.location.pathname.split("/").pop();
+    SessionMaintenance.highlightActivePage(currentPage);
+
+    SessionMaintenance.hideLoader();
+});
+```
+
+* **Get Stats Button (`getStatsBtn.click`)**  
+  * Triggered when the user clicks the "Get Stats" button after selecting a start and end date.  
+  * Retrieves the username from `localStorage` and the date range from the input fields.  
+  * Calls `getStats()` with these parameters to fetch and display the requested statistics dynamically.  
+  * Logs the button click action for auditing.
+ 
+``` js
+// Get Stats Button Click --------------------------------------------------------------------------
+getStatsBtn.addEventListener('click', async () => {
+    await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", "Full Stats page loaded");
+
+    // Declare Variables
+    const username = localStorage.getItem('username').toLowerCase();
+    const start = document.getElementById('start').value;
+    const end = document.getElementById('end').value;
+
+    await getStats(username, start, end);
+});
+```
+
+---
