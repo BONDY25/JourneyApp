@@ -2074,3 +2074,288 @@ Technical Considerations
 This script provides the **business logic** for editing journeys, ensuring that user inputs are validated, statistics are recalculated consistently, and records are synchronised with the database.
 
 ---
+
+## Settings Page
+
+This page provides users with the ability to view and update their personalized application settings. Users can modify key parameters that influence journey calculations and the app interface, including:
+
+* Default fuel tank volume: Sets the tank size for calculating fuel usage and percentage of tank consumed.  
+* Default fuel cost: Used for calculating journey costs and cost per mile.  
+* User currency: Determines the currency symbol used throughout the app.  
+* Preferred gallon system (US or UK): Adjusts fuel consumption calculations based on the measurement system.  
+* Font selection: Allows the user to choose a preferred font for the app interface for readability or aesthetic preference.  
+* Password update: Provides the option to change the user’s login password securely.
+
+Additionally, the page displays non-editable user information, such as the username and the total number of journeys recorded, giving users a quick overview of their account data. Settings are persisted both locally and on the server to ensure consistency across sessions and devices.
+
+### Settings Page \- Design
+
+The **Settings page** provides users with the ability to customize application preferences and update their account information. The HTML structure is designed to present these options clearly while maintaining consistency with the rest of the application.
+
+Key Sections
+
+1. **Document Setup**  
+   * Declares the document type as HTML5 and sets the language to English.  
+   * Includes meta tags for **character encoding** (`UTF-8`) and **viewport scaling** to ensure responsiveness on mobile devices.  
+   * The `<title>` is set to *Journey App \- Settings*.  
+   * External resources include:  
+     * A custom stylesheet (`assets/styles.css`).  
+     * A favicon for branding (`JourneyApp-logo-1.png`).  
+     * Google Fonts Material Symbols for icons.
+
+2. **Loader Component**  
+   * A `<div>` with the class `loader-overlay` contains a spinner element.  
+   * This acts as a loading screen shown during asynchronous operations such as saving settings.
+
+3. **Main Application Container** (`<div id="app" class="app">`)  
+   * **Page Title**: Displays "Settings" in an `<h1>`.  
+   * **User Info Section**: Displays the current username and total journeys recorded, dynamically filled with JavaScript.
+
+4. **Settings Form** (`<form id="settingsForm">`)  
+    The form allows users to configure application preferences:  
+   * **Tank Volume**: Default fuel tank capacity in litres.  
+   * **Fuel Cost**: Default cost of fuel per litre in £.  
+   * **Gallon Selection**: Allows the user to choose between UK and US gallon units.  
+   * **Font Selection**: Provides multiple font choices for personalising the app’s appearance.  
+   * **Currency Selection**: Allows the user to choose between £, $, and €.  
+   * **Update Password**: Provides an input field to change the account password.  
+   * **Save Button**: Submits the form to persist settings changes.
+
+5. *Note*: A commented-out section for theme selection (Dark/Light) is present, this is for future functionality.
+
+6. **Navigation Bar** (`<div id="nav-bar">`)  
+   * Fixed navigation at the bottom of the page provides quick access to other sections:  
+     * **Home**  
+     * **Add Journey**  
+     * **Your Journeys**  
+     * **Statistics**  
+     * **Settings** (active)  
+   * Each navigation item is represented with an icon from Google’s Material Symbols and a text label.
+
+7. **JavaScript Integration**  
+   * At the end of the `<body>`, the script `settings.js` is included as a module.  
+   * This script handles form submission, loads current settings, and applies user preferences dynamically.
+
+Summary  
+ The **Settings page** is structured to give users control over their app experience, combining **user account info**, **application preferences**, and **navigation** within a responsive and consistent design.
+
+### Settings Page \- JavaScript
+
+The JavaScript for the Settings page provides functionality for **loading, displaying, updating, and saving user preferences** as well as handling some interactive UI features like font selection.
+
+Key Sections
+
+1\. Boilerplate and Imports  
+
+``` js
+import SessionMaintenance from "./sessionMaintenance.js";
+import {API_BASE_URL} from "./config.js";
+
+const fontSelect = document.getElementById('font-select');
+```
+
+* Imports the **SessionMaintenance** module for logging and loader control.  
+* Imports the API base URL from `config.js`.  
+* Captures the font selection dropdown element for later event handling.
+
+2\. Operational Functions
+
+a) `getTotalJourneys(username)`
+
+`async function getTotalJourneys(username) { ... }`
+
+* Fetches the **total number of journeys** for the logged-in user from the API endpoint `/api/getTotalJourneys/{username}`.  
+* Updates the DOM element `totalJourneys` with the retrieved value.  
+* Logs the action via `SessionMaintenance.logBook`.  
+* Implements error handling to fallback to `0` if the fetch fails.
+
+``` js
+// Get total number of journeys ----------------------------------------------------------
+async function getTotalJourneys(username) {
+    const totalElem = document.getElementById('totalJourneys');
+
+    try {
+        const res = await fetch(`${API_BASE_URL}/api/getTotalJourneys/${username}`);
+        if (!res.ok) throw new Error("Failed to fetch journeys");
+
+        const data = await res.json();
+        totalElem.textContent = data.total; // update DOM
+
+        await SessionMaintenance.logBook("settings", "getTotalJourneys", `Journey Total retrieved: ${data.total}`);
+
+        return data.total;
+    } catch (err) {
+        console.error("Error fetching total journeys:", err);
+        await SessionMaintenance.logBook("settings", "getTotalJourneys", `Network Error: ${err}`, true);
+        return 0;
+    }
+}
+```
+
+3\. Event Listeners
+
+a) Font Selection
+
+``` js
+fontSelect.addEventListener('change', (e) => {
+    document.documentElement.style.setProperty(
+        '--default-font',
+        ` `${e.target.value}, sans-serif` `
+    );  
+});
+```
+
+* Dynamically updates the application font when the user selects a new option.  
+* Uses a CSS variable (`--default-font`) to apply the font globally.
+
+b) Window Loaded Event
+
+`document.addEventListener('DOMContentLoaded', async () => { ... });`
+
+When the page loads, several initialization tasks occur:
+
+1. **Logging and UI Highlighting**  
+   * Logs page load and highlights the active page in the navigation bar.
+
+2. **Loader Control**  
+   * Hides the loading overlay once initialization starts.
+
+3. **User Validation**  
+   * Retrieves the `username` from `localStorage`.  
+   * Alerts the user if no username is found.
+
+4. **Display Basic User Info**  
+   * Sets the DOM element `username` with the logged-in user.  
+   * Calls `getTotalJourneys` to display the user’s journey count.
+
+5. **Fetch Current Settings**  
+   * Fetches stored user settings from `/api/getUsers/{username}`.  
+   * Populates input fields in the form: tank volume, fuel cost, gallon type, font, and currency.  
+   * Implements error handling and logging for failed requests.
+
+4\. Form Submission (Save Settings)  
+`document.getElementById('settingsForm').addEventListener('submit', async (e) => { ... });`
+
+* Prevents default form submission with `e.preventDefault()`.  
+* Reads form field values and builds a payload object for the API.  
+* Adds optional password update if provided.  
+* Sends the payload via a **PUT request** to `/api/saveUsers/{username}`.  
+* Updates **localStorage** with new preferences to maintain app state.  
+* Provides feedback via `alert()` for both success and failure.  
+* Logs all actions using `SessionMaintenance.logBook`.  
+* Handles errors gracefully and ensures loader visibility is properly managed.
+
+``` js
+// window loaded event listener ------------------------------------------------------------------------
+document.addEventListener('DOMContentLoaded', async () => {
+    await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Settings page loaded");
+
+    const currentPage = window.location.pathname.split("/").pop();
+    SessionMaintenance.highlightActivePage(currentPage);
+
+    SessionMaintenance.hideLoader();
+
+    const username = localStorage.getItem('username');
+    if (!username) {
+        alert('No user logged in!');
+        return;
+    }
+
+    document.getElementById('username').textContent = username;
+    if (username) {
+        await getTotalJourneys(username);
+    }
+
+    // Fetch current user settings
+    try {
+        SessionMaintenance.showLoader();
+        await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Getting current user settings");
+        const res = await fetch(`${API_BASE_URL}/api/getUsers/${username}`);
+
+        if (res.ok) {
+            const user = await res.json();
+            document.getElementById('tankVolume').value = user.tankVolume ?? "";
+            document.getElementById('fuelCost').value = user.defFuelCost ?? "";
+            document.getElementById('gallon-select').value = user.gallon ?? "UK";
+            document.getElementById('font-select').value = user.userFont ?? "Lexend";
+            document.getElementById('currency-select').value = user.currency ?? "£";
+
+        } else {
+            await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Failed fetching user settings", true);
+        }
+    } catch (err) {
+        await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", `Failed fetching user settings: ${err}`, true);
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+
+    // Handle save function -----------------------------------------------------------------------------------------
+    document.getElementById('settingsForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const tankVolume = Number(document.getElementById('tankVolume').value);
+        const fuelCost = Number(document.getElementById('fuelCost').value);
+        let gallon = document.getElementById('gallon-select').value.toUpperCase();
+        if (!gallon || gallon.trim() === "") gallon = "UK";
+        const userFont = document.getElementById('font-select').value || "Lexend";
+        const currency = document.getElementById('currency-select').value || "£";
+        const newPassword = document.getElementById('new-password').value || "";
+
+        // Build Payload
+        const payLoad = {
+            tankVolume,
+            defFuelCost: fuelCost,
+            gallon,
+            userFont,
+            currency,
+        };
+
+        if (newPassword && newPassword.trim() !== "") {
+            payLoad.newPassword = newPassword;
+        }
+
+        try {
+            SessionMaintenance.showLoader();
+            const res = await fetch(`${API_BASE_URL}/api/saveUsers/${username}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(payLoad),
+            });
+
+            // Update Local storage
+            localStorage.setItem('tankVolume', tankVolume.toString());
+            localStorage.setItem('fuelCost', fuelCost.toString());
+            localStorage.setItem('gallon', gallon);
+            localStorage.setItem('userFont', userFont);
+            localStorage.setItem('userFont', userFont);
+            localStorage.setItem('currency', currency);
+
+            if (res.ok) {
+                await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", `Settings saved successfully {${JSON.stringify(payLoad)}}`);
+                alert("Settings saved successfully");
+            } else {
+                const err = await res.text();
+                await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", `Failed to save user settings: ${err}`);
+                alert(`Failed to save user settings: ${err}`);
+            }
+        } catch (err) {
+            await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", `Network Error: ${err}`, true);
+        } finally {
+            SessionMaintenance.hideLoader();
+        }
+    });
+});
+```
+
+5\. Summary of Functionality
+
+* **Fetches and displays** user-specific data (username, total journeys, settings).  
+* **Allows dynamic customization** of font style.  
+* **Persists user preferences** to the backend and updates local storage.  
+* Provides **error handling and logging** for network or API failures.  
+* Integrates with UI elements (loader, input fields, font selection, form submission).
+
+**Summary**  
+ The `settings.js` file is responsible for **loading, editing, and saving user preferences**, ensuring the UI reflects the current user settings and maintaining consistent logging and error handling.
+
+---
