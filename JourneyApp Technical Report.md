@@ -1652,3 +1652,425 @@ The `journeyDetails.js` file makes the Journey Details page **interactive and da
 * Logs all major events for debugging and maintenance.
 
 ---
+
+## Edit Journey Page
+
+This page allows a user to update the details of an existing journey they have previously recorded. The editable fields are the same as those found on the New Journey page (such as date and time, distance, MPG, time driven, weather condition, temperature, and fuel cost per litre), with the exception of the journey description, which cannot be changed once a journey has been created.  
+When the user updates a field, the system automatically recalculates key statistics, such as fuel usage, total cost, cost per mile, and average speed. This ensures the journey record remains accurate and consistent with the changes.
+
+* In addition to editing, the page provides options to:  
+  * Save Changes: Updates the journey in the database and returns the user to the Your Journeys overview.  
+  * Delete Journey: Permanently removes the selected journey from the database after confirmation.  
+  * Back: Returns the user to the journey list without making any changes.
+
+This page ensures flexibility for correcting mistakes or updating information, while also maintaining clear safeguards for data integrity.
+
+### Edit Journey Page \- Design
+
+The **Edit Journey page** provides a form-based interface that allows the user to modify or delete an existing journey record. It uses a structured layout for input fields and includes validation where appropriate.
+
+---
+
+1\. Page Metadata and Styling  
+
+``` html
+<!DOCTYPE html>  
+<html lang="en">  
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">  
+    <title>Edit Journey</title>  
+    <link rel="stylesheet" href="assets/styles.css">  
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>  
+</head>
+```
+
+* **Document type and language**: Defines the file as HTML5 and sets language to English.  
+* **Meta tags**: Ensure proper character encoding (`UTF-8`) and mobile responsiveness (`viewport`).  
+* **Title**: Sets the browser tab name to *Edit Journey*.  
+* **Stylesheet**: Applies custom application styles from `assets/styles.css`.  
+* **Google Material Symbols**: Provides access to standard icon fonts for consistency across the app.
+
+2\. Loader Overlay  
+
+``` html
+<div id="loader" class="loader-overlay">
+    <div class="spinner"></div>
+</div>
+```
+
+* Displays a **spinner overlay** while data is being fetched or saved.  
+* Managed dynamically by JavaScript to indicate loading state.
+
+3\. Main Application Container
+
+``` html
+<div id="app" class="app">
+    <h1>Edit Journey</h1>
+    <form id="editJourneyForm">
+        ...  
+    </form>
+</div>
+```
+
+* **Wrapper (`#app`)**: Provides a container for all page content.  
+* **Heading**: The page is clearly labelled as *Edit Journey*.  
+* **Form (`#editJourneyForm`)**: Contains the input fields for modifying journey data.
+
+4\. Form Fields
+
+The form captures a complete set of journey attributes. Each field uses HTML5 input types for validation and better user experience.
+
+1. **Date & Time**
+
+``` html
+<label for="datetime">Date & Time:</label>
+<input type="datetime-local" id="datetime" required>
+```
+
+* Ensures precise entry of date and time.  
+* Marked as **required** to prevent missing entries.
+
+2. **Distance**
+
+``` html
+<label for="distance">Distance:</label>
+<input type="number" id="distance" name="distance" step="0.1" required>
+```
+
+* Captures journey distance (in miles).  
+* Uses **decimal step control (0.1)** for accuracy.  
+* Required field.
+
+3. **Miles per Gallon (MPG)**
+
+``` html
+<label for="mpg">MPG:</label>
+<input type="number" id="mpg" name="mpg" step="0.1" required>
+```
+
+* Tracks vehicle fuel efficiency.  
+* Decimal input with 0.1 precision.  
+* Required field.
+
+4. **Time Driven**
+
+``` html
+<label for="timedriven">Time Driving:</label>
+<input type="number" id="timedriven" name="timedriven" step="0.1" required>
+```
+
+* Records journey duration (in minutes or hours).  
+* Decimal values permitted.  
+* Required field.
+
+5. **Temperature**
+
+``` html
+<label for="temp">Temperature (°C)</label>  
+<input type="number" id="temp" step="0.1">
+```
+
+* Captures outside temperature.  
+* Decimal precision of 0.1°C.  
+* Optional field.
+
+6. **Condition**
+
+``` html
+<label for="condition">Condition</label> 
+<select id="condition">
+    <option value="">Select</option>
+    <option value="dry">Dry</option>
+    <option value="wet">Wet</option>
+</select>
+```
+
+* Dropdown menu for selecting **road/weather conditions**.  
+* Defaults to “Select” with no preset value.
+
+7. **Fuel Cost**
+
+``` html
+<label for="cost">Cost per L(£)</label>
+<input type="number" id="cost" step="0.01" required>
+```
+
+* Input for **fuel price per litre**.  
+* Two decimal precision for currency.  
+* Required field.
+
+5\. Form Action Buttons  
+
+``` html
+<div class="button-group">
+    <button type="submit" class="button">Save Changes</button>
+    <button type="button" id="deleteBtn" class="danger button">Delete Journey</button>
+    <a href="your-journeys.html">
+        <button type="button" class="button" id="btnBack">Back</button>
+    </a>
+</div>
+```
+
+* **Save Changes**: Submits the form to update the journey in the database.  
+* **Delete Journey**: Triggers a delete action via JavaScript (`#deleteBtn`), removing the record.  
+* **Back Button**: Navigates the user back to the *Your Journeys* page without making changes.
+
+6\. JavaScript Integration  
+`<script type="module" src="editJourney.js"></script>`
+
+* Links to the `editJourney.js` script file, which:  
+  * Loads existing journey data into the form.  
+  * Handles validation and submission.  
+  * Implements delete functionality.  
+  * Provides error handling and loader control.
+
+### Summary
+
+The **Edit Journey HTML page** is designed to give users full control over modifying journey data. It includes:
+
+* A structured **form** with validation on critical fields.  
+* Support for editing time, distance, efficiency, weather conditions, and costs.  
+* Dedicated buttons for **saving, deleting, and navigation**.  
+* Integration with JavaScript for dynamic behaviour and backend communication.
+
+This ensures consistency, reliability, and usability when managing journey records.
+
+### Edit Journey Page \- JavaScript
+
+The **Edit Journey page** is powered by a JavaScript module that enables users to load, update, and delete journey records. It communicates with the backend API and recalculates journey statistics in real time.
+
+1\. Boilerplate Setup
+
+* Imports configuration (`API_BASE_URL`) and the `SessionMaintenance` module for logging and session control.  
+* Extracts the `journeyId` from the page URL using query parameters.
+
+``` js
+import {API_BASE_URL} from "./config.js";
+import SessionMaintenance from "./sessionMaintenance.js";
+
+const params = new URLSearchParams(window.location.search);
+const journeyId = params.get("id");
+```
+
+2\. Utility Functions
+
+* **`formatDatetime()`**: Converts ISO date strings into a format compatible with HTML `<input type="datetime-local">`. This ensures consistent date/time display when editing records.
+
+``` js
+// format date time --------------------------------------------------------------------------
+function formatDatetime(isoString){
+    const date = new Date(isoString);
+    const pad = (num) => num.toString().padStart(2,'0');
+
+    const yyyy = date.getFullYear();
+    const MM = pad(date.getMonth()+1);
+    const dd = pad(date.getDate());
+    const hh = pad(date.getHours());
+    const mm = pad(date.getMinutes());
+
+    return `${yyyy}-${MM}-${dd}T${hh}:${mm}` || "";
+}
+```
+
+3\. Core Operational Functions
+
+* **`reCalculateValues()`**:  
+  * Reads form input values (distance, MPG, cost per litre, conditions, etc.).  
+  * Uses helper calculations to derive additional statistics, such as:  
+    * Average speed.  
+    * Fuel used (litres).  
+    * Cost per mile.  
+    * Total cost.  
+    * Percentage of fuel tank consumed.
+
+  * Applies rounding for readability and stores results in a structured object.  
+  * Logs calculation steps for traceability.
+ 
+``` js
+//Calculate Values ----------------------------------------------------------------------------
+async function reCalculateValues({timeUnit = 'minutes'} = {}) {
+    await SessionMaintenance.logBook("editJourney", "calculateValues", "Calculating Values");
+
+    const tankVolume = Number(localStorage.getItem('tankVolume')) || 64;
+    const dateTime = document.getElementById("datetime").value || "";
+    const distance = document.getElementById("distance").value || 0;
+    const mpg = document.getElementById("mpg").value || 0;
+    const timeDriven = document.getElementById("timedriven").value || 0;
+    const costPerLitre = document.getElementById("cost").value || 0;
+    const condition = document.getElementById("condition").value || "Dry";
+    const temp = document.getElementById("temp").value  || 0;
+
+    // Calculate Helpers
+    const gallon = localStorage.getItem('gallon');
+    const hours = timeUnit === 'minutes' ? (timeDriven / 60) : timeDriven;
+    const safeHours = hours > 0 ? hours : 1; // avoid division by zero
+    const GALLON_L = (gallon === 'US') ? 3.79541 : 4.54609;
+    const milesPerLitre = mpg > 0 ? (mpg / GALLON_L) : 1; // avoid division by zero
+
+    // Calculate Values
+    const avgSpeed = distance / safeHours;
+    const fuelUsedL = distance / milesPerLitre;
+    const costPerMile = costPerLitre / milesPerLitre;
+    const totalCost = costPerMile * distance;
+    const percOfTank = tankVolume > 0 ? (fuelUsedL / tankVolume) : 0;
+
+    const round = (n, dp = 3) => isNaN(n) ? 0 : Number(Number(n).toFixed(dp));
+
+    const output = {
+        dateTime,
+        distance: round(distance, 2),
+        mpg: round(mpg, 2),
+        timeDriven: round(timeDriven, 2),
+        temp: round(temp, 1),
+        condition,
+        costPl: round(costPerLitre, 2),
+        avgSpeed: round(avgSpeed, 2),
+        totalCost: round(totalCost, 2),
+        costPerMile: round(costPerMile, 2),
+        fuelUsedL: round(fuelUsedL, 2),
+        percOfTank: round(percOfTank, 4),
+    }
+
+    await SessionMaintenance.logBook("editJourney", "calculateValues", `Values Calculated: ${JSON.stringify(output, null, 2)}`);
+
+    return output;
+}
+```
+
+* **`loadJourney()`**:  
+  * Fetches the journey record from the API using the `journeyId`.  
+  * Populates the edit form with stored values.  
+  * Provides fallback behaviour in case of fetch errors (logs errors and maintains session stability).
+ 
+``` js
+// Load Journey -----------------------------------------------------------------------------
+async function loadJourney() {
+    try {
+        SessionMaintenance.showLoader();
+        const res = await fetch(`${API_BASE_URL}/api/journeys/${journeyId}`);
+        if (!res.ok) throw new Error("Failed to fetch journey");
+
+        const journey = await res.json();
+        document.getElementById("datetime").value = formatDatetime(journey.dateTime) || journey.dateTime?.split("T")[0] || ""
+        document.getElementById("distance").value = journey.distance || "";
+        document.getElementById("mpg").value = journey.mpg || "";
+        document.getElementById("timedriven").value = journey.timeDriven || "";
+        document.getElementById("temp").value = journey.temp || "";
+        document.getElementById("condition").value = journey.condition || "";
+        document.getElementById("cost").value = journey.costPl || "";
+    } catch (err) {
+        await SessionMaintenance.logBook("editJourney", "loadJourney", `Error getting journey ${err}`, true);
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+}
+```
+
+* **`saveJourney()`**:  
+  * Recalculates values based on current form inputs.  
+  * Submits an HTTP `PUT` request to update the record in the database.  
+  * On success: alerts the user, logs the event, and redirects to the *Your Journeys* page.  
+  * On failure: logs the error and alerts the user.
+
+``` js
+// Save Journey -----------------------------------------------------------------------------
+async function saveJourney() {
+
+    const updated = await reCalculateValues();
+
+    try {
+        SessionMaintenance.showLoader();
+        const res = await fetch(`${API_BASE_URL}/api/journeys/${journeyId}`, {
+            method: "PUT",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify(updated),
+        });
+
+        if (res.ok) {
+            alert("Journey updated successfully!");
+            await SessionMaintenance.logBook("saveJourney", "saveJourney", `Journey Saved successfully! ${JSON.stringify(updated)}`);
+            window.location.href = "your-journeys.html";
+        } else {
+            throw new Error("Update failed");
+        }
+    } catch (err) {
+        await SessionMaintenance.logBook("editJourney", "saveJourney", `Error saving journey ${err}`, true);
+        alert("Failed to save changes.");
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+}
+```
+
+* **`deleteJourney()`**:  
+  * Confirms with the user before proceeding.  
+  * Sends an HTTP `DELETE` request to remove the record.  
+  * Provides success/failure feedback and redirects back to the *Your Journeys* overview page.
+ 
+``` js
+// Delete Journey -----------------------------------------------------------------------------
+async function deleteJourney() {
+    if (!confirm("Are you sure you want to delete this journey?")) return;
+
+    try {
+        SessionMaintenance.showLoader();
+        const res = await fetch(`${API_BASE_URL}/api/journeys/${journeyId}`, {
+            method: "DELETE",
+        });
+
+        if (res.ok) {
+            alert("Journey deleted");
+            window.location.href = "your-journeys.html";
+        } else {
+            throw new Error("Delete failed");
+        }
+    } catch (err) {
+        await SessionMaintenance.logBook("editJourney", "deleteJourney", `Error deleting journey ${err}`, true);
+        alert("failed to delete the journey");
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+}
+
+```
+
+4\. Event Binding
+
+* On page load (`DOMContentLoaded`):  
+  * Logs that the page is ready.  
+  * Calls `loadJourney()` to prefill form data.  
+  * Attaches event listeners:  
+    * **Form submit** → `saveJourney()`.  
+    * **Delete button** → `deleteJourney()`.
+   
+``` js
+// Page loaded -----------------------------------------------------------------------------
+document.addEventListener("DOMContentLoaded", async () => {
+    await SessionMaintenance.logBook("editJourney", "window.DOMContentLoaded", "Edit journey page loaded");
+    SessionMaintenance.hideLoader();
+
+    await loadJourney();
+
+    const form = document.getElementById("editJourneyForm");
+    form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        await saveJourney();
+    });
+
+    document.getElementById("deleteBtn").addEventListener("click", deleteJourney);
+});
+```
+
+Technical Considerations
+
+* **Error handling**: All API operations use `try/catch` with user feedback (alerts) and server-side logging.  
+* **Data integrity**: Calculations include safeguards against division by zero and missing values.  
+* **User experience**:  
+  * A loader is shown during long operations.  
+  * Alerts and redirects provide clear navigation after changes.  
+* **Maintainability**: Modular design separates concerns (calculation, load, save, delete).
+
+This script provides the **business logic** for editing journeys, ensuring that user inputs are validated, statistics are recalculated consistently, and records are synchronised with the database.
+
+---
