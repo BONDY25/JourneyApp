@@ -1259,47 +1259,38 @@ Displays an error message in the table:
    * Calls `SessionMaintenance.hideLoader()` in a `finally` block to ensure the loader disappears regardless of success or failure.
   
 ``` js
-// Get Journeys -----------------------------------------------------------------------------------------
-async function getJourneys(journeyId) {
+// Get Journeys --------------------------------------------------------------------
+async function getJourneys(tableBody, username) {
     try {
         SessionMaintenance.showLoader();
-        if (!journeyId) {
-            await SessionMaintenance.logBook("journeyDetails", "getJourney", `No Journey Found ${journeyId}`, true);
+        const res = await fetch(`${API_BASE_URL}/api/getJourneys?username=${username}`, {})
+        const journeys = await res.json();
+
+        if (journeys.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="3">No journeys found.</td></tr>`;
             return;
         }
 
-        // Log action
-        await SessionMaintenance.logBook("journeyDetails", "getJourney", `Getting journey ${journeyId}`);
+        await SessionMaintenance.logBook("yourJourneys", "getJourneys", `Getting Journeys`);
+        journeys.forEach((journey) => {
+            const row = document.createElement("tr");
 
-        // Get Journey Details
-        const response = await fetch(`${API_BASE_URL}/api/getJourney/${journeyId}`, {
-            method: "GET",
-            headers: {"Content-Type": "application/json"}
+            row.innerHTML = `
+        <td>${new Date(journey.dateTime).toLocaleString()}</td>
+        <td>${journey.description}</td>
+        <td>${journey.distance}</td>
+      `;
+
+            row.addEventListener("click", () => {
+                window.location.href = `journey-details.html?id=${journey._id}`;
+            });
+
+            tableBody.appendChild(row);
         });
 
-        if (!response.ok) throw new Error("Failed to get journey details");
-
-        const journey = await response.json();
-        const formattedTime = journey.timeDriven > 60 ? journey.timeDriven / 60 : journey.timeDriven;
-        const timeUnit = journey.timeDriven > 60 ? "Hours" : "Minutes";
-
-        await SessionMaintenance.logBook("journeyDetails", "getJourney", `journey Data: ${JSON.stringify(journey)}`);
-
-        // Populate Fields
-        document.getElementById("DateTime").textContent = formatDateTime(journey.dateTime);
-        document.getElementById("description").textContent = journey.description || "-";
-        document.getElementById("distance").textContent = journey.distance ? `${formatNumber(journey.distance, 1)} mi` : "0 mi";
-        document.getElementById("timeDriven").textContent = `${formatNumber(formattedTime, 2)} ${timeUnit}` || "-";
-        document.getElementById("fuelUsedL").textContent = journey.fuelUsedL ? `${formatNumber(journey.fuelUsedL, 2)} L` : "0 L";
-        document.getElementById("cost").textContent = journey.totalCost ? `${currency}${formatNumber(journey.totalCost, 2)}` : "£0.00";
-        document.getElementById("mpg").textContent = journey.mpg ? `${formatNumber(journey.mpg, 1)}` : "0 mpg";
-        document.getElementById("temp").textContent = journey.temp ? `${formatNumber(journey.temp, 1)} °C` : "0 °C";
-        document.getElementById("condition").textContent = journey.condition || "-";
-        document.getElementById("avgSpeed").textContent = journey.avgSpeed ? `${formatNumber(journey.avgSpeed, 1)} mph` : "0 mph";
-        document.getElementById("costPerMile").textContent = journey.costPerMile ? `${currency}${formatNumber(journey.costPerMile, 2)}/mi` : `${currency}0.00/mi`;
-        document.getElementById("percOfTank").textContent = journey.percOfTank ? `${formatNumber(journey.percOfTank * 100, 2)} %` : "0 %";
     } catch (err) {
-        await SessionMaintenance.logBook("journeyDetails", "getJourney", `Error getting journeys ${err}`, true);
+        await SessionMaintenance.logBook("yourJourneys", "getJourneys", `Network Error: ${err}`, true);
+        tableBody.innerHTML = `<tr><td colspan="3">Error loading journeys</td></tr>`;
     } finally {
         SessionMaintenance.hideLoader();
     }
@@ -1334,18 +1325,23 @@ If absent, displays a message in the table:
   
 ``` js
 // window loaded event listener ------------------------------------------------------------------------
-window.addEventListener('DOMContentLoaded', async () => {
-    await SessionMaintenance.logBook("journeyDetails", "window.DOMContentLoaded", "journey page loaded");
+document.addEventListener("DOMContentLoaded", async () => {
+    await SessionMaintenance.logBook("yourJourneys", "window.DOMContentLoaded", "Home page loaded");
+
+    const currentPage = window.location.pathname.split("/").pop();
+    SessionMaintenance.highlightActivePage(currentPage);
+
     SessionMaintenance.hideLoader();
 
-    // Get ID from URL
-    const params = new URLSearchParams(window.location.search);
-    journeyId = params.get("id");
+    const username = localStorage.getItem("username");
+    const tableBody = document.querySelector("#journeys-table tbody");
 
-    // Log what we got
-    await SessionMaintenance.logBook("journeyDetails", "window.DOMContentLoaded", `Journey ID from URL: ${journeyId}`);
+    if (!username) {
+        tableBody.innerHTML = `<tr><td colspan="3">No username found</td></tr>`;
+        return;
+    }
 
-    await getJourneys(journeyId);
+    await getJourneys(tableBody, username);
 });
 ```
 
