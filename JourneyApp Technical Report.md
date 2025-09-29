@@ -1152,3 +1152,215 @@ getStatsBtn.addEventListener('click', async () => {
 ```
 
 ---
+
+## Your Journeys Page
+
+This page provides the user with a complete list of all their recorded journeys, displayed in a table format. Each entry shows the date and time, the journey description, and the distance travelled, giving a clear overview of past activity. If no journeys are found, the page will display a message to inform the user instead of showing an empty table.
+
+The table rows are interactive, by selecting a journey, the user is redirected to a detailed journey view where more information about that specific trip can be accessed. This functionality makes it easy for users to review and recall individual journeys while maintaining a simple, high-level overview on the main list page.
+
+### Your Journeys Page \- Design
+
+1. **Document Metadata and Resources**  
+   * Declares the document as HTML5 (`<!DOCTYPE html>`).  
+   * `<html lang="en">` specifies the language for accessibility and search engines.  
+   * `<head>` contains key metadata:  
+     * Character encoding is set to UTF-8 for full symbol and character support.  
+     * A responsive `<meta viewport>` tag ensures proper scaling on mobile devices.  
+     * The `<title>` element names the page: *Journey App – Your Journeys*.  
+     * Stylesheet `assets/styles.css` is linked for consistent styling.  
+     * A favicon (`JourneyApp-logo-1.png`) provides branding in the browser tab.  
+     * Google’s **Material Symbols Outlined** icon font is imported for navigation icons.
+
+2. **Loader Overlay**  
+   * `<div id="loader" class="loader-overlay">` defines a hidden loading spinner.  
+   * Used to indicate processing during asynchronous operations, e.g., fetching journey data.
+
+3. **Main Application Container (`#app`)**  
+   * Acts as the primary wrapper for the page’s content.  
+   * Contains:  
+     * **Heading (`<h1>`)**: Clearly labels the page as *Your Journeys*.  
+     * **Table Container (`#table-container`)**:  
+       * Holds the journey history table.  
+       * Table structure:  
+         * `<thead>` defines column headers: *Date/Time*, *Description*, *Distance (miles)*.  
+         * `<tbody>` initially empty. It will be dynamically populated with user journey data by JavaScript.  
+       * Provides a structured and scrollable display for multiple entries.  
+4. **Navigation Bar (`#nav-bar`)**  
+   * Persistent bottom navigation for app-wide consistency.  
+   * Each `<a>` element acts as a navigation item with an icon and label:  
+     * **Home:** `home.html`  
+     * **Add New Journey:** `new-journey.html`  
+     * **Your Journeys (active page):** `your-journeys.html`  
+     * **Statistics:** `full-stats.html`  
+     * **Settings:** `settings.html`  
+   * Icons come from the Material Symbols font, paired with descriptive text labels for clarity and accessibility.
+
+5. **JavaScript Integration**  
+   * `<script type="module" src="yourJourneys.js"></script>` links the page-specific JavaScript module.  
+   * This script dynamically retrieves journey records from the backend, inserts rows into the `<tbody>` of the table, and manages interactive features.
+
+**Purpose and Functionality**  
+The **Your Journeys page** provides users with a historical view of their recorded journeys. The empty table body (`<tbody>`) acts as a dynamic placeholder where journeys are inserted once fetched from the database. This design ensures scalability, allowing the table to grow as the user records more journeys. The page maintains visual and functional consistency with the rest of the application through the loader overlay, navigation bar, and shared styles.
+
+### Your Journeys Page \- JavaScript
+
+#### Boilerplate Imports
+
+``` js
+import SessionMaintenance from "./sessionMaintenance.js";
+import { API_BASE_URL } from "./config.js";
+```
+
+* **SessionMaintenance**: a utility module for handling UI session actions (e.g., showing/hiding the loader, logging events, highlighting the active nav item).  
+* **API\_BASE\_URL**: a centralised constant defining the base URL of the backend API. Keeps endpoints consistent across files.
+
+#### Operational Function – `getJourneys()`
+
+`async function getJourneys(tableBody, username) { ... }`
+
+This asynchronous function retrieves and displays the user’s journeys.
+
+**Process Flow**:
+
+1. **Loader Display**  
+   * Calls `SessionMaintenance.showLoader()` to indicate data fetching.
+
+2. **API Call**
+
+Sends a `fetch` request to:  
+ `GET /api/getJourneys?username={username}`
+
+* Returns a JSON response containing the user’s journey records.  
+3. **No Data Handling**
+
+If the response array is empty, inserts a single table row:  
+ `<tr><td colspan="3">No journeys found.</td></tr>`
+
+* Prevents a blank table.
+
+4. **Data Population**  
+   * Iterates over each journey object in the response.  
+   * Creates a `<tr>` for each journey with three cells:  
+     * **Date/Time**: formatted with `toLocaleString()` for readability.  
+     * **Description**: user-entered description of the journey.  
+     * **Distance**: miles travelled.
+
+   * Each row is clickable:  
+     * `row.addEventListener("click", ...)` redirects the user to a `journey-details.html` page, passing the journey’s unique `_id` as a query parameter.
+
+5. **Error Handling**  
+   * If the fetch fails (e.g., network issue), logs the error with `SessionMaintenance.logBook()`.
+
+Displays an error message in the table:  
+ `<tr><td colspan="3">Error loading journeys</td></tr>`
+
+6. **Cleanup**  
+   * Calls `SessionMaintenance.hideLoader()` in a `finally` block to ensure the loader disappears regardless of success or failure.
+  
+``` js
+// Get Journeys -----------------------------------------------------------------------------------------
+async function getJourneys(journeyId) {
+    try {
+        SessionMaintenance.showLoader();
+        if (!journeyId) {
+            await SessionMaintenance.logBook("journeyDetails", "getJourney", `No Journey Found ${journeyId}`, true);
+            return;
+        }
+
+        // Log action
+        await SessionMaintenance.logBook("journeyDetails", "getJourney", `Getting journey ${journeyId}`);
+
+        // Get Journey Details
+        const response = await fetch(`${API_BASE_URL}/api/getJourney/${journeyId}`, {
+            method: "GET",
+            headers: {"Content-Type": "application/json"}
+        });
+
+        if (!response.ok) throw new Error("Failed to get journey details");
+
+        const journey = await response.json();
+        const formattedTime = journey.timeDriven > 60 ? journey.timeDriven / 60 : journey.timeDriven;
+        const timeUnit = journey.timeDriven > 60 ? "Hours" : "Minutes";
+
+        await SessionMaintenance.logBook("journeyDetails", "getJourney", `journey Data: ${JSON.stringify(journey)}`);
+
+        // Populate Fields
+        document.getElementById("DateTime").textContent = formatDateTime(journey.dateTime);
+        document.getElementById("description").textContent = journey.description || "-";
+        document.getElementById("distance").textContent = journey.distance ? `${formatNumber(journey.distance, 1)} mi` : "0 mi";
+        document.getElementById("timeDriven").textContent = `${formatNumber(formattedTime, 2)} ${timeUnit}` || "-";
+        document.getElementById("fuelUsedL").textContent = journey.fuelUsedL ? `${formatNumber(journey.fuelUsedL, 2)} L` : "0 L";
+        document.getElementById("cost").textContent = journey.totalCost ? `${currency}${formatNumber(journey.totalCost, 2)}` : "£0.00";
+        document.getElementById("mpg").textContent = journey.mpg ? `${formatNumber(journey.mpg, 1)}` : "0 mpg";
+        document.getElementById("temp").textContent = journey.temp ? `${formatNumber(journey.temp, 1)} °C` : "0 °C";
+        document.getElementById("condition").textContent = journey.condition || "-";
+        document.getElementById("avgSpeed").textContent = journey.avgSpeed ? `${formatNumber(journey.avgSpeed, 1)} mph` : "0 mph";
+        document.getElementById("costPerMile").textContent = journey.costPerMile ? `${currency}${formatNumber(journey.costPerMile, 2)}/mi` : `${currency}0.00/mi`;
+        document.getElementById("percOfTank").textContent = journey.percOfTank ? `${formatNumber(journey.percOfTank * 100, 2)} %` : "0 %";
+    } catch (err) {
+        await SessionMaintenance.logBook("journeyDetails", "getJourney", `Error getting journeys ${err}`, true);
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+}
+```
+
+### Event Listener – DOMContentLoaded
+
+`document.addEventListener("DOMContentLoaded", async () => { ... });`
+
+This listener runs when the HTML is fully loaded and parsed.
+
+**Steps Executed**:
+
+1. **Logging and Navigation Highlight**  
+   * Records a log entry: `"Home page loaded"`.  
+   * Highlights the active page in the bottom navigation bar using `SessionMaintenance.highlightActivePage()`.
+
+2. **Loader Handling**  
+   * Ensures the loader is hidden when the page is first displayed.
+
+3. **User Validation**  
+   * Retrieves the `username` from `localStorage`.
+
+If absent, displays a message in the table:  
+ `<tr><td colspan="3">No username found</td></tr>`
+
+* Prevents further execution without a valid user.
+
+4. **Fetch Journeys**  
+   * Calls `getJourneys(tableBody, username)` to fetch and render the user’s journey history in the table.
+  
+``` js
+// window loaded event listener ------------------------------------------------------------------------
+window.addEventListener('DOMContentLoaded', async () => {
+    await SessionMaintenance.logBook("journeyDetails", "window.DOMContentLoaded", "journey page loaded");
+    SessionMaintenance.hideLoader();
+
+    // Get ID from URL
+    const params = new URLSearchParams(window.location.search);
+    journeyId = params.get("id");
+
+    // Log what we got
+    await SessionMaintenance.logBook("journeyDetails", "window.DOMContentLoaded", `Journey ID from URL: ${journeyId}`);
+
+    await getJourneys(journeyId);
+});
+```
+
+### Key Features and Design Choices
+
+* **Separation of Concerns**:  
+  * `getJourneys()` handles only data retrieval and table rendering.  
+  * The `DOMContentLoaded` event deals with page setup and orchestration.
+
+* **Resilience**:  
+  * Includes error states for both missing usernames and network/API issues.  
+  * Loader ensures a smooth UX during data fetching.
+
+* **Scalability**:  
+  * The table body is dynamically populated, supporting an arbitrary number of journeys.  
+  * Clickable rows allow for easy navigation to detailed views, paving the way for expansion (e.g., editing or deleting journeys).
+
+---
