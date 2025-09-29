@@ -2359,3 +2359,165 @@ document.addEventListener('DOMContentLoaded', async () => {
  The `settings.js` file is responsible for **loading, editing, and saving user preferences**, ensuring the UI reflects the current user settings and maintaining consistent logging and error handling.
 
 ---
+
+## SessionMaintenance Class  
+
+The `SessionMaintenance` class is a **utility class** that provides essential application-wide functions for session management, logging, loader control, and UI navigation highlighting in the Journey App. It is designed as a **static class**, meaning all methods and properties are accessed directly on the class rather than through instances.
+
+1\. Boilerplate and Imports
+
+`import {API_BASE_URL} from "./config.js";`
+
+* Imports the API base URL from `config.js` to enable server communication for logging purposes.
+
+2\. Class Properties (Global Variables)
+
+``` js
+static debugMode = false;
+static currentVersion = "1.0.0";
+static appName = "journeyApp"; 
+static sessionId = null;
+static username = null;
+```
+
+* `debugMode`: Controls whether logs are printed to the console only (true) or sent to the server (false).  
+* `currentVersion` and `appName`: Metadata for logging and version tracking.  
+* `sessionId` and `username`: Track the current session and user.
+
+3\. Operational Functions
+
+a) startSession(username)
+
+`static startSession(username) { ... }`
+
+* Starts a new session by generating a **unique session ID** using `crypto.randomUUID()`.  
+* Stores the `username` and `sessionId` in **localStorage** to persist session state across pages.  
+* Calls `logBook` to record the session start event.
+
+**Purpose:** Ensure each user session is uniquely identified and traceable in logs.
+
+``` js
+    static startSession(username) {
+        this.sessionId = crypto.randomUUID();
+        this.username = username;
+
+        // Save Session ID & Username
+        localStorage.setItem("username", this.username);
+        localStorage.setItem("sessionId", this.sessionId);
+
+        this.logBook("SessionMaintenance", "startSession", `Starting session for ${username}`);
+    }
+```
+
+b) logBook(source, func, notes, error \= false)
+
+`static async logBook(source, func, notes, error = false) { ... }`
+
+* Creates a **log entry object** containing:  
+  * `timestamp`, `app`, `version`, `sessionId`, `username`  
+  * `source` (module or page), `func` (function name), `notes` (description), `error` (optional flag)  
+* If `debugMode` is enabled, logs to **console** only.  
+* Otherwise, sends the log to the server via `POST` to `/api/logBook`.  
+* Handles network errors gracefully with a `console.error`.
+
+**Purpose:** Provides **centralized logging** for actions, errors, and debugging across all pages.
+
+``` js
+ // LogBook Function ---------------------------------------------------
+    static async logBook(source, func, notes, error = false) {
+        // Construct Output
+        const entry = {
+            timestamp: new Date().toISOString(),
+            app: this.appName,
+            version: this.currentVersion,
+            sessionId: this.sessionId ?? localStorage.getItem("sessionId"),
+            username: this.username ?? localStorage.getItem("username"),
+            source,
+            func,
+            notes
+        };
+
+        if (this.debugMode) {
+            // Show as console error if error
+            if (error) {
+                console.error(entry);
+            } else {
+                console.log(entry);
+            }
+        } else {
+            console.log(entry);
+            try {
+                await fetch(`${API_BASE_URL}/api/logBook`, {
+                    method: "POST",
+                    headers: {"content-type": "application/json"},
+                    body: JSON.stringify(entry)
+                });
+            } catch (err) {
+                console.error("Failed to send log", err);
+            }
+        }
+    }
+```
+
+c) showLoader() and hideLoader()
+
+``` js
+static showLoader() { ... }
+static hideLoader() { ... }
+```
+
+* Controls visibility of the **page loader overlay** (`#loader`).  
+* `showLoader()` removes the `hidden` class to display the loader.  
+* `hideLoader()` adds the `hidden` class to hide it.
+
+**Purpose:** Standardizes loader behavior across all pages to improve UX during asynchronous operations.
+
+d) highlightActivePage(currentPage)
+
+`static highlightActivePage(currentPage) { ... }`
+
+* Maps page filenames to navbar element IDs.  
+* Removes the `active` class from all `.nav-item` elements.  
+* Adds the `active` class to the element corresponding to the current page.
+
+**Purpose:** Dynamically highlights the **active page** in the navigation bar for user orientation.
+
+``` js
+// Highlight active page on navbar -----------------------------------------------------------------------
+    static highlightActivePage(currentPage) {
+
+        // Map of pages
+        const pageMap = {
+            "home.html": "nav-home",
+            "new-journey.html": "nav-add",
+            "your-journeys.html": "nav-journeys",
+            "full-stats.html": "nav-stats",
+            "settings.html": "nav-settings"
+        };
+
+        const activeId = pageMap[currentPage];
+
+        if (!activeId) return;
+
+        // Remove class for all items first
+        document.querySelectorAll(".nav-item").forEach(el => el.classList.remove("active"));
+
+        // add active class to current page
+        const activeEl = document.getElementById(activeId);
+        if (activeEl) activeEl.classList.add("active");
+    }
+```
+
+4\. Summary of Functionality
+
+The `SessionMaintenance` class provides a **centralized utility system** for:
+
+1. **Session Management:** Starting and persisting unique sessions per user.  
+2. **Logging:** Tracking actions, events, and errors both in the console and remotely on the server.  
+3. **UI Enhancements:** Showing/hiding loaders and highlighting active navigation links.  
+4. **Debugging Support:** Optional debug mode for development without server logging.
+
+**Summary**  
+ `SessionMaintenance.js` is a **foundational class** for the Journey App that ensures consistent session tracking, logging, and UI feedback, making it easier to maintain, debug, and monitor application behavior.
+
+---
