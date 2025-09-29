@@ -2716,3 +2716,799 @@ The CSS file establishes a **consistent, visually appealing, and responsive desi
 * Full support for **responsive adjustments** on small devices.
 
 ---
+
+## Backend
+
+This javaScript file contains all the API endpoints to communicate with the frontend and allow the application to communicate with the MongoDb database. 
+
+**Boilerplate code**
+
+The boilerplate section of `server.js` sets up the necessary environment, dependencies, and initial configuration for the backend server. Its purpose is to establish a foundation for the RESTful API endpoints and provide connectivity to the database.
+
+1\. Environment and Dependency Imports  
+
+``` js
+import dotenv from 'dotenv';
+import bcryptjs from 'bcryptjs';
+import fetch from "node-fetch";
+import express from 'express';
+import cors from 'cors';
+import {MongoClient, ObjectId} from 'mongodb';
+import path from 'path';
+import {fileURLToPath} from 'url';
+```
+
+* **dotenv**: Loads environment variables from a `.env` file, allowing sensitive data such as database URIs or API keys to be kept outside the source code.  
+* **bcryptjs**: Provides password hashing for secure user authentication.  
+* **node-fetch**: Enables server-side HTTP requests to external APIs.  
+* **express**: Framework for creating the server and routing endpoints.  
+* **cors**: Middleware for enabling Cross-Origin Resource Sharing (CORS), controlling which domains can access the server.  
+* **mongodb**: Provides MongoDB connectivity through `MongoClient` and object ID handling via `ObjectId`.  
+* **path** and **fileURLToPath**: Utilities for working with file paths, particularly useful when serving frontend files in a cross-platform way.
+
+2\. Environment Configuration  
+
+``` js
+dotenv.config(); 
+console.log("Mongo URI:", process.env.MONGO_URI); // test output
+```
+
+* Loads `.env` configuration variables into `process.env`.  
+* Outputs the MongoDB URI to the console for verification. This ensures the server is using the correct connection string.
+
+3\. Path Setup  
+
+``` js
+const __filename = fileURLToPath(import.meta.url);  
+const __dirname = path.dirname(__filename);
+```
+
+* Converts the ES module file URL to a standard file path.  
+* Defines `__dirname` for resolving relative paths, which is necessary because ES modules do not provide `__dirname` natively.
+
+4\. Default Server Variables  
+`let tankVolume = 64;`
+
+* Sets a default value for the vehicle tank volume, which may be used in journey calculations if no user-specific value exists.
+
+5\. Express Application Initialization  
+
+``` js
+const app = express();
+app.use(express.json());  
+app.use(express.static(path.join(__dirname, '..', 'frontend')));
+```
+
+* Creates an instance of the Express application.  
+* Enables **JSON parsing** for incoming request bodies (`express.json()`).  
+* Serves static frontend files from the `frontend` directory, allowing the client application to be accessed via the same server.
+
+6\. CORS Configuration  
+
+``` js
+const corsOptions = { 
+    origin: 'http://localhost:63342', // Allow requests from this origin 
+    optionsSuccessStatus: 200 
+};  
+app.use(cors(corsOptions));
+```
+
+* Configures CORS to allow requests only from a specified origin (your local frontend).  
+* Ensures compatibility with browsers that require a 200 response for preflight requests.
+
+7\. MongoDB Client Setup  
+`const client = new MongoClient(process.env.MONGO_URI);`
+
+* Initializes a new MongoDB client instance with the URI from environment variables.  
+* This client will later be used to connect to the database, perform CRUD operations, and manage collections for journeys and user data.
+
+Summary
+
+This boilerplate section establishes the **core backend infrastructure**:
+
+* Loads environment variables.  
+* Imports required libraries for server operation and security.  
+* Configures paths, default variables, and JSON handling.  
+* Sets up **CORS** for controlled cross-origin requests.  
+* Initializes a **MongoDB client** for database interactions.  
+* Serves frontend static files to allow seamless integration between client and server.
+
+**Endpoints**
+
+The endpoints in the `startServer` function provide all **CRUD operations** and supporting functionality for the Journey App. They interact with two main MongoDB collections: **`users`** and **`journeys`**. Each endpoint performs input validation, database operations, and error handling.
+
+1\. Logging Endpoint
+
+`app.post('/api/logBook', ...)`
+
+* **Purpose**: Stores log entries for debugging and operational tracking.  
+* **Input**: Log object containing `source`, `function`, `notes`, timestamp, and session info.  
+* **Database**: Inserts into `logBook` collection.  
+* **Response**: Returns `200` on success or `500` on error.
+
+``` js
+// LogBook Endpoint ------------------------------------------------------------------------------------------
+        app.post('/api/logBook', async (req, res) => {
+            try {
+                const logEntry = req.body;
+                console.log(logEntry);
+                const db = client.db('journeyAppDb');
+                await db.collection('logBook').insertOne(logEntry);
+                res.status(200).json({success: true, message: "Log recorded"});
+            } catch (err) {
+                console.error('Error saving log:', err);
+                res.status(500).send('Error saving log:');
+            }
+        });
+```
+
+2\. Journey Management
+
+**a) Insert a Journey**
+
+`app.post('/api/journeys', ...)`
+
+* Saves a new journey document to the `journeys` collection.  
+* Request body contains journey details like `distance`, `timeDriven`, `fuelUsedL`, etc.  
+* Returns `201` on success or `500` on error.
+
+``` js
+ // Insert Journey --------------------------------------------------------------------------------------------
+        app.post('/api/journeys', async (req, res) => {
+            try {
+                await journeys.insertOne(req.body);
+                console.log('Journey saved:', req.body);
+                res.status(201).send('Journey saved');
+            } catch (err) {
+                console.error('Error saving journey:', err);
+                res.status(500).send('Error saving journey');
+            }
+        });
+```
+
+**b) Get All Journeys for User**
+
+`app.get('/api/getJourneys', ...)`
+
+* Retrieves all journeys for a specific `username`.  
+* Uses aggregation to cast `dateTime` to `Date` and sort by newest first.
+
+``` js
+// Your Journeys Endpoint ----------------------------------------------------------------
+        app.get('/api/getJourneys', async (req, res) => {
+            try {
+                const {username} = req.query; // safer to get from query
+
+                const journeys = await db.collection('journeys').aggregate([
+                    {
+                        $match: {user: username}
+                    },
+                    {
+                        $addFields: {
+                            dateTimeCorrected: {$toDate: "$dateTime"} // cast to Date
+                        }
+                    },
+                    {
+                        $sort: {dateTimeCorrected: -1} // newest first
+                    }
+                ]).toArray();
+
+                res.json(journeys);
+            } catch (err) {
+                console.error("Error retrieving journeys", err);
+                res.status(500).send("Error retrieving journeys");
+            }
+        });
+
+```
+
+**c) Get Single Journey by ID**
+
+`app.get("/api/getJourney/:id", ...)`
+
+* Fetches a journey by its MongoDB ObjectId.  
+* Returns `404` if not found.
+
+``` js
+// Get single journey ---------------------------------------------------------------
+        app.get('/api/journeys/:id', async (req, res) => {
+            try {
+                const {id} = req.params;
+                const journey = await db.collection('journeys').findOne({_id: new ObjectId(id)});
+                if (!journey) return res.status(404).send('No journey found.');
+                res.json(journey);
+            } catch (err) {
+                res.status(500).send("Error retrieving journeys");
+            }
+        });
+```
+
+**d) Update Journey**
+
+`app.put('/api/journeys/:id', ...)`
+
+* Updates an existing journey based on its ObjectId.  
+* Uses `$set` to update only the fields provided.
+
+``` js
+// Update journey -------------------------------------------------------------------
+        app.put('/api/journeys/:id', async (req, res) => {
+            try {
+                const {id} = req.params;
+                const updated = req.body;
+                const result = await db.collection('journeys').updateOne(
+                    {_id: new ObjectId(id)},
+                    {$set: updated},
+                );
+                res.json(result);
+            } catch (err) {
+                res.status(500).send("Error updating journeys");
+            }
+        });
+```
+
+**e) Delete Journey**
+
+`app.delete('/api/journeys/:id', ...)`
+
+* Deletes a journey by ObjectId.  
+* Returns `204 No Content` on success.
+
+``` js
+// Delete journey -------------------------------------------------------------------
+        app.delete('/api/journeys/:id', async (req, res) => {
+            try {
+                const {id} = req.params;
+                await db.collection('journeys').deleteOne({_id: new ObjectId(id)});
+                res.sendStatus(204);
+            } catch (err) {
+                res.status(500).send("Error deleting journeys");
+            }
+        });
+```
+
+**f) Import Multiple Journeys**
+
+`app.post('/api/importJourneys', ...)`
+
+* Accepts an array of journeys to insert in bulk.  
+* Performs validation, type conversion, and calculates derived fields like `fuelUsedL` and `percOfTank`.  
+* Inserts into the `journeys` collection using `insertMany`.
+
+``` js
+// Import Journey ---------------------------------------------------------------
+        app.post('/api/importJourneys', async (req, res) => {
+            try {
+                let journeys = req.body;
+                console.log(journeys);
+
+                // Check if Array has data
+                if (!Array.isArray(journeys) || journeys.length === 0) {
+                    return res.status(400).send("No journeys provided");
+                }
+
+                // Clean data before import
+                journeys = journeys.map(j => {
+                    const distance = Number(j.distance) || 0;
+                    const mpg = Number(j.mpg) || 0;
+
+                    const fuelUsedL = mpg > 0 ? distance / (mpg / 3.785) : 0;
+                    const percOfTank = tankVolume > 0 ? fuelUsedL / tankVolume : 0;
+
+                    return {
+                        user: j.user?.toLowerCase() || "unknown",
+                        description: j.description || "",
+                        dateTime: new Date(j.dateTime),
+                        distance,
+                        mpg,
+                        timeDriven: Number(j.timeDriven) || 0,
+                        temp: Number(j.temp) || 0,
+                        condition: j.condition || "Dry",
+                        costPl: Number(j.costPl) || 0,
+                        avgSpeed: Number(j.avgSpeed) || 0,
+                        totalCost: Number(j.totalCost) || 0,
+                        costPerMile: Number(j.costPerMile) || 0,
+                        fuelUsedL,
+                        percOfTank
+                    };
+                });
+
+
+                // Declare Db & Collection
+                const db = client.db('journeyAppDb');
+                const collection = db.collection('journeys');
+
+                // insert records
+                await collection.insertMany(journeys);
+                res.status(201).send("Journeys imported successfully");
+            } catch (err) {
+                console.error("Error importing journeys:", err);
+                res.status(500).send("Error importing journeys");
+            }
+        });
+```
+
+3\. User Management
+
+**a) Create User**
+
+`app.post('/api/users', ...)`
+
+* Accepts `username`, `password`, and `captcha`.  
+* Verifies Google reCAPTCHA for bot prevention.  
+* Hashes password using `bcryptjs`.  
+* Adds default settings (tank volume, fuel cost, currency, font).  
+* Inserts user into the `users` collection.
+
+``` js
+ // Insert User --------------------------------------------------------------------------------------------
+        app.post('/api/users', async (req, res) => {
+            try {
+                const {username, password, captcha} = req.body;
+
+                const secretKey = process.env.RECAPTCHA_SECRET;
+                const verifyRes = await fetch(
+                    `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captcha}`,
+                    {method: "POST"}
+                );
+                const verifyData = await verifyRes.json();
+
+                console.log("Captcha received:", captcha);
+
+                if (!verifyData.success) {
+                    return res.status(400).send("Captcha failed, try again.");
+                }
+
+                // check is fields are complete
+                if (!username || !password) {
+                    return res.status(400).send('Username and Password required');
+                }
+
+                // check if the user already exists in the database
+                const existing = await users.findOne({username});
+                if (existing) {
+                    return res.status(400).send('Username already exist');
+                }
+
+                // Hash password
+                const hashedPassword = await bcryptjs.hash(req.body.password, 10);
+
+                // create user document to insert
+                const userDoc = {
+                    username,
+                    password: hashedPassword,
+                    dateCreated: new Date(),
+                    tankVolume: tankVolume,
+                    defFuelCost: 0.0,
+                    gallon: "UK",
+                    userFont: "Lexend",
+                    currency: "£",
+                };
+
+                // insert the user into the database
+                await users.insertOne(userDoc);
+                res.status(201).send('User created');
+            } catch (err) {
+                console.error('Error saving user:', err);
+                res.status(500).send('Error saving user:');
+            }
+        });
+```
+
+**b) Login User**
+
+`app.post('/api/login', ...)`
+
+* Validates `username` and `password`.  
+* Uses `bcryptjs.compare` to check hashed password.  
+* Returns `200` with username if successful.
+
+``` js
+ // Check User for Login --------------------------------------------------------------------------------------------
+        app.post('/api/login', async (req, res) => {
+            try {
+                const {username, password} = req.body;
+
+                // Find user
+                const user = await users.findOne({username});
+                if (!user) {
+                    return res.status(400).send('Invalid username or password');
+                }
+
+                // Compare password
+                const isMatch = await bcryptjs.compare(password, user.password);
+                if (!isMatch) {
+                    return res.status(400).send('Invalid username or password');
+                }
+
+                // Success Login
+                res.status(200).json({username: user.username});
+            } catch (err) {
+                console.error('Error saving user:', err);
+                res.status(500).send('Error logging in:');
+            }
+        });
+```
+
+**c) Get User Data**
+
+`app.get('/api/getUsers/:username', ...)`
+
+* Retrieves a user document excluding the password.  
+* Returns `404` if user is not found.
+
+``` js
+// Get Users Endpoint -------------------------------------------------------------------
+        app.get('/api/getUsers/:username', async (req, res) => {
+            const username = req.params.username.toLowerCase();
+            try {
+                const db = client.db('journeyAppDb');
+                const user = await db.collection('users').findOne({username}, {projection: {password: 0}});
+                if (!user) return res.status(404).send('No user found.');
+                res.json(user);
+            } catch (err) {
+                console.error("Error retrieving user:", err);
+                res.status(500).send("Error retrieving user");
+            }
+        });
+```
+
+**d) Update User Settings**
+
+`app.put('/api/saveUsers/:username', ...)`
+
+* Updates user-specific fields: `tankVolume`, `defFuelCost`, `gallon`, `userFont`, `currency`.  
+* Optionally updates password if provided.  
+* Uses `$set` for atomic updates.
+
+``` js
+ // Save User Endpoint -----------------------------------------------------------------
+        app.put('/api/saveUsers/:username', async (req, res) => {
+            const username = req.params.username.toLowerCase();
+            const {tankVolume, defFuelCost, gallon, userFont, currency, newPassword} = req.body;
+
+            try {
+                const db = client.db('journeyAppDb');
+                const updateFields = {tankVolume, defFuelCost, gallon, userFont, currency};
+
+                // Add Password if provided
+                if (newPassword && newPassword.trim() !== "") {
+                    updateFields.password = await bcryptjs.hash(newPassword, 10);
+                }
+
+                console.log(`Payload received: ${JSON.stringify(updateFields)}`);
+
+                const result = await db.collection('users').updateOne(
+                    {username},
+                    {$set: updateFields}
+                );
+
+                if (result.matchedCount === 0) {
+                    return res.status(404).send('No user found.');
+                }
+
+                res.send("Successfully updated user");
+            } catch (err) {
+                console.error("Error updating user:", err);
+                res.status(500).send("Error updating user");
+            }
+        });
+```
+
+4\. Summary and Statistics
+
+**a) User Totals**
+
+`app.get('/api/summary/:username', ...)`
+
+* Aggregates total metrics for a user: `totalMiles`, `totalTime`, `totalFuel`, `totalCost`, `avgMpg`, `longestDistance`, etc.  
+* Converts `Decimal128` to JavaScript numbers.  
+* Returns `0` for all metrics if no journeys exist.
+
+``` js
+ // Get user totals ---------------------------------------------------------------------------------
+        app.get('/api/summary/:username', async (req, res) => {
+            const username = req.params.username;
+
+            try {
+                const summary = await db.collection('journeys').aggregate([
+                    { $match: { user: username } },
+                    {
+                        $group: {
+                            _id: null,
+                            totalMiles: { $sum: { $toDouble: "$distance" } },
+                            totalTime: { $sum: { $toDouble: "$timeDriven" } },
+                            totalFuel: { $sum: { $toDouble: "$fuelUsedL" } },
+                            totalCost: { $sum: { $toDouble: "$totalCost" } },
+                            avgMpg: { $avg: { $toDouble: "$mpg" } },
+                            longestDistance: { $max: { $toDouble: "$distance" } },
+                            longestTime: { $max: { $toDouble: "$timeDriven" } },
+                            bestMpg: { $max: { $toDouble: "$mpg" } }
+                        }
+                    }
+                ]).toArray();
+
+                if (summary.length === 0) {
+                    return res.json({
+                        totalMiles: 0,
+                        totalTime: 0,
+                        totalFuel: 0,
+                        totalCost: 0,
+                        avgMpg: 0,
+                        longestDistance: 0,
+                        longestTime: 0,
+                        bestMpg: 0
+                    });
+                }
+
+                // Convert Decimal128 → JS numbers (just in case)
+                const cleanSummary = Object.fromEntries(
+                    Object.entries(summary[0]).map(([key, val]) => [key, Number(val)])
+                );
+
+                res.json(cleanSummary);
+            } catch (err) {
+                console.error(err);
+                res.status(500).send("Error retrieving summary");
+            }
+        });
+```
+
+**b) Cost Breakdown**
+
+`app.get('/api/costs/:username', ...)`
+
+* Computes fuel cost over different time periods: 7, 14, 28, 90, 180, 365 days.  
+* Uses `$addFields` to normalize `dateTime` strings to `Date`.  
+* Aggregates totals using `$sum` with conditional `$cond`.
+
+``` js
+// Cost Breakdown --------------------------------------------------------------------------------
+        app.get('/api/costs/:username', async (req, res) => {
+            const username = req.params.username;
+
+            try {
+                const journeysCollection = db.collection('journeys');
+                const now = new Date();
+
+                const sevenDaysAgo = new Date(now);
+                sevenDaysAgo.setDate(now.getDate() - 7);
+
+                const fourteenDaysAgo = new Date(now);
+                fourteenDaysAgo.setDate(now.getDate() - 14);
+
+                const twentyEightDaysAgo = new Date(now);
+                twentyEightDaysAgo.setDate(now.getDate() - 28);
+
+                const nintyDaysAgo = new Date(now);
+                nintyDaysAgo.setDate(now.getDate() - 90);
+
+                const sixMonthsAgo = new Date(now);
+                sixMonthsAgo.setDate(now.getDate() - 180);
+
+                const threeSixFiveDaysAgo = new Date(now);
+                threeSixFiveDaysAgo.setDate(now.getDate() - 365);
+
+                const result = await journeysCollection.aggregate([
+                    {
+                        $match: {user: username}
+                    },
+                    {
+                        // Normalize dateTime
+                        $addFields: {
+                            parsedDate: {
+                                $cond: [
+                                    {$eq: [{$type: "$dateTime"}, "string"]},
+                                    {$dateFromString: {dateString: "$dateTime"}},
+                                    "$dateTime"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        $match: {
+                            parsedDate: {$gte: threeSixFiveDaysAgo}
+                        }
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            seven: {
+                                $sum: {$cond: [{$gte: ["$parsedDate", sevenDaysAgo]}, "$totalCost", 0]}
+                            },
+                            fourteen: {
+                                $sum: {$cond: [{$gte: ["$parsedDate", fourteenDaysAgo]}, "$totalCost", 0]}
+                            },
+                            twentyEight: {
+                                $sum: {$cond: [{$gte: ["$parsedDate", twentyEightDaysAgo]}, "$totalCost", 0]}
+                            },
+                            ninty:{
+                                $sum: {$cond: [{$gte: ["$parsedDate", nintyDaysAgo]}, "$totalCost", 0]}
+                            },
+                            sixMonth: {
+                                $sum: {$cond: [{$gte: ["$parsedDate", sixMonthsAgo]}, "$totalCost", 0]}
+                            },
+                            threeSixFive: {
+                                $sum: {$cond: [{$gte: ["$parsedDate", threeSixFiveDaysAgo]}, "$totalCost", 0]}
+                            }
+                        }
+                    }
+                ]).toArray();
+
+                const costs = result.length > 0 ? result[0] : {seven: 0, fourteen: 0, twentyEight: 0};
+
+                res.json({cost: costs});
+            } catch (err) {
+                console.error("Error retrieving costs:", err);
+                res.status(500).send("Error retrieving costs");
+            }
+        });
+```
+
+**c) Full Stats**
+
+`app.get('/api/stats/:username', ...)`
+
+* Returns detailed metrics over journeys, optionally filtered by `start` and `end` dates.  
+* Metrics include totals, averages, and derived statistics like `avgMilesPerTank`, `avgCostPerDay`, and `avgCostPerMile`.
+
+``` js
+// Full Stats Endpoint ---------------------------------------------------------------
+        app.get('/api/stats/:username', async (req, res) => {
+            // Declare Parameters
+            const username = req.params.username;
+            const {start, end} = req.query;
+
+            try {
+                const query = {user: username};
+
+                // Check date parameters
+                if (start || end) {
+                    query.dateTime = {};
+                    if (start) query.dateTime.$gte = new Date(start);
+                    if (end) {
+                        const endDate = new Date(end);
+                        endDate.setHours(23, 59, 59, 999); // Included end of the date
+                        query.dateTime.$lte = endDate;
+                    }
+                }
+
+                const journeysData = await journeys.aggregate([
+                    {$match: {user: username}},
+                    {$addFields: {dateTimeCorrected: {$toDate: "$dateTime"}}},
+                    {
+                        $match: (() => {
+                            const filter = {};
+                            if (start) filter.$gte = new Date(start);
+                            if (end) {
+                                const endDate = new Date(end);
+                                endDate.setHours(23, 59, 59, 999);
+                                filter.$lte = endDate;
+                            }
+                            return Object.keys(filter).length ? {dateTimeCorrected: filter} : {};
+                        })()
+                    }
+                ]).toArray();
+
+                console.log(journeysData);
+
+                // Handle empty array
+                if (!journeysData || journeysData.length === 0) {
+                    return res.json({
+                        totalMiles: 0,
+                        totalTime: 0,
+                        totalFuel: 0,
+                        totalCost: 0,
+                        avgMilesPerTank: 0,
+                        avgMpg: 0,
+                        avgSpeed: 0,
+                        avgCostPerDay: 0,
+                        avgCostPerMile: 0,
+                        avgFuelPrice: 0,
+                        avgTemp: 0,
+                        avgTimeDriven: 0
+                    });
+                }
+
+                // Calculate base totals
+                const totalMiles = journeysData.reduce((sum, j) => sum + j.distance, 0);
+                const totalTime = journeysData.reduce((sum, j) => sum + j.timeDriven, 0);
+                const totalFuel = journeysData.reduce((sum, j) => sum + j.fuelUsedL, 0);
+                const totalCost = journeysData.reduce((sum, j) => sum + j.totalCost, 0);
+
+                // Calculate Averages
+                const avgTimeDriven = totalTime / journeysData.length;
+                const avgMpg = journeysData.reduce((sum, j) => sum + (+j.mpg || 0), 0) / journeysData.length;
+                const avgSpeed = journeysData.reduce((sum, j) => sum + j.avgSpeed, 0) / journeysData.length;
+                const avgFuelPrice = journeysData.reduce((sum, j) => sum + j.costPl, 0) / journeysData.length;
+                const avgTemp = journeysData.reduce((sum, j) => sum + j.temp, 0) / journeysData.length;
+
+                // Derived Stats
+                const avgMilesPerTank = totalFuel > 0 ? totalMiles / totalFuel * tankVolume : 0;
+                const avgCostPerDay = (() => {
+                    const dates = journeysData.map(j => new Date(j.dateTime));
+                    const minDate = start ? new Date(start) : new Date(Math.min(...dates));
+                    const maxDate = end ? new Date(end) : new Date(Math.max(...dates));
+                    const diffDays = Math.max(1, Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24)));
+                    return totalCost / diffDays;
+                })();
+                const avgCostPerMile = totalMiles > 0 ? totalCost / totalMiles : 0;
+
+                // Build object
+                res.json({
+                    totalMiles,
+                    totalTime,
+                    totalFuel,
+                    totalCost,
+                    avgMilesPerTank,
+                    avgMpg,
+                    avgSpeed,
+                    avgCostPerDay,
+                    avgCostPerMile,
+                    avgFuelPrice,
+                    avgTemp,
+                    avgTimeDriven
+                });
+            } catch (err) {
+                console.error("Error retrieving stats:", err);
+                res.status(500).send("Error retrieving stats");
+            }
+        });
+```
+
+5\. Totals and Counting
+
+**a) Total Journeys for User**
+
+`app.get('/api/getTotalJourneys/:username', ...)`
+
+* Counts total journeys for a specific user using `countDocuments`.
+
+``` js
+// Get total journeys -------------------------------------------------------------
+        app.get('/api/getTotalJourneys/:username', async (req, res) => {
+            try {
+                const username = req.params.username.toLowerCase();
+                const count = await db.collection('journeys').countDocuments({user: username});
+                res.json({total: count});
+            } catch (error) {
+                console.error("Error fetching total journeys:", error);
+                res.status(500).json({error: "Failed to fetch total journeys"});
+            }
+        });
+```
+
+6\. Security and Validation Features
+
+* **Password Hashing**: Ensures passwords are never stored in plaintext.  
+* **reCAPTCHA**: Protects user creation from bots.  
+* **Input Sanitization**: Converts string inputs to numbers for calculations, validates arrays for bulk inserts.  
+* **Error Handling**: All endpoints catch errors and return appropriate HTTP status codes (`400`, `404`, `500`).
+
+7\. Server Initialization
+
+`app.listen(3000, ...)`
+
+* Starts the Express server on port `3000`.  
+* Logs successful startup or MongoDB connection errors.
+
+Summary
+
+The endpoints collectively provide:
+
+* **CRUD operations** for journeys.  
+* **User authentication and management**.  
+* **Statistics and analytics** for journeys and fuel costs.  
+* **Logging and session tracking** for operational insights
+
+All endpoints are designed to handle asynchronous database operations, provide informative responses, and maintain data integrity.
+
+---
+
+## Conclusion
+
+This report has documented a snapshot version of the Journey App, a web-based application integrated into an Android WebView designed to track user journeys, fuel consumption, and related costs. The application replaces manual spreadsheet tracking with a more efficient, interactive, and visually intuitive system.
+The frontend, implemented with HTML, CSS, and JavaScript, provides pages for creating, editing, and viewing journeys, adjusting user-specific settings, and visualising statistics. Features such as responsive design, dynamic form handling, and a mobile-optimised navigation bar enhance usability across devices. The backend, built with Express.js and MongoDB Atlas, offers RESTful API endpoints to manage users, journeys, and analytics securely and efficiently. Additional functionality, such as password management, user-specific settings, and cost aggregation over multiple time periods, ensures the app is both practical and flexible for real-world use.
+Throughout development, session management and logging mechanisms have been implemented to support debugging, user tracking, and operational reliability. Together, these components provide a cohesive system that automates journey data collection, reduces manual effort, and delivers actionable insights for users.
+Although the current version is fully functional, further testing and refinement are recommended to ensure robustness, data integrity, and usability across all intended devices. Future improvements could include enhanced data visualisation, support for multiple vehicles, offline functionality, and expanded analytics features.
+In conclusion, the Journey App demonstrates a complete, end-to-end web and mobile solution for journey tracking, providing a clear improvement over manual spreadsheet methods and laying a foundation for ongoing development and enhancement.
