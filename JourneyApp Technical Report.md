@@ -1360,3 +1360,295 @@ document.addEventListener("DOMContentLoaded", async () => {
   * Clickable rows allow for easy navigation to detailed views, paving the way for expansion (e.g., editing or deleting journeys).
 
 ---
+
+## Journey Details Page
+
+The Journey Details page displays the complete dataset for an individual journey. It retrieves both raw input values (such as distance, time driven, and fuel price) and calculated statistics (such as cost per mile, percentage of tank used, and average speed) from the database for the selected journey.  
+The page provides:
+
+* A clear breakdown of the journey’s date, time, description, and conditions.  
+* Key performance metrics, including MPG, fuel consumption, and journey cost.  
+* Supporting statistics that help users understand efficiency, such as cost per mile and percentage of fuel tank consumed.  
+* A simple navigation and action interface:  
+  * Edit button: Allows users to modify the journey’s details.  
+  * Back button: Returns users to the Your Journeys overview page.
+
+This page acts as the single record view, giving the user a complete picture of a journey and enabling further actions (edit or review) as part of the wider journey management workflow.
+
+### Journey Details Page \- Design
+
+The **Journey Details page** is structured using standard HTML5 and provides a detailed view of a single recorded journey.
+
+#### **1\. Page Setup**
+
+* `<!DOCTYPE html>` defines the document type as HTML5.  
+* The `<head>` contains metadata, including:  
+  * Character set (`UTF-8`) for broad text compatibility.  
+  * Viewport settings for **mobile responsiveness**.  
+  * A `<title>` that identifies the page in the browser tab.  
+  * Links to an external **CSS stylesheet** (`assets/styles.css`) for consistent styling.  
+  * A favicon (`JourneyApp-logo-1.png`) for branding in the browser tab.
+
+#### **2\. Loader Overlay**
+
+``` html
+<div id="loader" class="loader-overlay">
+   <div class="spinner"></div>
+</div>
+```
+
+This provides a **loading screen** that overlays the page while data is being fetched. The `spinner` is styled with CSS to show a visual loading animation, and it is controlled by JavaScript to appear/disappear as required.
+
+#### **3\. Main Application Container**
+
+`<div id="app" class="app">`
+
+This acts as the main wrapper for all journey details content, giving structure and allowing CSS to style the app layout consistently.
+
+#### **4\. Header and Section Divider**
+
+* `<h1>` shows the page title *Journey Details*.  
+* `<hr>` adds a horizontal rule to visually separate the heading from the data.
+
+#### **5\. Journey Statistics Section**
+
+``` html
+<div id="stats">
+    <div id="sum-stats" class="stats numbers">  
+        <p><span id="DateTime">0000-00-00 00:00:00</span></p> 
+        <p>Description: <span id="description">If you're reading this, Something went wrong</span></p>
+        ...
+    </div> 
+    <hr>  
+</div>
+```
+
+This section displays all journey-specific statistics. Each statistic is wrapped in a `<p>` tag with a `<span>` that has a unique ID (e.g., `distance`, `mpg`, `timeDriven`).
+
+* These spans are **placeholders** that are dynamically updated by JavaScript (`journeyDetails.js`).  
+* Default or fallback values are included (e.g., `0` or a warning message) to handle cases where data is not loaded correctly.  
+* The stats cover key fields such as **date/time, distance, time driven, fuel used, cost, MPG, average speed, and percentage of fuel tank used**.
+
+#### **6\. Action Buttons**
+
+``` html
+<div class="button-group">
+    <button class="button" id="btnEdit">Edit</button>
+    <a href="your-journeys.html">
+        <button type="button" class="button" id="btnBack">Back</button>
+    </a>
+</div>
+```
+
+* **Edit button**: Allows the user to modify the details of the current journey (handled in JavaScript).  
+* **Back button**: A link back to the *Your Journeys* page so users can return to the list view.
+
+#### **7\. JavaScript Linking**
+
+`<script type="module" src="journeyDetails.js"></script>`
+
+* Connects the page to the **journeyDetails.js** file.  
+* This script is responsible for fetching the journey’s data from the database, updating the `<span>` elements with real values, and handling button actions.  
+* Declared as a `module` for cleaner imports and modern JavaScript usage.
+
+### Journey Details Page \- JavaScript
+
+The JavaScript file `journeyDetails.js` provides the **dynamic behaviour** of the Journey Details page. It retrieves journey data from the server, formats it for readability, and updates the HTML fields. It also manages user interactions such as editing a journey.
+
+#### **1\. Imports and Global Variables**
+
+``` js
+import SessionMaintenance from "./sessionMaintenance.js";
+import { API_BASE_URL } from "./config.js";
+
+const editButton = document.getElementById("btnEdit");
+const currency = localStorage.getItem('currency');
+let journeyId = null;
+```
+
+* **SessionMaintenance**: provides utility functions like logging and showing/hiding the loader.  
+* **API\_BASE\_URL**: stores the base URL for the backend API.  
+* **editButton**: references the "Edit" button in the HTML.  
+* **currency**: retrieves the user’s chosen currency symbol from `localStorage`.  
+* **journeyId**: stores the ID of the journey currently being viewed.
+
+#### **2\. Helper Functions**
+
+**a. Formatting Dates**
+
+``` js
+function formatDateTime(value){
+    if(!value){ return "-"; } 
+    const date = new Date(value);
+    return date.toLocaleDateString("en-GB", {
+        day: "2-digit", month: "short", year: "numeric",
+        hour: "2-digit", minute: "2-digit"
+    });  
+}
+```
+
+* Converts a raw date-time string into a **readable UK-style format** (e.g., `26 Sep 2025, 14:30`).  
+* Returns `"-"` if no date is available.
+
+**b. Formatting Numbers**
+
+``` js
+function formatNumber(value, decimals = 2){
+    if(value==null||value==="") return "-";
+    return Number(value).toFixed(decimals);
+}
+```
+
+* Converts numeric values to fixed decimal places.  
+* Returns `"-"` for empty or invalid inputs.
+
+#### **3\. Main Operational Function: `getJourneys()`**
+
+`async function getJourneys(journeyId) { ... }`
+
+This function retrieves the details for a specific journey and updates the page:
+
+1. **Validation and Logging**  
+   * Checks if a `journeyId` is present.  
+   * Logs the action with `SessionMaintenance.logBook()`.
+
+2. **API Request**
+
+Sends a `GET` request to:
+
+ `{API_BASE_URL}/api/getJourney/{journeyId}`
+
+* Expects a JSON response containing the journey’s details.
+
+3. **Processing Response**  
+   * If `timeDriven > 60`, converts minutes into hours and changes the unit label accordingly.  
+   * Logs the received journey data for debugging.
+
+4. **Populating the Page**  
+   * Updates the `<span>` fields in the HTML with journey details, including:  
+     * **Date & Time**  
+     * **Description**  
+     * **Distance (mi)**  
+     * **Time Driven (mins/hours)**  
+     * **Fuel Used (litres)**  
+     * **Cost (with currency symbol)**  
+     * **MPG**  
+     * **Temperature (°C)**  
+     * **Weather condition**  
+     * **Average Speed (mph)**  
+     * **Cost per Mile**  
+     * **Percentage of Tank Used**  
+   * Uses the formatting helpers to ensure consistent display (e.g., `12.50 mi` instead of raw numbers).  
+   * Fallback values such as `"-"` or `0` are shown if data is missing.
+
+5. **Error Handling**  
+   * If the request fails, logs an error with `SessionMaintenance`.
+
+6. **Cleanup**  
+   * Hides the loader overlay once data has been processed.
+  
+``` js
+// Get Journeys -----------------------------------------------------------------------------------------
+async function getJourneys(journeyId) {
+    try {
+        SessionMaintenance.showLoader();
+        if (!journeyId) {
+            await SessionMaintenance.logBook("journeyDetails", "getJourney", `No Journey Found ${journeyId}`, true);
+            return;
+        }
+
+        // Log action
+        await SessionMaintenance.logBook("journeyDetails", "getJourney", `Getting journey ${journeyId}`);
+
+        // Get Journey Details
+        const response = await fetch(`${API_BASE_URL}/api/getJourney/${journeyId}`, {
+            method: "GET",
+            headers: {"Content-Type": "application/json"}
+        });
+
+        if (!response.ok) throw new Error("Failed to get journey details");
+
+        const journey = await response.json();
+        const formattedTime = journey.timeDriven > 60 ? journey.timeDriven / 60 : journey.timeDriven;
+        const timeUnit = journey.timeDriven > 60 ? "Hours" : "Minutes";
+
+        await SessionMaintenance.logBook("journeyDetails", "getJourney", `journey Data: ${JSON.stringify(journey)}`);
+
+        // Populate Fields
+        document.getElementById("DateTime").textContent = formatDateTime(journey.dateTime);
+        document.getElementById("description").textContent = journey.description || "-";
+        document.getElementById("distance").textContent = journey.distance ? `${formatNumber(journey.distance, 1)} mi` : "0 mi";
+        document.getElementById("timeDriven").textContent = `${formatNumber(formattedTime, 2)} ${timeUnit}` || "-";
+        document.getElementById("fuelUsedL").textContent = journey.fuelUsedL ? `${formatNumber(journey.fuelUsedL, 2)} L` : "0 L";
+        document.getElementById("cost").textContent = journey.totalCost ? `${currency}${formatNumber(journey.totalCost, 2)}` : "£0.00";
+        document.getElementById("mpg").textContent = journey.mpg ? `${formatNumber(journey.mpg, 1)}` : "0 mpg";
+        document.getElementById("temp").textContent = journey.temp ? `${formatNumber(journey.temp, 1)} °C` : "0 °C";
+        document.getElementById("condition").textContent = journey.condition || "-";
+        document.getElementById("avgSpeed").textContent = journey.avgSpeed ? `${formatNumber(journey.avgSpeed, 1)} mph` : "0 mph";
+        document.getElementById("costPerMile").textContent = journey.costPerMile ? `${currency}${formatNumber(journey.costPerMile, 2)}/mi` : `${currency}0.00/mi`;
+        document.getElementById("percOfTank").textContent = journey.percOfTank ? `${formatNumber(journey.percOfTank * 100, 2)} %` : "0 %";
+    } catch (err) {
+        await SessionMaintenance.logBook("journeyDetails", "getJourney", `Error getting journeys ${err}`, true);
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+}
+```
+
+#### **4\. Event Listeners**
+
+**a. Page Load (`DOMContentLoaded`)**
+
+`window.addEventListener('DOMContentLoaded', async () => { ... });`
+
+* Runs when the page is fully loaded.  
+* Logs that the journey details page has loaded.  
+* Extracts the journey ID from the page URL (using `URLSearchParams`).  
+* Calls `getJourneys(journeyId)` to fetch and display the journey’s data.
+
+``` js
+// window loaded event listener ------------------------------------------------------------------------
+window.addEventListener('DOMContentLoaded', async () => {
+    await SessionMaintenance.logBook("journeyDetails", "window.DOMContentLoaded", "journey page loaded");
+    SessionMaintenance.hideLoader();
+
+    // Get ID from URL
+    const params = new URLSearchParams(window.location.search);
+    journeyId = params.get("id");
+
+    // Log what we got
+    await SessionMaintenance.logBook("journeyDetails", "window.DOMContentLoaded", `Journey ID from URL: ${journeyId}`);
+
+    await getJourneys(journeyId);
+});
+```
+
+**b. Edit Button**
+
+`editButton.addEventListener("click", () => { ... });`
+
+* Redirects the user to the **Edit Journey page**, passing the journey ID in the URL.  
+* If no journey ID is available, alerts the user.
+
+``` js
+// Edit button event listener -------------------------------------------------------------------------
+editButton.addEventListener("click", () => {
+    if (journeyId) {
+        window.location.href = `edit-journey.html?id=${journeyId}`;
+    } else {
+        alert("No journey ID available to edit.");
+    }
+});
+```
+
+### **Summary**
+
+The `journeyDetails.js` file makes the Journey Details page **interactive and data-driven**. It:
+
+* Retrieves journey information from the backend API.  
+* Formats and displays the information in a clear, user-friendly way.  
+* Provides an **edit option** for modifying journey data.  
+* Handles missing data and errors gracefully.  
+* Logs all major events for debugging and maintenance.
+
+---
