@@ -361,14 +361,14 @@ submitReg.addEventListener('click', async (e) => {
 The Home page is the first page a user sees after logging in or registering. It provides a quick overview of their driving and fuel usage data. At the top, the user is presented with total summary statistics, including their total mileage, total travel time, total fuel used, overall costs, and average miles per gallon (MPG).
 
 In addition to the lifetime totals, the Home page also displays a 28-day summary showing recent mileage, time spent driving, fuel consumption, costs, and fuel efficiency. This allows the user to monitor short-term trends in their usage.
-
 The page also includes a cost breakdown for the past 7, 14, and 28 days, giving users a clear picture of how their fuel expenses are changing over time.
-
 Together, these elements make the Home page a dashboard-style landing screen, designed to give the user a quick but detailed snapshot of their driving habits and costs without needing to dig into the full statistics page.
 
 ## Home Page \- Design
 
 The home page serves as the main dashboard of the WebApp, displaying journey statistics and providing navigation to other sections. It is implemented using **HTML5** markup with a layout designed for clarity, responsiveness, and mobile accessibility.
+
+<img width="380" height="823" alt="image" src="https://github.com/user-attachments/assets/54eafa6d-9b69-4e1b-9fdc-414699b23873" />
 
 #### **Document Head**
 
@@ -700,6 +700,8 @@ The completed journey record is then saved to the database under the logged-in u
 
 ## New Journey Page \- Design
 
+<img width="380" height="823" alt="image" src="https://github.com/user-attachments/assets/07ba1cf1-2df1-4a4c-bd9e-1f84cd291fe5" />
+
 **Document setup**
 
 * The page starts with `<!DOCTYPE html>` to declare the document type as HTML5.  
@@ -995,6 +997,8 @@ This page allows the user to enter a start and end date and retrieve a summary o
 
 ## Full Stats Page \- Design
 
+<img width="380" height="823" alt="image" src="https://github.com/user-attachments/assets/3e41ff91-2fa8-4b2e-b555-8ad7e1f7e9e6" />
+
 **Document Setup**
 
 * The page starts with `<!DOCTYPE html>` to declare HTML5.  
@@ -1162,6 +1166,8 @@ This page provides the user with a complete list of all their recorded journeys,
 The table rows are interactive, by selecting a journey, the user is redirected to a detailed journey view where more information about that specific trip can be accessed. This functionality makes it easy for users to review and recall individual journeys while maintaining a simple, high-level overview on the main list page.
 
 ### Your Journeys Page \- Design
+
+<img width="380" height="823" alt="image" src="https://github.com/user-attachments/assets/36fefc3f-1185-4798-8437-5d5521dc70bd" />
 
 1. **Document Metadata and Resources**  
    * Declares the document as HTML5 (`<!DOCTYPE html>`).  
@@ -1378,6 +1384,8 @@ The page provides:
 This page acts as the single record view, giving the user a complete picture of a journey and enabling further actions (edit or review) as part of the wider journey management workflow.
 
 ### Journey Details Page \- Design
+
+<img width="380" height="823" alt="image" src="https://github.com/user-attachments/assets/32397103-f463-4976-95ea-619a1e807bb8" />
 
 The **Journey Details page** is structured using standard HTML5 and provides a detailed view of a single recorded journey.
 
@@ -1668,6 +1676,8 @@ When the user updates a field, the system automatically recalculates key statist
 This page ensures flexibility for correcting mistakes or updating information, while also maintaining clear safeguards for data integrity.
 
 ### Edit Journey Page \- Design
+
+<img width="380" height="823" alt="image" src="https://github.com/user-attachments/assets/ddd4debd-6c54-450e-b135-94b769c91356" />
 
 The **Edit Journey page** provides a form-based interface that allows the user to modify or delete an existing journey record. It uses a structured layout for input fields and includes validation where appropriate.
 
@@ -2093,6 +2103,8 @@ Additionally, the page displays non-editable user information, such as the usern
 ### Settings Page \- Design
 
 The **Settings page** provides users with the ability to customize application preferences and update their account information. The HTML structure is designed to present these options clearly while maintaining consistency with the rest of the application.
+
+<img width="380" height="823" alt="image" src="https://github.com/user-attachments/assets/53a8eed3-6184-45b1-b6a2-e52da0ca25e0" />
 
 Key Sections
 
