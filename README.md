@@ -9,7 +9,7 @@ Repo for the android app here https://github.com/BONDY25/JourneyAppAndroid
 
 **Currently in phase 2 After getting basic functionallity complete so users can view, add and edit journeys. Now for QoL imporvements and some more interesting features!**
 
-* [29/09/2025 Technical Report (Phase 1)](JourneyAppTechnicalReportV1.md)
+* [29/09/2025 Technical Report (Phase 1)](https://github.com/BONDY25/JourneyApp/wiki/Journey-App-Technical-Report-V1)
 
 ## Current "To Do"
 
