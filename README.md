@@ -7,7 +7,7 @@ I use a MongoDb Atlas NoSql Database to store each journey entry and then go fro
 
 Repo for the android app here https://github.com/BONDY25/JourneyAppAndroid
 
-**Currently is phase 2 After getting basic functionallity complete so users can view, add and edit journeys. Now for QoL imporvements and some more interesting features!**
+**Currently in phase 2 After getting basic functionallity complete so users can view, add and edit journeys. Now for QoL imporvements and some more interesting features!**
 
 * [29/09/2025 Technical Report (Phase 1)](JourneyAppTechnicalReportV1.md)
 
