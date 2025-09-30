@@ -22,6 +22,8 @@ This page allows users to either log in or register. When a username and passwor
 
 The login page is implemented using standard **HTML5** markup and structured to ensure responsiveness, accessibility, and security.
 
+<img width="380" height="823" alt="image" src="https://github.com/user-attachments/assets/97c58a2b-9368-4ffa-a020-3f1b5530e094" />
+
 #### **Document Head**
 
 * `<!DOCTYPE html>` declares the document as HTML5.  
