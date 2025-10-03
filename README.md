@@ -13,7 +13,14 @@ As of right now, both the MongoDB atlas and Render web hosting services I used a
 
 ## Current "To Do"
 
+* Change time driven field to number
+* make fuel cost per liter to 3 decimal places
 * Add Budget Tracking Feature
+* Expand insights into Distance, Time and consuption sub headings and add more intersiting facts:
+    * Olympic Pools of fuel used
+    * Distance to the moon
+    * percentage of time driving since first journey
+    * Condition/percentage of times it was wet
 * Add user themes Light/dark/etc...
 * Add mileage/time targets/limits
 * Add ability to create graphical representations of stats, e.g. line graph, bar charts.
