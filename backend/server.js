@@ -108,7 +108,7 @@ async function startServer() {
                     password: hashedPassword,
                     dateCreated: new Date(),
                     tankVolume: tankVolume,
-                    defFuelCost: 0.0,
+                    defFuelCost: 0.000,
                     gallon: "UK",
                     userFont: "Lexend",
                     currency: "£",

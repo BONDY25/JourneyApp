@@ -62,7 +62,7 @@ async function reCalculateValues({timeUnit = 'minutes'} = {}) {
         timeDriven: round(timeDriven, 2),
         temp: round(temp, 1),
         condition,
-        costPl: round(costPerLitre, 2),
+        costPl: round(costPerLitre, 3),
         avgSpeed: round(avgSpeed, 2),
         totalCost: round(totalCost, 2),
         costPerMile: round(costPerMile, 2),
