@@ -110,10 +110,10 @@ async function loadInsights(username) {
         })}%`;
 
         // Olympic Pools Used
-        document.getElementById('olympicPools').textContent = (summary.totalFuel / 2500000).toLocaleString(undefined, {
-            minimumFractionDigits: 5,
-            maximumFractionDigits: 5
-        });
+        document.getElementById('olympicPools').textContent = `${((summary.totalFuel / 2500000) * 100).toLocaleString(undefined, {
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3
+        })}%`;
 
         // Times Bohemian Rhapsody could have played whilst driving
         document.getElementById('bohemPlayed').textContent = (summary.totalTime / 5.916).toLocaleString(undefined, {
