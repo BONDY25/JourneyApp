@@ -68,8 +68,8 @@ async function loadInsights(username) {
 
         // Times around the world
         document.getElementById('aroundWorld').textContent = (summary.totalMiles / 29901).toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3
         });
 
         // Years Driving
@@ -101,6 +101,24 @@ async function loadInsights(username) {
         document.getElementById('tanksUsed').textContent = (summary.totalFuel / tankVolume).toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
+        });
+
+        // Progress to the moon
+        document.getElementById('moonProgress').textContent = `${((summary.totalMiles / 238855) * 100).toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })}%`;
+
+        // Olympic Pools Used
+        document.getElementById('olympicPools').textContent = (summary.totalFuel / 2500000).toLocaleString(undefined, {
+            minimumFractionDigits: 5,
+            maximumFractionDigits: 5
+        });
+
+        // Times Bohemian Rhapsody could have played whilst driving
+        document.getElementById('bohemPlayed').textContent = (summary.totalTime / 5.916).toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
         });
 
         await SessionMaintenance.logBook("home", "loadInsights", `Summary Loaded: ${summary}`);
