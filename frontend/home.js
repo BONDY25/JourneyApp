@@ -19,12 +19,9 @@ async function loadSummary(username) {
         const summary = await res.json();
         const formattedTime = summary.totalTime > 60 ? summary.totalTime / 60 : summary.totalTime;
         const timeUnit = summary.totalTime > 60 ? "Hours" : "Minutes";
+        const lpkm = SessionMaintenance.calculateConsumption(summary.avgMpg);
+        const kWh = SessionMaintenance.calculateConsumption(summary.avgMpg, 'kwhper100');
 
-        // Calculate Consumption
-        const fuelType = localStorage.getItem('fuelType');
-        let gallon = localStorage.getItem('gallon');
-        const lpkm = (gallon === 'UK' ? 282.48:235.21)/summary.avgMpg
-        const kWh = lpkm * (fuelType === 'petrol' ? 9.5 : 10.7) * (fuelType === 'petrol' ? 0.25 : 0.3)
 
         // Total Miles
         document.getElementById('totalMiles').textContent = summary.totalMiles.toLocaleString(undefined, {

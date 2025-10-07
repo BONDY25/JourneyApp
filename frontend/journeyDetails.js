@@ -56,12 +56,8 @@ async function getJourneys(journeyId) {
         const journey = await response.json();
         const formattedTime = journey.timeDriven > 60 ? journey.timeDriven / 60 : journey.timeDriven;
         const timeUnit = journey.timeDriven > 60 ? "Hours" : "Minutes";
-
-        // Calculate Consumption
-        const fuelType = localStorage.getItem('fuelType');
-        let gallon = localStorage.getItem('gallon');
-        const lpkm = (gallon === 'UK' ? 282.48:235.21)/journey.mpg
-        const kWh = lpkm * (fuelType === 'petrol' ? 9.5 : 10.7) * (fuelType === 'petrol' ? 0.25 : 0.3)
+        const lpkm = SessionMaintenance.calculateConsumption(journey.mpg);
+        const kWh = SessionMaintenance.calculateConsumption(journey.mpg, 'kwhper100');
 
         await SessionMaintenance.logBook("journeyDetails", "getJourney", `journey Data: ${JSON.stringify(journey)}`);
 

@@ -96,4 +96,27 @@ export default class SessionMaintenance {
         const activeEl = document.getElementById(activeId);
         if (activeEl) activeEl.classList.add("active");
     }
+
+    // Calculate Consumption -------------------------------------------------------------------------
+    static calculateConsumption(mpg, mode = "lper100") {
+        if(!mpg || mpg <=0) return 0;
+
+        const fuelType = localStorage.getItem("fuelType") || 'Petrol';
+        const gallon = localStorage.getItem("gallon") || 'UK';
+
+        const constants = {
+            Petrol: {kWhperL: 9.5, eff: 0.25},
+            Diesel: {kWhperL: 10.7, eff: 0.30},
+        };
+
+        const {kWhperL, eff} = constants[fuelType] || constants.Petrol;
+
+        const conv = gallon === 'UK' ? 282.48 : 235.21;
+        const lp100 = conv / mpg;
+
+        if (mode === "kwhper100") {
+            return lp100 * kWhperL * eff;
+        }
+        return lp100;
+    }
 }

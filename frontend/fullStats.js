@@ -22,12 +22,8 @@ async function getStats(username, start, end) {
         const data = await res.json();
         const formattedTime = data.totalTime > 60 ? data.totalTime / 60 : data.totalTime;
         const timeUnit = data.totalTime > 60 ? "Hours" : "Minutes";
-
-        // Calculate Consumption
-        const fuelType = localStorage.getItem('fuelType');
-        let gallon = localStorage.getItem('gallon');
-        const lpkm = (gallon === 'UK' ? 282.48:235.21)/data.avgMpg
-        const kWh = lpkm * (fuelType === 'petrol' ? 9.5 : 10.7) * (fuelType === 'petrol' ? 0.25 : 0.3)
+        const lpkm = SessionMaintenance.calculateConsumption(data.avgMpg);
+        const kWh = SessionMaintenance.calculateConsumption(data.avgMpg, 'kwhper100');
 
         await SessionMaintenance.logBook("fullStats", "getStats", `Full Stats retrieved: ${JSON.stringify(data, null, 2)}`);
 
