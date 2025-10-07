@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const fuelCost = Number(document.getElementById('fuelCost').value);
         let gallon = document.getElementById('gallon-select').value.toUpperCase();
         if (!gallon || gallon.trim() === "") gallon = "UK";
-        const fuelType = document.getElementById('fuelType').value || 'Petrol';
+        const fuelType = document.getElementById('fuel-select').value || 'Petrol';
         const userFont = document.getElementById('font-select').value || "Lexend";
         const currency = document.getElementById('currency-select').value || "£";
         const newPassword = document.getElementById('new-password').value || "";
@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tankVolume,
             defFuelCost: fuelCost,
             gallon,
-            fuelType,
+            fuelType: fuelType,
             userFont,
             currency,
         };
