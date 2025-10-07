@@ -110,6 +110,7 @@ async function startServer() {
                     tankVolume: tankVolume,
                     defFuelCost: 0.000,
                     gallon: "UK",
+                    fuelType: "Petrol",
                     userFont: "Lexend",
                     currency: "£",
                 };
@@ -447,11 +448,11 @@ async function startServer() {
         // Save User Endpoint -----------------------------------------------------------------
         app.put('/api/saveUsers/:username', async (req, res) => {
             const username = req.params.username.toLowerCase();
-            const {tankVolume, defFuelCost, gallon, userFont, currency, newPassword} = req.body;
+            const {tankVolume, defFuelCost, gallon, fuelType, userFont, currency, newPassword} = req.body;
 
             try {
                 const db = client.db('journeyAppDb');
-                const updateFields = {tankVolume, defFuelCost, gallon, userFont, currency};
+                const updateFields = {tankVolume, defFuelCost, gallon, fuelType, userFont, currency};
 
                 // Add Password if provided
                 if (newPassword && newPassword.trim() !== "") {

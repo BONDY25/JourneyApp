@@ -57,6 +57,12 @@ async function getJourneys(journeyId) {
         const formattedTime = journey.timeDriven > 60 ? journey.timeDriven / 60 : journey.timeDriven;
         const timeUnit = journey.timeDriven > 60 ? "Hours" : "Minutes";
 
+        // Calculate Consumption
+        const fuelType = localStorage.getItem('fuelType');
+        let gallon = localStorage.getItem('gallon');
+        const lpkm = (gallon === 'UK' ? 282.48:235.21)/journey.mpg
+        const kWh = lpkm * (fuelType === 'petrol' ? 9.5 : 10.7) * (fuelType === 'petrol' ? 0.25 : 0.3)
+
         await SessionMaintenance.logBook("journeyDetails", "getJourney", `journey Data: ${JSON.stringify(journey)}`);
 
         // Populate Fields
@@ -72,6 +78,8 @@ async function getJourneys(journeyId) {
         document.getElementById("avgSpeed").textContent = journey.avgSpeed ? `${formatNumber(journey.avgSpeed, 1)} mph` : "0 mph";
         document.getElementById("costPerMile").textContent = journey.costPerMile ? `${currency}${formatNumber(journey.costPerMile, 2)}/mi` : `${currency}0.00/mi`;
         document.getElementById("percOfTank").textContent = journey.percOfTank ? `${formatNumber(journey.percOfTank * 100, 2)} %` : "0 %";
+        document.getElementById("lpkm").textContent = lpkm ? `${formatNumber(lpkm,2)}` : "0";
+        document.getElementById("kWh").textContent = kWh ? `${formatNumber(kWh, 2)}` : "0";
     } catch (err) {
         await SessionMaintenance.logBook("journeyDetails", "getJourney", `Error getting journeys ${err}`, true);
     } finally {

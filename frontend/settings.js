@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('tankVolume').value = user.tankVolume ?? "";
             document.getElementById('fuelCost').value = user.defFuelCost ?? "";
             document.getElementById('gallon-select').value = user.gallon ?? "UK";
+            document.getElementById('fuel-select').value = user.fuelType ?? "Petrol"
             document.getElementById('font-select').value = user.userFont ?? "Lexend";
             document.getElementById('currency-select').value = user.currency ?? "£";
 
@@ -95,6 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const fuelCost = Number(document.getElementById('fuelCost').value);
         let gallon = document.getElementById('gallon-select').value.toUpperCase();
         if (!gallon || gallon.trim() === "") gallon = "UK";
+        const fuelType = document.getElementById('fuelType').value || 'Petrol';
         const userFont = document.getElementById('font-select').value || "Lexend";
         const currency = document.getElementById('currency-select').value || "£";
         const newPassword = document.getElementById('new-password').value || "";
@@ -104,6 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             tankVolume,
             defFuelCost: fuelCost,
             gallon,
+            fuelType,
             userFont,
             currency,
         };
@@ -124,6 +127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             localStorage.setItem('tankVolume', tankVolume.toString());
             localStorage.setItem('fuelCost', fuelCost.toString());
             localStorage.setItem('gallon', gallon);
+            localStorage.setItem('fuelType', fuelType.toString());
             localStorage.setItem('userFont', userFont);
             localStorage.setItem('userFont', userFont);
             localStorage.setItem('currency', currency);

@@ -23,6 +23,12 @@ async function getStats(username, start, end) {
         const formattedTime = data.totalTime > 60 ? data.totalTime / 60 : data.totalTime;
         const timeUnit = data.totalTime > 60 ? "Hours" : "Minutes";
 
+        // Calculate Consumption
+        const fuelType = localStorage.getItem('fuelType');
+        let gallon = localStorage.getItem('gallon');
+        const lpkm = (gallon === 'UK' ? 282.48:235.21)/data.avgMpg
+        const kWh = lpkm * (fuelType === 'petrol' ? 9.5 : 10.7) * (fuelType === 'petrol' ? 0.25 : 0.3)
+
         await SessionMaintenance.logBook("fullStats", "getStats", `Full Stats retrieved: ${JSON.stringify(data, null, 2)}`);
 
         // Populate UI with Data
@@ -38,6 +44,9 @@ async function getStats(username, start, end) {
         document.getElementById('avgFuelPrice').textContent = `${currency}${data.avgFuelPrice.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}`;
         document.getElementById('avgTemp').textContent = data.avgTemp.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
         document.getElementById('avgTimeDriven').textContent = data.avgTimeDriven.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('avgLpkm').textContent = lpkm.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('avgKwh').textContent = kWh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
     } catch (err) {
         await SessionMaintenance.logBook("fullStats", "getStats", `Error fetching stats: ${err}`, true);
         alert("Failed to load stats");

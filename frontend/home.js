@@ -20,6 +20,12 @@ async function loadSummary(username) {
         const formattedTime = summary.totalTime > 60 ? summary.totalTime / 60 : summary.totalTime;
         const timeUnit = summary.totalTime > 60 ? "Hours" : "Minutes";
 
+        // Calculate Consumption
+        const fuelType = localStorage.getItem('fuelType');
+        let gallon = localStorage.getItem('gallon');
+        const lpkm = (gallon === 'UK' ? 282.48:235.21)/summary.avgMpg
+        const kWh = lpkm * (fuelType === 'petrol' ? 9.5 : 10.7) * (fuelType === 'petrol' ? 0.25 : 0.3)
+
         // Total Miles
         document.getElementById('totalMiles').textContent = summary.totalMiles.toLocaleString(undefined, {
             minimumFractionDigits: 1,
@@ -42,6 +48,18 @@ async function loadSummary(username) {
         });
         // Average MPG
         document.getElementById('avgMpg').textContent = summary.avgMpg.toLocaleString(undefined, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+        });
+
+        // Average L/100km
+        document.getElementById('avgLpkm').textContent = lpkm.toLocaleString(undefined, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+        });
+
+        // Average kWh/100km
+        document.getElementById('avgKwh').textContent = kWh.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         });
