@@ -77,7 +77,7 @@ async function getJourneys(journeyId) {
         document.getElementById("percOfTank").textContent = journey.percOfTank ? `${formatNumber(journey.percOfTank * 100, 2)} %` : "0 %";
         document.getElementById("lpkm").textContent = lpkm ? `${formatNumber(lpkm,2)}` : "0";
         document.getElementById("kWh").textContent = kWh ? `${formatNumber(kWh, 2)}` : "0";
-        document.getElementById("kWhTotal").textContent = kWhTotal ? `${formatNumber(kWh, 2)}` : "0";
+        document.getElementById("kWhTotal").textContent = kWhTotal ? `${formatNumber(kWhTotal, 2)}` : "0";
 
     } catch (err) {
         await SessionMaintenance.logBook("journeyDetails", "getJourney", `Error getting journeys ${err}`, true);
