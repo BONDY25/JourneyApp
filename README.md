@@ -20,8 +20,6 @@ As of right now, both the MongoDB atlas and Render web hosting services I used a
     * This means adding fuel type to user settings
 * Add Budget Tracking Feature
 * Expand insights into Distance, Time and consuption sub headings and add more interesting facts:
-    * Olympic Pools of fuel used
-    * Distance to the moon
     * percentage of time driving since first journey
     * Condition/percentage of times it was wet
 * Add user setting for Speed unit (MPH, KM/H)
