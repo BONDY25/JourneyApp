@@ -58,6 +58,7 @@ async function getJourneys(journeyId) {
         const timeUnit = journey.timeDriven > 60 ? "Hours" : "Minutes";
         const lpkm = SessionMaintenance.calculateConsumption(journey.mpg);
         const kWh = SessionMaintenance.calculateConsumption(journey.mpg, 'kwhper100');
+        const kWhTotal = SessionMaintenance.calculateConsumption(journey.avgMpg, 'kwhper100', 'Total');
 
         await SessionMaintenance.logBook("journeyDetails", "getJourney", `journey Data: ${JSON.stringify(journey)}`);
 
@@ -65,7 +66,7 @@ async function getJourneys(journeyId) {
         document.getElementById("DateTime").textContent = formatDateTime(journey.dateTime);
         document.getElementById("description").textContent = journey.description || "-";
         document.getElementById("distance").textContent = journey.distance ? `${formatNumber(journey.distance, 1)} mi` : "0 mi";
-        document.getElementById("timeDriven").textContent = `${formatNumber(formattedTime, 2)} ${timeUnit}` || "-";
+        document.getElementById("timeDriven").textContent = `${formatNumber(formattedTime, (timeUnit === "Minutes" ? 0 : 2))} ${timeUnit}` || "-";
         document.getElementById("fuelUsedL").textContent = journey.fuelUsedL ? `${formatNumber(journey.fuelUsedL, 2)} L` : "0 L";
         document.getElementById("cost").textContent = journey.totalCost ? `${currency}${formatNumber(journey.totalCost, 2)}` : "£0.00";
         document.getElementById("mpg").textContent = journey.mpg ? `${formatNumber(journey.mpg, 1)}` : "0 mpg";
@@ -76,6 +77,8 @@ async function getJourneys(journeyId) {
         document.getElementById("percOfTank").textContent = journey.percOfTank ? `${formatNumber(journey.percOfTank * 100, 2)} %` : "0 %";
         document.getElementById("lpkm").textContent = lpkm ? `${formatNumber(lpkm,2)}` : "0";
         document.getElementById("kWh").textContent = kWh ? `${formatNumber(kWh, 2)}` : "0";
+        document.getElementById("kWhTotal").textContent = kWhTotal ? `${formatNumber(kWh, 2)}` : "0";
+
     } catch (err) {
         await SessionMaintenance.logBook("journeyDetails", "getJourney", `Error getting journeys ${err}`, true);
     } finally {

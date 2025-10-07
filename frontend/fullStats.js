@@ -24,6 +24,7 @@ async function getStats(username, start, end) {
         const timeUnit = data.totalTime > 60 ? "Hours" : "Minutes";
         const lpkm = SessionMaintenance.calculateConsumption(data.avgMpg);
         const kWh = SessionMaintenance.calculateConsumption(data.avgMpg, 'kwhper100');
+        const kWhTotal = SessionMaintenance.calculateConsumption(data.avgMpg, 'kwhper100', 'Total');
 
         await SessionMaintenance.logBook("fullStats", "getStats", `Full Stats retrieved: ${JSON.stringify(data, null, 2)}`);
 
@@ -42,6 +43,7 @@ async function getStats(username, start, end) {
         document.getElementById('avgTimeDriven').textContent = data.avgTimeDriven.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         document.getElementById('avgLpkm').textContent = lpkm.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         document.getElementById('avgKwh').textContent = kWh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('avgKwhTotal').textContent = kWhTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     } catch (err) {
         await SessionMaintenance.logBook("fullStats", "getStats", `Error fetching stats: ${err}`, true);

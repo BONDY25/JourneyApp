@@ -98,7 +98,7 @@ export default class SessionMaintenance {
     }
 
     // Calculate Consumption -------------------------------------------------------------------------
-    static calculateConsumption(mpg, mode = "lper100") {
+    static calculateConsumption(mpg, mode = "lper100", fig = 'Useful') {
         if(!mpg || mpg <=0) return 0;
 
         const fuelType = localStorage.getItem("fuelType") || 'Petrol';
@@ -115,7 +115,7 @@ export default class SessionMaintenance {
         const lp100 = conv / mpg;
 
         if (mode === "kwhper100") {
-            return lp100 * kWhperL * eff;
+            return lp100 * kWhperL * (fig === "Total" ? 1 : eff);
         }
         return lp100;
     }

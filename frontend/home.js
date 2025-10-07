@@ -21,7 +21,7 @@ async function loadSummary(username) {
         const timeUnit = summary.totalTime > 60 ? "Hours" : "Minutes";
         const lpkm = SessionMaintenance.calculateConsumption(summary.avgMpg);
         const kWh = SessionMaintenance.calculateConsumption(summary.avgMpg, 'kwhper100');
-
+        const kWhTotal = SessionMaintenance.calculateConsumption(summary.avgMpg, 'kwhper100', 'Total');
 
         // Total Miles
         document.getElementById('totalMiles').textContent = summary.totalMiles.toLocaleString(undefined, {
@@ -55,8 +55,14 @@ async function loadSummary(username) {
             maximumFractionDigits: 1
         });
 
-        // Average kWh/100km
+        // Average kWh/100km Useful
         document.getElementById('avgKwh').textContent = kWh.toLocaleString(undefined, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+        });
+
+        // Average kWh/100km Total
+        document.getElementById('avgKwhTotal').textContent = kWhTotal.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         });
