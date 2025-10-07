@@ -58,7 +58,7 @@ async function getJourneys(journeyId) {
         const timeUnit = journey.timeDriven > 60 ? "Hours" : "Minutes";
         const lpkm = SessionMaintenance.calculateConsumption(journey.mpg);
         const kWh = SessionMaintenance.calculateConsumption(journey.mpg, 'kwhper100');
-        const kWhTotal = SessionMaintenance.calculateConsumption(journey.avgMpg, 'kwhper100', 'Total');
+        const kWhTotal = SessionMaintenance.calculateConsumption(journey.mpg, 'kwhper100', 'Total');
 
         await SessionMaintenance.logBook("journeyDetails", "getJourney", `journey Data: ${JSON.stringify(journey)}`);
 
