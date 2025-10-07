@@ -13,6 +13,8 @@ As of right now, both the MongoDB atlas and Render web hosting services I used a
 
 ## Current "To Do"
 
+* Add L/100km stats `(L/100km = (US:235.21|UK:282.48)/MPG)`
+* Add energy consumption in kWh/100km `(kWh/100km = L/100km X kWh/L(Petrol:9.5|Diesel:10.7) X efficiency (Petrol:25%|Diesel:30%))`
 * Add Budget Tracking Feature
 * Expand insights into Distance, Time and consuption sub headings and add more interesting facts:
     * Olympic Pools of fuel used
