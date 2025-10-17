@@ -6,6 +6,11 @@ import SessionMaintenance from "./sessionMaintenance.js";
 import {API_BASE_URL} from "./config.js";
 
 const fontSelect = document.getElementById('font-select');
+const budgetToggle = document.getElementById('budget-toggle');
+const budgetFields = document.getElementById('budgetFields');
+const rangeSelect = document.getElementById('budget-range');
+const resetDayContainer = document.getElementById('resetDayContainer');
+const resetDaySelect = document.getElementById('reset-day');
 
 // ==========================================================================================================
 // -- Operational Functions --
@@ -32,6 +37,35 @@ async function getTotalJourneys(username) {
     }
 }
 
+function updateResetDayOptions() {
+    const range = rangeSelect.value;
+    resetDaySelect.innerHTML = ''; // Clear previous options
+
+    if (range === 'Weekly') {
+        // Weekly: Monday-Sunday
+        const days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        days.forEach((day, index) => {
+            const option = document.createElement('option');
+            option.value = index + 1; // Optional: store as 1–7
+            option.textContent = day;
+            resetDaySelect.appendChild(option);
+        });
+        resetDayContainer.style.display = 'block';
+    } else if (range === 'Monthly') {
+        // Monthly: 1–28
+        for (let i = 1; i <= 28; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = i;
+            resetDaySelect.appendChild(option);
+        }
+        resetDayContainer.style.display = 'block';
+    } else {
+        // Hide for other ranges
+        resetDayContainer.style.display = 'none';
+    }
+}
+
 // ==========================================================================================================
 // -- Event Listeners --
 // ==========================================================================================================
@@ -42,6 +76,17 @@ fontSelect.addEventListener('change', (e) => {
         '--default-font',
         `${e.target.value}, sans-serif`
     );
+});
+
+// Budget Tracking ------------------------------------------------------------
+budgetToggle.addEventListener('change', () => {
+    budgetFields.style.display = budgetToggle.checked ? 'block' : 'none';
+    if (budgetToggle.checked) updateResetDayOptions();
+});
+
+// Range Select ---------------------------------------------------------------
+rangeSelect.addEventListener('change', () => {
+    if (budgetToggle.checked) updateResetDayOptions();
 });
 
 // window loaded event listener ------------------------------------------------------------------------
@@ -78,6 +123,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('fuel-select').value = user.fuelType ?? "Petrol"
             document.getElementById('font-select').value = user.userFont ?? "Lexend";
             document.getElementById('currency-select').value = user.currency ?? "£";
+            document.getElementById('budget-toggle').checked = user.budgetEnabled ?? false;
+            document.getElementById('budget-range').value = user.budgetRange ?? "Monthly";
+            document.getElementById('budget-amount').value = user.budgetAmount ?? 0;
 
         } else {
             await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Failed fetching user settings", true);
@@ -100,6 +148,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const userFont = document.getElementById('font-select').value || "Lexend";
         const currency = document.getElementById('currency-select').value || "£";
         const newPassword = document.getElementById('new-password').value || "";
+        const budgetEnabled = document.getElementById('budget-toggle').checked || false;
+        const budgetRange = document.getElementById('budget-range').value || "Monthly";
+        const budgetAmount = Number(document.getElementById('budget-amount').value) || 0;
+        const resetDay = document.getElementById('reset-day').value || "1";
 
         // Build Payload
         const payLoad = {
@@ -109,6 +161,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             fuelType: fuelType,
             userFont,
             currency,
+            budgetEnabled,
+            budgetRange,
+            budgetAmount,
+            resetDay,
         };
 
         if (newPassword && newPassword.trim() !== "") {
@@ -131,6 +187,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             localStorage.setItem('userFont', userFont);
             localStorage.setItem('userFont', userFont);
             localStorage.setItem('currency', currency);
+            localStorage.setItem('budgetEnabled', JSON.stringify(budgetEnabled));
+            localStorage.setItem('budgetRange', budgetRange);
+            localStorage.setItem('budgetAmount', budgetAmount.toString());
+            localStorage.setItem('resetDay', resetDay);
 
             if (res.ok) {
                 await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", `Settings saved successfully {${JSON.stringify(payLoad)}}`);

@@ -155,18 +155,18 @@ async function startServer() {
 
             try {
                 const summary = await db.collection('journeys').aggregate([
-                    { $match: { user: username } },
+                    {$match: {user: username}},
                     {
                         $group: {
                             _id: null,
-                            totalMiles: { $sum: { $toDouble: "$distance" } },
-                            totalTime: { $sum: { $toDouble: "$timeDriven" } },
-                            totalFuel: { $sum: { $toDouble: "$fuelUsedL" } },
-                            totalCost: { $sum: { $toDouble: "$totalCost" } },
-                            avgMpg: { $avg: { $toDouble: "$mpg" } },
-                            longestDistance: { $max: { $toDouble: "$distance" } },
-                            longestTime: { $max: { $toDouble: "$timeDriven" } },
-                            bestMpg: { $max: { $toDouble: "$mpg" } }
+                            totalMiles: {$sum: {$toDouble: "$distance"}},
+                            totalTime: {$sum: {$toDouble: "$timeDriven"}},
+                            totalFuel: {$sum: {$toDouble: "$fuelUsedL"}},
+                            totalCost: {$sum: {$toDouble: "$totalCost"}},
+                            avgMpg: {$avg: {$toDouble: "$mpg"}},
+                            longestDistance: {$max: {$toDouble: "$distance"}},
+                            longestTime: {$max: {$toDouble: "$timeDriven"}},
+                            bestMpg: {$max: {$toDouble: "$mpg"}}
                         }
                     }
                 ]).toArray();
@@ -255,7 +255,7 @@ async function startServer() {
                             twentyEight: {
                                 $sum: {$cond: [{$gte: ["$parsedDate", twentyEightDaysAgo]}, "$totalCost", 0]}
                             },
-                            ninty:{
+                            ninty: {
                                 $sum: {$cond: [{$gte: ["$parsedDate", nintyDaysAgo]}, "$totalCost", 0]}
                             },
                             sixMonth: {
@@ -448,11 +448,34 @@ async function startServer() {
         // Save User Endpoint -----------------------------------------------------------------
         app.put('/api/saveUsers/:username', async (req, res) => {
             const username = req.params.username.toLowerCase();
-            const {tankVolume, defFuelCost, gallon, fuelType, userFont, currency, newPassword} = req.body;
+            const {
+                tankVolume,
+                defFuelCost,
+                gallon,
+                fuelType,
+                userFont,
+                currency,
+                budgetEnabled,
+                budgetRange,
+                budgetAmount,
+                resetDay,
+                newPassword
+            } = req.body;
 
             try {
                 const db = client.db('journeyAppDb');
-                const updateFields = {tankVolume, defFuelCost, gallon, fuelType, userFont, currency};
+                const updateFields = {
+                    tankVolume,
+                    defFuelCost,
+                    gallon,
+                    fuelType,
+                    userFont,
+                    currency,
+                    budgetEnabled,
+                    budgetRange,
+                    budgetAmount,
+                    resetDay
+                };
 
                 // Add Password if provided
                 if (newPassword && newPassword.trim() !== "") {

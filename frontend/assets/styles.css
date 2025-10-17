@@ -326,3 +326,117 @@ form input, form select, form button {
     color: white;
 }
 
+/* --------------------------------------------------------------------------- */
+/* Budget Settings */
+/* --------------------------------------------------------------------------- */
+
+/* --- Budget Settings --- */
+#budgetSettings {
+    background: var(--card-bg, #1e1e1e);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-top: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+#budgetSettings input[type="number"],
+#budgetSettings select {
+    width: 100%;
+    box-sizing: border-box; /* <-- add this line */
+    padding: 8px 10px;
+    margin-top: 4px;
+    border: 1px solid #555;
+    border-radius: 8px;
+    background: #2a2a2a;
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+#budgetFields {
+    display: none;
+    transition: all 0.3s ease;
+}
+#budgetFields.active {
+    display: block;
+}
+
+#budgetFields {
+    display: none;
+}
+
+#resetDayContainer {
+    display: none;
+}
+
+#budgetSettings h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    color: var(--accent-color, #ffd966);
+}
+
+/* Layout the fields neatly */
+#budgetSettings label {
+    display: block;
+    margin-top: 10px;
+    font-weight: 500;
+    color: var(--accent-color, #ffd966);
+}
+
+#budgetSettings input[type="number"],
+#budgetSettings select {
+    width: 100%;
+    padding: 8px 10px;
+    margin-top: 4px;
+    border: 1px solid #555;
+    border-radius: 8px;
+    background: #2a2a2a;
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+/* Toggle switch styling (optional) */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 46px;
+    height: 24px;
+    margin-top: 8px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0;
+    right: 0; bottom: 0;
+    background-color: #555;
+    transition: 0.3s;
+    border-radius: 24px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+input:checked + .slider {
+    background-color: var(--accent-color, #ffd966);
+}
+
+input:checked + .slider:before {
+    transform: translateX(22px);
+}
+
+

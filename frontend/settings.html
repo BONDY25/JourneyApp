@@ -68,6 +68,40 @@
                <option value="Light">Light</option>
              </select>
            -->
+
+            <!-- Budget Settings -->
+            <div id="budgetSettings" class="stats">
+                <h3>Budget Tracking</h3>
+
+                <!-- Budget Toggle -->
+                <label for="budget-toggle" class="switch">
+                    <input type="checkbox" id="budget-toggle"/>
+                    <span class="slider round"></span>
+                </label>
+
+                <!-- Budget Fields -->
+                <div id="budgetFields">
+                    <label for="budget-range">Budget Range:</label>
+                    <select id="budget-range">
+                        <option value="Daily">Daily</option>
+                        <option value="Weekly">Weekly</option>
+                        <option value="Monthly">Monthly</option>
+                        <option value="Quarterly">Quarterly</option>
+                        <option value="Yearly">Yearly</option>
+                    </select>
+
+                    <label for="budget-amount">Budget Amount:</label>
+                    <input type="number" id="budget-amount" step="0.001" min="0"/>
+
+                    <div id="resetDayContainer">
+                        <label for="reset-day">Reset Day:</label>
+                        <select id="reset-day"></select>
+                    </div>
+                </div>
+
+            </div>
+
+
             <button type="submit" class="button">Save</button>
         </form>
     </div>
