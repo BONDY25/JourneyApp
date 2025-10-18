@@ -126,6 +126,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('budget-toggle').checked = user.budgetEnabled ?? false;
             document.getElementById('budget-range').value = user.budgetRange ?? "Monthly";
             document.getElementById('budget-amount').value = user.budgetAmount ?? 0;
+            document.getElementById('reset-day').value = user.reset ?? "";
 
         } else {
             await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Failed fetching user settings", true);
@@ -134,6 +135,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", `Failed fetching user settings: ${err}`, true);
     } finally {
         SessionMaintenance.hideLoader();
+
+        budgetFields.style.display = budgetToggle.checked ? 'block' : 'none';
+        if (budgetToggle.checked) updateResetDayOptions();
+
+        if (budgetToggle.checked) updateResetDayOptions();
     }
 
     // Handle save function -----------------------------------------------------------------------------------------

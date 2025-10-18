@@ -6,17 +6,22 @@
     <title>Journey App - Home</title>
     <link href="assets/styles.css" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="assets/JourneyApp-logo-1.png"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 </head>
 <body>
 <div id="loader" class="loader-overlay">
     <div class="spinner"></div>
     <h1 class="loader-text">Loading...</h1>
 </div>
-<div id="app" class="app" style = "height:1800px">
+<div id="app" class="app" style="height:1800px">
     <h1>Journey App</h1>
-    <hr>
     <div id="stats">
+        <div id="budgetCard" class="stats" style="display: none">
+            <h3>Budget</h3>
+            <canvas id="budgetChart" width="400" height="200"></canvas>
+            <p id="budgetSummary" class="summary-text"></p>
+        </div>
+        <hr>
         <div id="sum-stats" class="stats numbers">
             <h3>Summary</h3>
             <p>Total Miles: <span id="totalMiles">0</span></p>
@@ -58,7 +63,7 @@
             <h4>Time</h4>
             <p>Years Driving: <span id="yearsDriven">0</span></p>
             <p>Longest Journey Time: <span id="longestTime">0</span></p>
-            <P>Times Bohemian Rhapsody by Queen could have played whilst driving: <span id = "bohemPlayed">0</span></P>
+            <P>Times Bohemian Rhapsody by Queen could have played whilst driving: <span id="bohemPlayed">0</span></P>
 
             <h4>Consumption</h4>
             <p>Best Journey: <span id="bestJourney">0</span></p>
@@ -90,6 +95,7 @@
     </a>
 </div>
 <!-- Link to the JavaScript file -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script type="module" src="home.js"></script>
 </body>
 </html>

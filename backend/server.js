@@ -593,6 +593,87 @@ async function startServer() {
             }
         });
 
+        // Get Budget Summary ------------------------------------------------------------------
+        app.get('/api/budget/:username',async(req,res)=>{
+            const username = req.params.username.toLowerCase();
+            const db= client.db('journeyAppDb');
+
+            try{
+                // Fetch user's budget Settings
+                const user = await db.collection('users').findOne({username});
+                if (!user || !user.budgetEnabled) {
+                    return res.json({enabled: false});
+                }
+
+                const {budgetRange, budgetAmount, resetDay} = user;
+
+                // determine date range for the current budget period
+                const now = new Date();
+                let startDate;
+
+                switch (budgetRange) {
+                    case "Daily":
+                        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                        break;
+                    case 'Weekly':
+                        const today = now.getDay(); // 0 = Sunday
+                        const target = parseInt(resetDay) || 1; // Default Monday
+                        const diff = (today < target ? 7 : 0) + today - target;
+                        startDate = new Date(now);
+                        startDate.setDate(now.getDate() - diff);
+                        break;
+                    case 'Monthly':
+                        startDate = new Date(now.getFullYear(), now.getMonth(), parseInt(resetDay) || 1);
+                        break;
+                    case "Quarterly":
+                        const quarter = Math.floor(now.getMonth() / 3);
+                        startDate = new Date(now.getFullYear(), quarter * 3, 1);
+                        break;
+                    case 'Yearly':
+                        startDate = new Date(now.getFullYear(), 0, 1);
+                        break;
+
+                }
+
+                // Aggregate journey cost from this date
+                const journeys = await db.collection('journeys').aggregate([
+                    {
+                        $addFields: {
+                            dateAsDate: {
+                                $cond: [
+                                    { $eq: [{ $type: "$dateTime" }, "string"] },
+                                    { $dateFromString: { dateString: "$dateTime" } },
+                                    "$dateTime"
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        $match: {
+                            user: username,
+                            dateAsDate: { $gte: startDate }
+                        }
+                    },
+                    {
+                        $group: { _id: null, totalCost: { $sum: "$totalCost" } }
+                    }
+                ]).toArray();
+
+                const totalCost = journeys[0]?.totalCost || 0;
+                const overUnder = budgetAmount - totalCost;
+
+                res.json({
+                    enabled: true,
+                    period: budgetRange,
+                    cost: totalCost,
+                    budget: budgetAmount, overUnder,
+                });
+            } catch (err) {
+                console.error("Error calculating budget:", err);
+                res.status(500).send("Error calculating budget");
+            }
+        });
+
         app.listen(3000, () => {
             console.log('Server running at http://localhost:3000');
         });
