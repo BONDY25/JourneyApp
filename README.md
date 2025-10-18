@@ -13,7 +13,6 @@ As of right now, both the MongoDB atlas and Render web hosting services I used a
 
 ## Current "To Do"
 
-* Add Budget Tracking Feature
 * Expand insights into Distance, Time and consuption sub headings and add more interesting facts:
     * percentage of time driving since first journey
     * Condition/percentage of times it was wet
