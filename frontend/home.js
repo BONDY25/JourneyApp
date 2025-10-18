@@ -265,8 +265,7 @@ async function loadBudget(username) {
                 ? `${currency}${data.overUnder.toFixed(2)} under budget`
                 : `${currency}${Math.abs(data.overUnder).toFixed(2)} over budget`;
 
-        let newPeriod
-
+        let newPeriod;
         switch(data.period.toLowerCase()){
             case 'monthly': newPeriod = 'month'; break;
             case 'yearly': newPeriod = 'year'; break;
@@ -276,52 +275,77 @@ async function loadBudget(username) {
 
         summary.textContent = `This ${newPeriod}: ${currency}${data.cost.toFixed(2)} of ${currency}${data.budget.toFixed(2)} → ${diffText}.`;
 
-        // Render chart (simple line for now)
+        let cumulativeCosts = [];
+        let labels = [];
         const ctx = document.getElementById('budgetChart').getContext('2d');
+
+        if (data.journeys && data.journeys.length > 0) {
+            // Sort journeys just in case
+            const sorted = data.journeys.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            // Prepare labels and cumulative cost
+            labels = sorted.map(j => {
+                const d = new Date(j.date);
+                const day = d.getDate();
+                const month = d.getMonth() + 1; // months are 0-indexed
+                return `${day}/${month}`;
+            });
+
+
+            let cumulative = 0;
+            for (let j of sorted) {
+                cumulative += j.cost;
+                cumulativeCosts.push(cumulative);
+            }
+        } else {
+            // No journeys yet → show a flat line from 0 to 0
+            labels = ['Start', 'Now'];
+            cumulativeCosts = [0, 0];
+        }
+
         new Chart(ctx, {
             type: 'line',
             data: {
-                labels: ['Start', 'Now'],
+                labels,
                 datasets: [
                     {
                         label: 'Budget',
-                        data: [data.budget, data.budget],
-                        borderColor: '#999',
-                        borderDash: [5, 5],
+                        data: Array(labels.length).fill(data.budget),
+                        borderColor: '#00ffea',
                         borderWidth: 1.5,
-                        fill: false
+                        fill: false,
+                        pointRadius: 0,
                     },
                     {
                         label: 'Cost',
-                        data: [0, data.cost],
-                        borderColor: data.overUnder >= 0 ? '#4caf50' : '#f44336',
+                        data: cumulativeCosts,
+                        borderColor: data.overUnder >= 0 ? '#00ff08' : '#ff1200',
                         borderWidth: 2,
-                        pointBackgroundColor: '#fff',
-                        pointRadius: 4,
-                        fill: false
+                        pointBackgroundColor: '#b4b4b4',
+                        pointRadius: 0,
+                        pointHoverRadius: 4,
+                        fill: true,
+                        fillOpacity: 0.8,
+                        fillColor: data.overUnder >= 0 ? '#009f05' : '#8e0b01',
+
                     }
                 ]
             },
             options: {
                 responsive: true,
-                layout: {
-                    padding: 8
-                },
+                layout: { padding: 8 },
                 plugins: {
                     legend: {
                         display: true,
                         labels: {
                             color: '#222',
-                            font: {
-                                family: 'inherit',
-                                size: 12
-                            },
+                            font: { family: 'inherit', size: 12 },
                             boxWidth: 14,
                             usePointStyle: true
                         }
                     },
                     tooltip: {
-                        backgroundColor: '#fff',
+                        backgroundColor: '#ffffff',
                         titleColor: '#000',
                         bodyColor: '#000',
                         borderColor: '#ccc',
@@ -331,33 +355,25 @@ async function loadBudget(username) {
                 scales: {
                     x: {
                         ticks: {
-                            color: '#333',
-                            font: { family: 'inherit' }
+                            color: '#000000',
+                            font: { family: 'inherit' },
+                            display: data.period.toLowerCase() === 'monthly' // only show labels for monthly
                         },
-                        grid: {
-                            color: 'rgba(0,0,0,0.05)'
-                        }
+                        grid: { color: 'rgba(0,0,0,0.05)' }
                     },
                     y: {
                         beginAtZero: true,
-                        ticks: {
-                            color: '#333',
-                            font: { family: 'inherit' }
-                        },
-                        grid: {
-                            color: 'rgba(0,0,0,0.05)'
-                        }
+                        ticks: { color: '#000000', font: { family: 'inherit' } },
+                        grid: { color: 'rgba(0,0,0,0.05)' }
                     }
                 }
             }
         });
 
-    } catch
-        (err)
-        {
-            await SessionMaintenance.logBook("home", "loadBudget", `Error fetching budget: ${err}`, true);
-            console.error("Error loading budget data:", err);
-        }
+    } catch (err) {
+        await SessionMaintenance.logBook("home", "loadBudget", `Error fetching budget: ${err}`, true);
+        console.error("Error loading budget data:", err);
+    }
 }
 
 // ==========================================================================================================

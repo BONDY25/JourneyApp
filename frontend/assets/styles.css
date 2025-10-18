@@ -444,8 +444,8 @@ input:checked + .slider:before {
 /* --------------------------------------------------------------------------- */
 
 #budgetCard {
-    background: var(--accent-color);
-    color: #222;
+    background: var(--accent-color, #ffd966);
+    color: #000000;
     border-radius: 12px;
     padding: 16px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.1);
@@ -463,11 +463,14 @@ input:checked + .slider:before {
     margin-top: 12px;
     text-align: left;
     font-size: 0.95rem;
+    border-radius: 6px;
+    padding: 4px 6px;
+    background-color: var(--stat-color-2);
     color: var(--card-text);
 }
 
 #budgetChart {
-    background-color: #fff;
+    background-color: var(--stat-color-2);
     border-radius: 8px;
 }
 

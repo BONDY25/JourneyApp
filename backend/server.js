@@ -594,20 +594,20 @@ async function startServer() {
         });
 
         // Get Budget Summary ------------------------------------------------------------------
-        app.get('/api/budget/:username',async(req,res)=>{
+        app.get('/api/budget/:username', async (req, res) => {
             const username = req.params.username.toLowerCase();
-            const db= client.db('journeyAppDb');
+            const db = client.db('journeyAppDb');
 
-            try{
-                // Fetch user's budget Settings
-                const user = await db.collection('users').findOne({username});
+            try {
+                // Fetch user's budget settings
+                const user = await db.collection('users').findOne({ username });
                 if (!user || !user.budgetEnabled) {
-                    return res.json({enabled: false});
+                    return res.json({ enabled: false });
                 }
 
-                const {budgetRange, budgetAmount, resetDay} = user;
+                const { budgetRange, budgetAmount, resetDay } = user;
 
-                // determine date range for the current budget period
+                // Determine start date for current budget period
                 const now = new Date();
                 let startDate;
 
@@ -615,27 +615,28 @@ async function startServer() {
                     case "Daily":
                         startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                         break;
-                    case 'Weekly':
+                    case "Weekly":
                         const today = now.getDay(); // 0 = Sunday
                         const target = parseInt(resetDay) || 1; // Default Monday
                         const diff = (today < target ? 7 : 0) + today - target;
                         startDate = new Date(now);
                         startDate.setDate(now.getDate() - diff);
                         break;
-                    case 'Monthly':
+                    case "Monthly":
                         startDate = new Date(now.getFullYear(), now.getMonth(), parseInt(resetDay) || 1);
                         break;
                     case "Quarterly":
                         const quarter = Math.floor(now.getMonth() / 3);
                         startDate = new Date(now.getFullYear(), quarter * 3, 1);
                         break;
-                    case 'Yearly':
+                    case "Yearly":
                         startDate = new Date(now.getFullYear(), 0, 1);
                         break;
-
+                    default:
+                        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
                 }
 
-                // Aggregate journey cost from this date
+                // Fetch all journeys in period and normalize dates
                 const journeys = await db.collection('journeys').aggregate([
                     {
                         $addFields: {
@@ -654,20 +655,29 @@ async function startServer() {
                             dateAsDate: { $gte: startDate }
                         }
                     },
+                    { $sort: { dateAsDate: 1 } }, // sort chronologically
                     {
-                        $group: { _id: null, totalCost: { $sum: "$totalCost" } }
+                        $project: {
+                            _id: 0,
+                            date: "$dateAsDate",
+                            cost: "$totalCost"
+                        }
                     }
                 ]).toArray();
 
-                const totalCost = journeys[0]?.totalCost || 0;
+                // Calculate cumulative total cost and over/under
+                const totalCost = journeys.reduce((sum, j) => sum + j.cost, 0);
                 const overUnder = budgetAmount - totalCost;
 
                 res.json({
                     enabled: true,
                     period: budgetRange,
+                    budget: budgetAmount,
                     cost: totalCost,
-                    budget: budgetAmount, overUnder,
+                    overUnder,
+                    journeys // array of journeys with date and cost
                 });
+
             } catch (err) {
                 console.error("Error calculating budget:", err);
                 res.status(500).send("Error calculating budget");
