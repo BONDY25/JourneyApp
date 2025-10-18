@@ -244,6 +244,7 @@ async function load28DaySum(username) {
 // Load Budget ------------------------------------------------------------------------------------
 async function loadBudget(username) {
     try {
+        SessionMaintenance.showLoader();
         const res = await fetch(`${API_BASE_URL}/api/budget/${username}`);
         const data = await res.json();
 
@@ -373,6 +374,9 @@ async function loadBudget(username) {
     } catch (err) {
         await SessionMaintenance.logBook("home", "loadBudget", `Error fetching budget: ${err}`, true);
         console.error("Error loading budget data:", err);
+    }
+    finally {
+        SessionMaintenance.hideLoader();
     }
 }
 
