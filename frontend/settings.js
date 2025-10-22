@@ -37,6 +37,7 @@ async function getTotalJourneys(username) {
     }
 }
 
+// Update UI for reset day ----------------------------------------------------------
 function updateResetDayOptions() {
     const range = rangeSelect.value;
     resetDaySelect.innerHTML = ''; // Clear previous options
@@ -159,6 +160,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         const budgetAmount = Number(document.getElementById('budget-amount').value) || 0;
         const resetDay = document.getElementById('reset-day').value || "1";
 
+        // Check if budget amount is valid
+        if (budgetEnabled && budgetAmount ?? 0 === 0)
+        {
+            alert('Budget Amount must be greater than 0');
+            return;
+        }
+
         // Build Payload
         const payLoad = {
             tankVolume,
@@ -173,6 +181,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             resetDay,
         };
 
+        // Handle password
         if (newPassword && newPassword.trim() !== "") {
             payLoad.newPassword = newPassword;
         }

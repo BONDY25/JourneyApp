@@ -250,22 +250,27 @@ async function loadBudget(username) {
 
         await SessionMaintenance.logBook("home", "loadBudget", `Budget retrieved: ${JSON.stringify(data, null, 2)}`);
 
+        // Return if budget not enabled
         if (!data.enabled) {
             document.getElementById('budgetCard').style.display = 'none';
             return;
         }
 
+        // show budget card
         const card = document.getElementById('budgetCard');
         card.style.display = 'block';
 
+        // Start budget statement
         const summary = document.getElementById('budgetSummary');
         const currency = localStorage.getItem('currency') || "£";
 
+        // establish over/under
         const diffText =
             data.overUnder >= 0
                 ? `${currency}${data.overUnder.toFixed(2)} under budget`
                 : `${currency}${Math.abs(data.overUnder).toFixed(2)} over budget`;
 
+        // Get period
         let newPeriod;
         switch(data.period.toLowerCase()){
             case 'monthly': newPeriod = 'month'; break;
@@ -274,6 +279,7 @@ async function loadBudget(username) {
             case 'daily': newPeriod = 'day'; break;
         }
 
+        // display statement
         summary.textContent = `This ${newPeriod}: ${currency}${data.cost.toFixed(2)} of ${currency}${data.budget.toFixed(2)} → ${diffText}.`;
 
         let cumulativeCosts = [];
@@ -292,7 +298,6 @@ async function loadBudget(username) {
                 return `${day}/${month}`;
             });
 
-
             let cumulative = 0;
             for (let j of sorted) {
                 cumulative += j.cost;
@@ -304,12 +309,14 @@ async function loadBudget(username) {
             cumulativeCosts = [0, 0];
         }
 
+        // Construct chart
         new Chart(ctx, {
             type: 'line',
             data: {
                 labels,
                 datasets: [
                     {
+                        // Plot line for budget
                         label: 'Budget',
                         data: Array(labels.length).fill(data.budget),
                         borderColor: '#00ffea',
@@ -318,6 +325,7 @@ async function loadBudget(username) {
                         pointRadius: 0,
                     },
                     {
+                        // Plot line for costs
                         label: 'Cost',
                         data: cumulativeCosts,
                         borderColor: data.overUnder >= 0 ? '#00ff08' : '#ff1200',
@@ -370,7 +378,6 @@ async function loadBudget(username) {
                 }
             }
         });
-
     } catch (err) {
         await SessionMaintenance.logBook("home", "loadBudget", `Error fetching budget: ${err}`, true);
         console.error("Error loading budget data:", err);
@@ -400,6 +407,8 @@ window.addEventListener('DOMContentLoaded', async () => {
         window.location.href = "index.html";
         return;
     }
+
+    // Call load functions
     await loadCosts(username);
     await loadSummary(username);
     await load28DaySum(username);
