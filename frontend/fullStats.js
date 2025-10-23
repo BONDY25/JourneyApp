@@ -133,8 +133,8 @@ async function getGraph(username, start, end, xAxis, yAxis) {
                         {
                             label: `${yAxis} vs ${xAxis}`,
                             data: sorted.map(d => ({ x: d.x, y: d.y })),
-                            borderColor: '#000000',
-                            backgroundColor: '#000000',
+                            borderColor: '#d95000',
+                            backgroundColor: '#d95000',
                             opacity: 0.5,
                             pointRadius: 0.5,
                         }
