@@ -721,7 +721,7 @@ async function startServer() {
                 const journeys = await db.collection('journeys')
                     .find({
                         user: username,
-                        dateTime: {$get: startDate, $lte: endDate},
+                        dateTime: {$gte: startDate, $lte: endDate},
                     })
                     .project({
                         [xField]: 1,

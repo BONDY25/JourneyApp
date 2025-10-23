@@ -63,6 +63,8 @@ async function getGraph(username, start, end, xAxis, yAxis) {
     try {
         SessionMaintenance.showLoader();
 
+        await SessionMaintenance.logBook("fullStats", "getGraph", `Getting graph: (${start}, ${end}, ${xAxis}, ${yAxis})`);
+
         // Fetch data
         const res = await fetch(
             `${API_BASE_URL}/api/graph/${username}?start=${start}&end=${end}&xAxis=${xAxis}&yAxis=${yAxis}`
@@ -167,7 +169,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
 // Get Stats Button Click --------------------------------------------------------------------------
 getStatsBtn.addEventListener('click', async () => {
-    await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", `Get Stats button clicked ${displayType.value}`);
+    await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", `Get Stats button clicked (${displayType.value})`);
 
     // Declare Variables
     const username = localStorage.getItem('username').toLowerCase();
