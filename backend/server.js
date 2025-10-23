@@ -721,7 +721,12 @@ async function startServer() {
                 const journeys = await db.collection('journeys')
                     .find({
                         user: username,
-                        dateTime: {$gte: startDate, $lte: endDate},
+                        $expr: {
+                            $and: [
+                                { $gte: [ { $toDate: "$dateTime" }, startDate ] },
+                                { $lte: [ { $toDate: "$dateTime" }, endDate ] }
+                            ]
+                        }
                     })
                     .project({
                         [xField]: 1,
@@ -729,7 +734,7 @@ async function startServer() {
                         dateTime: 1,
                         _id: 0
                     })
-                    .sort({[xField]: 1})
+                    .sort({ [xField]: 1 })
                     .toArray();
 
                 // Format response as array of { x, y }
