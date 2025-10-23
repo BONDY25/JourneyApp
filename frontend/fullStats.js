@@ -76,7 +76,7 @@ async function getGraph(username, start, end, xAxis, yAxis) {
         await SessionMaintenance.logBook(
             "fullStats",
             "getGraph",
-            `Graph data retrieved (${start}, ${end}, ${xAxis}, ${yAxis})`
+            `Graph data retrieved: ${JSON.stringify(data, null, 2)})`
         );
 
         const graphStats = document.getElementById("graph-stats");
