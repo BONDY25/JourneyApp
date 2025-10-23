@@ -100,8 +100,7 @@ async function getGraph(username, start, end, xAxis, yAxis) {
                     {
                         label: `${yAxis} vs ${xAxis}`,
                         data: sorted.map(d => ({ x: d.x, y: d.y })),
-                        borderColor: "#0d84e8",
-                        backgroundColor: "#0d84e820",
+                        borderColor: '#00ffea',
                         tension: 0.3,
                         borderWidth: 2,
                         pointRadius: 0,
@@ -115,12 +114,12 @@ async function getGraph(username, start, end, xAxis, yAxis) {
                     x: {
                         type: typeof sorted[0]?.x === "string" ? "category" : "linear",
                         title: { text: xAxis, display: true },
-                        ticks: { color: "#333", font: { family: "inherit" } },
+                        ticks: { color: "#000000", font: { family: "inherit" } },
                         grid: { color: "rgba(0,0,0,0.05)" },
                     },
                     y: {
                         title: { text: yAxis, display: true },
-                        ticks: { color: "#333", font: { family: "inherit" } },
+                        ticks: { color: "#000000", font: { family: "inherit" } },
                         grid: { color: "rgba(0,0,0,0.05)" },
                         beginAtZero: true,
                     },

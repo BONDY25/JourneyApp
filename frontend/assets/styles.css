@@ -440,7 +440,7 @@ input:checked + .slider:before {
 }
 
 /* --------------------------------------------------------------------------- */
-/* Budget Chart */
+/* Budget & Chart Styling */
 /* --------------------------------------------------------------------------- */
 
 #budgetCard {
@@ -470,6 +470,11 @@ input:checked + .slider:before {
 }
 
 #budgetChart {
+    background-color: var(--stat-color-2);
+    border-radius: 8px;
+}
+
+#statsGraph {
     background-color: var(--stat-color-2);
     border-radius: 8px;
 }
