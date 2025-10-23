@@ -13,6 +13,8 @@ const axisFields = document.getElementById('axisFields');
 const sumStats = document.getElementById('sum-stats');
 const graphStats = document.getElementById("graph-stats");
 
+Chart.register(ChartTrendline);
+
 // ==========================================================================================================
 // -- Operational Functions --
 // ==========================================================================================================
