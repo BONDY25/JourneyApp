@@ -477,6 +477,7 @@ input:checked + .slider:before {
 #statsGraph {
     background-color: var(--stat-color-2);
     border-radius: 8px;
+    color: var(--card-text);
 }
 
 

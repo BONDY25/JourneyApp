@@ -92,57 +92,94 @@ async function getGraph(username, start, end, xAxis, yAxis) {
         // Sort data just in case backend doesn’t
         const sorted = data.sort((a, b) => (a.x > b.x ? 1 : -1));
 
-        // Create new chart
-        window.currentGraph = new Chart(ctx, {
-            type: "line",
-            data: {
-                datasets: [
-                    {
-                        label: `${yAxis} vs ${xAxis}`,
-                        data: sorted.map(d => ({ x: d.x, y: d.y })),
-                        borderColor: '#00ffea',
-                        tension: 0.3,
-                        borderWidth: 2,
-                        pointRadius: 0,
-                    },
-                ],
-            },
-            options: {
-                responsive: true,
-                layout: { padding: 8 },
-                scales: {
-                    x: {
-                        type: typeof sorted[0]?.x === "string" ? "category" : "linear",
-                        title: { text: xAxis, display: true },
-                        ticks: { color: "#000000", font: { family: "inherit" } },
-                        grid: { color: "rgba(0,0,0,0.05)" },
-                    },
-                    y: {
-                        title: { text: yAxis, display: true },
-                        ticks: { color: "#000000", font: { family: "inherit" } },
-                        grid: { color: "rgba(0,0,0,0.05)" },
-                        beginAtZero: true,
-                    },
+        if (xAxis !=="date") {
+            // Create Scatter Graph
+            window.currentGraph = new Chart(ctx, {
+                type: "scatter",
+                data: {
+                    datasets: [
+                        {
+                            label: `${yAxis} vs ${xAxis}`,
+                            data: sorted.map(d => ({ x: d.x, y: d.y })),
+                            borderColor: '#00ffea',
+                            backgroundColor: '#00ffea',
+                            pointRadius: 4,
+                            trendlineLinear: {
+                                color: "rgba(0,0,0,0.4)",
+                                lineStyle: "solid",
+                                width: 2
+                            }
+                        }
+                    ]
                 },
-                plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            color: "#222",
-                            font: { family: "inherit", size: 12 },
-                            boxWidth: 14,
+                options: {
+                    responsive: true,
+                    scales: {
+                        x: {
+                            type: typeof sorted[0]?.x === "string" ? "category" : "linear",
+                            title: { text: xAxis, display: true }
+                        },
+                        y: {
+                            title: { text: yAxis, display: true },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+
+        } else {
+            // Create Line Chart
+            window.currentGraph = new Chart(ctx, {
+                type: "line",
+                data: {
+                    datasets: [
+                        {
+                            label: `${yAxis} vs ${xAxis}`,
+                            data: sorted.map(d => ({x: d.x, y: d.y})),
+                            borderColor: '#00ffea',
+                            tension: 0.3,
+                            borderWidth: 2,
+                            pointRadius: 0,
+                        },
+                    ],
+                },
+                options: {
+                    responsive: true,
+                    layout: {padding: 8},
+                    scales: {
+                        x: {
+                            type: typeof sorted[0]?.x === "string" ? "category" : "linear",
+                            title: {text: xAxis, display: true},
+                            ticks: {color: "#000000", font: {family: "inherit"}},
+                            grid: {color: "rgba(0,0,0,0.05)"},
+                        },
+                        y: {
+                            title: {text: yAxis, display: true},
+                            ticks: {color: "#000000", font: {family: "inherit"}},
+                            grid: {color: "rgba(0,0,0,0.05)"},
+                            beginAtZero: true,
                         },
                     },
-                    tooltip: {
-                        backgroundColor: "#fff",
-                        titleColor: "#000",
-                        bodyColor: "#000",
-                        borderColor: "#ccc",
-                        borderWidth: 1,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: {
+                                color: "#222",
+                                font: {family: "inherit", size: 12},
+                                boxWidth: 14,
+                            },
+                        },
+                        tooltip: {
+                            backgroundColor: "#fff",
+                            titleColor: "#000",
+                            bodyColor: "#000",
+                            borderColor: "#ccc",
+                            borderWidth: 1,
+                        },
                     },
                 },
-            },
-        });
+            });
+        }
     } catch (err) {
         await SessionMaintenance.logBook("fullStats", "getGraph", `Error fetching graph: ${err}`, true);
         alert("Failed to load graph data.");
