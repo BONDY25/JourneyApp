@@ -13,8 +13,6 @@ const axisFields = document.getElementById('axisFields');
 const sumStats = document.getElementById('sum-stats');
 const graphStats = document.getElementById("graph-stats");
 
-Chart.register(ChartTrendline);
-
 // ==========================================================================================================
 // -- Operational Functions --
 // ==========================================================================================================
@@ -61,6 +59,27 @@ async function getStats(username, start, end) {
     }
 }
 
+// Calculate Trend Line --------------------------------------------------------------------------------
+function calculateAveragedTrendline(data) {
+    const grouped = {};
+
+    // Group values by X
+    data.forEach(({ x, y }) => {
+        if (!grouped[x]) grouped[x] = [];
+        grouped[x].push(y);
+    });
+
+    // Create average Y for each X
+    const averaged = Object.keys(grouped).map(xVal => {
+        const arr = grouped[xVal];
+        const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
+        return { x: Number(xVal), y: avg };
+    });
+
+    // Sort by X in case
+    return averaged.sort((a, b) => a.x - b.x);
+}
+
 // Get Graph --------------------------------------------------------------------------------
 async function getGraph(username, start, end, xAxis, yAxis) {
     try {
@@ -96,6 +115,8 @@ async function getGraph(username, start, end, xAxis, yAxis) {
 
         if (xAxis !=="date") {
             // Create Scatter Graph
+            const trendlineData = calculateAveragedTrendline(sorted);
+
             window.currentGraph = new Chart(ctx, {
                 type: "scatter",
                 data: {
@@ -105,12 +126,16 @@ async function getGraph(username, start, end, xAxis, yAxis) {
                             data: sorted.map(d => ({ x: d.x, y: d.y })),
                             borderColor: '#000000',
                             backgroundColor: '#000000',
-                            pointRadius: 1,
-                            trendlineLinear: {
-                                color: "#00ffea",
-                                lineStyle: "solid",
-                                width: 2
-                            }
+                            pointRadius: 2,
+                        },
+                        {
+                            label: "Trend",
+                            type: "line",
+                            data: trendlineData,
+                            borderColor: "#00bcd4",
+                            borderWidth: 2,
+                            pointRadius: 0,
+                            tension: 0.3,
                         }
                     ]
                 },
@@ -118,14 +143,14 @@ async function getGraph(username, start, end, xAxis, yAxis) {
                     responsive: true,
                     scales: {
                         x: {
-                            type: typeof sorted[0]?.x === "string" ? "category" : "linear",
-                            title: { text: xAxis, display: true },
+                            type: isNaN(sorted[0].x) ? "category" : "linear",
                             ticks: {color: "#000000", font: {family: "inherit"}},
+                            title: { text: xAxis, display: true },
                         },
                         y: {
                             title: { text: yAxis, display: true },
-                            beginAtZero: true,
                             ticks: {color: "#000000", font: {family: "inherit"}},
+                            beginAtZero: true,
                         }
                     }
                 }
