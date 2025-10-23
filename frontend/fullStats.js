@@ -11,6 +11,7 @@ const getStatsBtn = document.getElementById('getStats');
 const displayType = document.getElementById('display-type');
 const axisFields = document.getElementById('axisFields');
 const sumStats = document.getElementById('sum-stats');
+const graphStats = document.getElementById("graph-stats");
 
 // ==========================================================================================================
 // -- Operational Functions --
@@ -79,7 +80,6 @@ async function getGraph(username, start, end, xAxis, yAxis) {
             `Graph data retrieved: ${JSON.stringify(data, null, 2)})`
         );
 
-        const graphStats = document.getElementById("graph-stats");
         graphStats.style.display = "block";
 
         const ctx = document.getElementById("statsGraph").getContext("2d");
@@ -175,6 +175,9 @@ getStatsBtn.addEventListener('click', async () => {
     const username = localStorage.getItem('username').toLowerCase();
     const start = document.getElementById('start').value;
     const end = document.getElementById('end').value;
+
+    graphStats.style.display = "none";
+    sumStats.style.display = 'none';
 
     if (displayType.value === 'figures') {
         await getStats(username, start, end);
