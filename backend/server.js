@@ -707,7 +707,10 @@ async function startServer() {
                     timeDriven: "timeDriven",
                     avgSpeed: "avgSpeed",
                     mpg: "mpg",
-                    cost: "totalCost"
+                    cost: "totalCost",
+                    temp: "temp",
+                    costPerMile: "costPerMile",
+                    fuelUsedL: "fuelUsedL",
                 };
 
                 const xField = fieldMap[xAxis];

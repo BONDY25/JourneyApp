@@ -113,25 +113,42 @@ async function getGraph(username, start, end, xAxis, yAxis) {
         // Sort data just in case backend doesn’t
         const sorted = data.sort((a, b) => (a.x > b.x ? 1 : -1));
 
+        // Map front-end fields to db fields
+        const fieldMap = {
+            date: "Date",
+            distance: "Distance",
+            timeDriven: "Duration",
+            avgSpeed: "Average Speed",
+            mpg: "MPG",
+            cost: "Cost",
+            temp: "Temperature",
+            costPerMile: "Cost Per Mile",
+            fuelUsedL: "Fuel Used (L)",
+        };
+
         if (xAxis !=="date") {
             // Create Scatter Graph
             const trendlineData = calculateAveragedTrendline(sorted);
+
+            const graphTitle = document.getElementById('graph-title');
+            graphTitle.textContent = `${fieldMap[yAxis]} vs ${fieldMap[xAxis]}`;
 
             window.currentGraph = new Chart(ctx, {
                 type: "scatter",
                 data: {
                     datasets: [
                         {
-                            label: "Trend",
+                            label: "",
                             type: "line",
                             data: trendlineData,
-                            borderColor: "#00bcd4",
+                            borderColor: "rgb(0,78,212)",
+                            backgroundColor: "rgb(0,78,212)",
                             borderWidth: 2,
                             pointRadius: 0,
                             tension: 0.3,
                         },
                         {
-                            label: `${yAxis} vs ${xAxis}`,
+                            label: "",
                             data: sorted.map(d => ({ x: d.x, y: d.y })),
                             borderColor: '#d95000',
                             backgroundColor: '#d95000',
@@ -146,10 +163,10 @@ async function getGraph(username, start, end, xAxis, yAxis) {
                         x: {
                             type: isNaN(sorted[0].x) ? "category" : "linear",
                             ticks: {color: "#000000", font: {family: "inherit"}},
-                            title: { text: xAxis, display: true },
+                            title: { text: fieldMap[xAxis], display: true },
                         },
                         y: {
-                            title: { text: yAxis, display: true },
+                            title: { text: fieldMap[yAxis], display: true },
                             ticks: {color: "#000000", font: {family: "inherit"}},
                             beginAtZero: true,
                         }
@@ -158,15 +175,23 @@ async function getGraph(username, start, end, xAxis, yAxis) {
             });
 
         } else {
-            // Create Line Chart
+            // Build cumulative graph points
+            const cumulativePoints = [];
+            let cumulative = 0;
+
+            for (let j of sorted) {
+                cumulative += j.y; // <-- add the Y value for cumulative
+                cumulativePoints.push({ x: j.x, y: cumulative });
+            }
+
             window.currentGraph = new Chart(ctx, {
                 type: "line",
                 data: {
                     datasets: [
                         {
-                            label: `${yAxis} vs ${xAxis}`,
-                            data: sorted.map(d => ({x: d.x, y: d.y})),
-                            borderColor: '#00ffea',
+                            label: `${fieldMap[yAxis]} cumulative`,
+                            data: cumulativePoints,
+                            borderColor: 'rgba(0,255,234,0.75)',
                             tension: 0.3,
                             borderWidth: 2,
                             pointRadius: 0,
@@ -175,41 +200,25 @@ async function getGraph(username, start, end, xAxis, yAxis) {
                 },
                 options: {
                     responsive: true,
-                    layout: {padding: 8},
+                    layout: { padding: 8 },
                     scales: {
                         x: {
-                            type: typeof sorted[0]?.x === "string" ? "category" : "linear",
-                            title: {text: xAxis, display: true},
-                            ticks: {color: "#000000", font: {family: "inherit"}},
-                            grid: {color: "rgba(0,0,0,0.05)"},
+                            type: "category",  // because x is a date string
+                            title: { text: fieldMap[xAxis], display: true },
+                            ticks: { color: "#000000", font: { family: "inherit" }, display: false},
+                            grid: { color: "rgba(0,0,0,0.05)" },
                         },
                         y: {
-                            title: {text: yAxis, display: true},
-                            ticks: {color: "#000000", font: {family: "inherit"}},
-                            grid: {color: "rgba(0,0,0,0.05)"},
+                            title: { text: fieldMap[yAxis], display: true },
+                            ticks: { color: "#000000", font: { family: "inherit" } },
+                            grid: { color: "rgba(0,0,0,0.05)" },
                             beginAtZero: true,
-                        },
-                    },
-                    plugins: {
-                        legend: {
-                            display: true,
-                            labels: {
-                                color: "#222",
-                                font: {family: "inherit", size: 12},
-                                boxWidth: 14,
-                            },
-                        },
-                        tooltip: {
-                            backgroundColor: "#fff",
-                            titleColor: "#000",
-                            bodyColor: "#000",
-                            borderColor: "#ccc",
-                            borderWidth: 1,
                         },
                     },
                 },
             });
         }
+
     } catch (err) {
         await SessionMaintenance.logBook("fullStats", "getGraph", `Error fetching graph: ${err}`, true);
         alert("Failed to load graph data.");

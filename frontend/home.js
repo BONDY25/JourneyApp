@@ -319,7 +319,8 @@ async function loadBudget(username) {
                         // Plot line for budget
                         label: 'Budget',
                         data: Array(labels.length).fill(data.budget),
-                        borderColor: '#00ffea',
+                        borderColor: "rgb(0,78,212)",
+                        backgroundColor: "rgb(0,78,212)",
                         borderWidth: 1.5,
                         fill: false,
                         pointRadius: 0,
@@ -329,6 +330,7 @@ async function loadBudget(username) {
                         label: 'Cost',
                         data: cumulativeCosts,
                         borderColor: data.overUnder >= 0 ? '#00ff08' : '#ff1200',
+                        backgroundColor: data.overUnder >= 0 ? 'rgba(0,255,8,0.6)' : 'rgba(255,18,0,0.6)',
                         borderWidth: 2,
                         pointBackgroundColor: '#b4b4b4',
                         pointRadius: 0,

@@ -161,7 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const resetDay = document.getElementById('reset-day').value || "1";
 
         // Check if budget amount is valid
-        if (budgetEnabled && budgetAmount ?? 0 === 0)
+        if (budgetEnabled && (budgetAmount ?? 0) === 0)
         {
             alert('Budget Amount must be greater than 0');
             return;
