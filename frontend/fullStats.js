@@ -124,15 +124,15 @@ async function getGraph(username, start, end, xAxis, yAxis) {
                         {
                             label: `${yAxis} vs ${xAxis}`,
                             data: sorted.map(d => ({ x: d.x, y: d.y })),
-                            borderColor: '#000000',
+                            borderColor: '#00bcd4',
                             backgroundColor: '#000000',
-                            pointRadius: 2,
+                            pointRadius: 0.5,
                         },
                         {
                             label: "Trend",
                             type: "line",
                             data: trendlineData,
-                            borderColor: "#00bcd4",
+                            borderColor: "#000000",
                             borderWidth: 2,
                             pointRadius: 0,
                             tension: 0.3,
