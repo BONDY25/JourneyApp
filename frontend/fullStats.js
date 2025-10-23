@@ -4,7 +4,6 @@
 
 import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
-import {Chart} from "chart.js";
 
 const currency = localStorage.getItem('currency');
 const getStatsBtn = document.getElementById('getStats');
