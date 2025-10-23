@@ -6,7 +6,7 @@
     <title>Journey App - Full Stats</title>
     <link href="assets/styles.css" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="assets/JourneyApp-logo-1.png"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 </head>
 <body>
 <div id="loader" class="loader-overlay">
@@ -14,8 +14,42 @@
 </div>
 <div id="app" class="app">
     <h1>Full Statistics</h1>
+
+    <!-- Parameters -->
     <div id="prams" class="stats">
         <form>
+
+            <!-- Display Type -->
+            <label for="display-type">Stats Display:</label>
+            <select id="display-type">
+                <option value="figures">Figures</option>
+                <option value="graph">Graph</option>
+            </select>
+
+            <!-- X-Axis -->
+            <div id="axisFields" style="display: none">
+            <label for="x-axis" style="display: flex">X-Axis:</label>
+            <select id="x-axis">
+                <option value="date">Date</option>
+                <option value="distance">Distance</option>
+                <option value="timeDriven">Time Driven</option>
+                <option value="avgSpeed">Average Speed</option>
+                <option value="mpg">Consumption</option>
+                <option value="cost">Cost</option>
+            </select>
+
+            <!-- X-Axis -->
+            <label for="y-axis" style="display: flex">Y-Axis:</label>
+            <select id="y-axis">
+                <option value="distance">Distance</option>
+                <option value="timeDriven">Time Driven</option>
+                <option value="avgSpeed">Average Speed</option>
+                <option value="mpg">Consumption</option>
+                <option value="cost">Cost</option>
+            </select>
+            </div>
+
+            <!-- Start & End Dates -->
             <label for="start">Start Date:</label>
             <input type="date" id="start"/>
             <label for="end">End Date:</label>
@@ -23,7 +57,15 @@
         </form>
         <button id="getStats" class="button">Get Stats</button>
     </div>
-    <div id="sum-stats" class="stats numbers">
+
+    <!-- Graph Stats-->
+    <div id="graph-stats" class="stats" style="display: none">
+        <h3>Budget</h3>
+        <canvas id="statsGraph" width="400" height="200"></canvas>
+    </div>
+
+    <!-- Figure Stats -->
+    <div id="sum-stats" class="stats numbers" style="display: none">
         <p>Total Miles: <span id="totalMiles">0</span></p>
         <p>Total Time Driven: <span id="totalTime">0</span></p>
         <p>Total Fuel Used (L): <span id="totalFuel">0</span></p>
@@ -40,6 +82,8 @@
         <p>Average Temp: <span id="avgTemp">0</span></p>
         <p>Average Time Driven: <span id="avgTimeDriven">0</span></p>
     </div>
+
+    <!-- Navigation Bar -->
     <div id="nav-bar">
         <a href="home.html" class="nav-item" id="nav-home">
             <span class="material-symbols-outlined">home</span>
@@ -63,6 +107,7 @@
         </a>
     </div>
 </div>
+
 <!-- Link to the JavaScript file -->
 <script type="module" src="fullStats.js"></script>
 </body>

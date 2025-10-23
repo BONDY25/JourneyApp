@@ -684,6 +684,68 @@ async function startServer() {
             }
         });
 
+        // Get Graph Endpoint ---------------------------------------------------------------------
+        app.get('/api/graph/:username', async (req, res) => {
+            try {
+                const {username} = req.params;
+                const {start, end, xAxis, yAxis} = req.query;
+
+                if (!xAxis || !yAxis) {
+                    return res.status(400).json({error: "xAxis and yAxis are required"});
+                }
+
+                const db = client.db('journeyAppDb');
+
+                // convert dates
+                const startDate = start ? new Date(start) : new Date("1970-01-01");
+                const endDate = end ? new Date(end) : new Date();
+
+                // Map front-end fields to db fields
+                const fieldMap = {
+                    date: "dateTime",
+                    distance: "distance",
+                    timeDriven: "timeDriven",
+                    avgSpeed: "avgSpeed",
+                    mpg: "mpg",
+                    cost: "totalCost"
+                };
+
+                const xField = fieldMap[xAxis];
+                const yField = fieldMap[yAxis];
+
+                if (!xField || !yField) {
+                    return res.status(400).json({ error: "Invalid xAxis or yAxis option" });
+                }
+
+                // Query journeys within date range
+                const journeys = await db.collection('journeys')
+                    .find({
+                        user: username,
+                        dateTime: {$get: startDate, $lte: endDate},
+                    })
+                    .project({
+                        [xField]: 1,
+                        [yField]: 1,
+                        dateTime: 1,
+                        _id: 0
+                    })
+                    .sort({[xField]: 1})
+                    .toArray();
+
+                // Format response as array of { x, y }
+                const result = journeys.map(j => ({
+                    x: j[xField],
+                    y: j[yField]
+                }));
+
+                return res.json({ data: result });
+
+            } catch (err) {
+                console.error("Error getting graph:", err);
+                res.status(500).send("Error getting graph");
+            }
+        });
+
         app.listen(3000, () => {
             console.log('Server running at http://localhost:3000');
         });
