@@ -3,7 +3,7 @@
 // ==========================================================================================================
 
 import SessionMaintenance from "./sessionMaintenance.js";
-import { API_BASE_URL } from "./config.js";
+import {API_BASE_URL} from "./config.js";
 
 const currency = localStorage.getItem('currency');
 const getStatsBtn = document.getElementById('getStats');
@@ -34,21 +34,66 @@ async function getStats(username, start, end) {
         await SessionMaintenance.logBook("fullStats", "getStats", `Full Stats retrieved: ${JSON.stringify(data, null, 2)}`);
 
         // Populate UI with Data
-        document.getElementById('totalMiles').textContent = data.totalMiles.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('totalTime').textContent = `${formattedTime.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${timeUnit}`;
-        document.getElementById('totalFuel').textContent = data.totalFuel.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('totalCost').textContent = `${currency}${data.totalCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        document.getElementById('avgMilesPerTank').textContent = data.avgMilesPerTank.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('avgMpg').textContent = data.avgMpg.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('avgSpeed').textContent = data.avgSpeed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('avgCostPerDay').textContent = `${currency}${data.avgCostPerDay.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        document.getElementById('avgCostPerMile').textContent = `${currency}${data.avgCostPerMile.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-        document.getElementById('avgFuelPrice').textContent = `${currency}${data.avgFuelPrice.toLocaleString(undefined, { minimumFractionDigits: 3, maximumFractionDigits: 3 })}`;
-        document.getElementById('avgTemp').textContent = data.avgTemp.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-        document.getElementById('avgTimeDriven').textContent = data.avgTimeDriven.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('avgLpkm').textContent = lpkm.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('avgKwh').textContent = kWh.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-        document.getElementById('avgKwhTotal').textContent = kWhTotal.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        document.getElementById('totalMiles').textContent = data.totalMiles.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById('totalTime').textContent = `${formattedTime.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })} ${timeUnit}`;
+        document.getElementById('totalFuel').textContent = data.totalFuel.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById('totalCost').textContent = `${currency}${data.totalCost.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })}`;
+        document.getElementById('avgMilesPerTank').textContent = data.avgMilesPerTank.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById('avgMpg').textContent = data.avgMpg.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById('avgSpeed').textContent = data.avgSpeed.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById('avgCostPerDay').textContent = `${currency}${data.avgCostPerDay.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })}`;
+        document.getElementById('avgCostPerMile').textContent = `${currency}${data.avgCostPerMile.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })}`;
+        document.getElementById('avgFuelPrice').textContent = `${currency}${data.avgFuelPrice.toLocaleString(undefined, {
+            minimumFractionDigits: 3,
+            maximumFractionDigits: 3
+        })}`;
+        document.getElementById('avgTemp').textContent = data.avgTemp.toLocaleString(undefined, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+        });
+        document.getElementById('avgTimeDriven').textContent = data.avgTimeDriven.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById('avgLpkm').textContent = lpkm.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById('avgKwh').textContent = kWh.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+        document.getElementById('avgKwhTotal').textContent = kWhTotal.toLocaleString(undefined, {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
 
         sumStats.style.display = 'block';
     } catch (err) {
@@ -64,7 +109,7 @@ function calculateAveragedTrendline(data) {
     const grouped = {};
 
     // Group values by X
-    data.forEach(({ x, y }) => {
+    data.forEach(({x, y}) => {
         if (!grouped[x]) grouped[x] = [];
         grouped[x].push(y);
     });
@@ -73,7 +118,7 @@ function calculateAveragedTrendline(data) {
     const averaged = Object.keys(grouped).map(xVal => {
         const arr = grouped[xVal];
         const avg = arr.reduce((a, b) => a + b, 0) / arr.length;
-        return { x: Number(xVal), y: avg };
+        return {x: Number(xVal), y: avg};
     });
 
     // Sort by X in case
@@ -93,7 +138,7 @@ async function getGraph(username, start, end, xAxis, yAxis) {
         );
 
         if (!res.ok) throw new Error(`Server returned ${res.status}`);
-        const { data } = await res.json();
+        const {data} = await res.json();
 
         await SessionMaintenance.logBook(
             "fullStats",
@@ -126,7 +171,7 @@ async function getGraph(username, start, end, xAxis, yAxis) {
             fuelUsedL: "Fuel Used (L)",
         };
 
-        if (xAxis !=="date") {
+        if (xAxis !== "date") {
             // Create Scatter Graph
             const trendlineData = calculateAveragedTrendline(sorted);
 
@@ -149,7 +194,7 @@ async function getGraph(username, start, end, xAxis, yAxis) {
                         },
                         {
                             label: "",
-                            data: sorted.map(d => ({ x: d.x, y: d.y })),
+                            data: sorted.map(d => ({x: d.x, y: d.y})),
                             borderColor: '#d95000',
                             backgroundColor: '#d95000',
                             opacity: 0.5,
@@ -163,10 +208,10 @@ async function getGraph(username, start, end, xAxis, yAxis) {
                         x: {
                             type: isNaN(sorted[0].x) ? "category" : "linear",
                             ticks: {color: "#000000", font: {family: "inherit"}},
-                            title: { text: fieldMap[xAxis], display: true },
+                            title: {text: fieldMap[xAxis], display: true},
                         },
                         y: {
-                            title: { text: fieldMap[yAxis], display: true },
+                            title: {text: fieldMap[yAxis], display: true},
                             ticks: {color: "#000000", font: {family: "inherit"}},
                             beginAtZero: true,
                         }
@@ -181,7 +226,7 @@ async function getGraph(username, start, end, xAxis, yAxis) {
 
             for (let j of sorted) {
                 cumulative += j.y; // <-- add the Y value for cumulative
-                cumulativePoints.push({ x: j.x, y: cumulative });
+                cumulativePoints.push({x: j.x, y: cumulative});
             }
 
             window.currentGraph = new Chart(ctx, {
@@ -200,18 +245,18 @@ async function getGraph(username, start, end, xAxis, yAxis) {
                 },
                 options: {
                     responsive: true,
-                    layout: { padding: 8 },
+                    layout: {padding: 8},
                     scales: {
                         x: {
                             type: "category",  // because x is a date string
-                            title: { text: fieldMap[xAxis], display: true },
-                            ticks: { color: "#000000", font: { family: "inherit" }, display: false},
-                            grid: { color: "rgba(0,0,0,0.05)" },
+                            title: {text: fieldMap[xAxis], display: true},
+                            ticks: {color: "#000000", font: {family: "inherit"}, display: false},
+                            grid: {color: "rgba(0,0,0,0.05)"},
                         },
                         y: {
-                            title: { text: fieldMap[yAxis], display: true },
-                            ticks: { color: "#000000", font: { family: "inherit" } },
-                            grid: { color: "rgba(0,0,0,0.05)" },
+                            title: {text: fieldMap[yAxis], display: true},
+                            ticks: {color: "#000000", font: {family: "inherit"}},
+                            grid: {color: "rgba(0,0,0,0.05)"},
                             beginAtZero: true,
                         },
                     },
@@ -223,6 +268,69 @@ async function getGraph(username, start, end, xAxis, yAxis) {
         await SessionMaintenance.logBook("fullStats", "getGraph", `Error fetching graph: ${err}`, true);
         alert("Failed to load graph data.");
         console.error(err);
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+}
+
+// Export the data ------------------------------------------------------------------------
+async function exportData(username, start, end) {
+    SessionMaintenance.showLoader();
+    await SessionMaintenance.logBook("fullStats", "exportData", `Exporting full stats: (${start}, ${end})`);
+
+    try {
+        // Fetch the data
+        const res = await fetch(`${API_BASE_URL}/api/export/${username}?start=${start}&end=${end}`);
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+        const data = await res.json();
+
+        if (!data || !Array.isArray(data) || data.length === 0) {
+            alert("No data found.");
+            return;
+        }
+
+        // Convert JSON to CSV
+        const headers = Object.keys(data[0]);
+        const csvRows = [];
+
+        // Header Row
+        csvRows.push(headers.join(","));
+
+        // Data Rows
+        for (const row of data) {
+            const values = headers.map(h => {
+                let val = row[h] ?? "";
+                if (typeof val === "object") {
+                    val = `"${val.replace(/"/g, '""')}`; // Escape quotes
+                }
+                return val;
+            });
+            csvRows.push(values.join(","));
+        }
+
+        const csvText = csvRows.join("\n");
+
+        // Create Blob and trigger download
+        const blob = new Blob([csvText], {type: "text/csv;charset=utf-8;"});
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        const timestamp = new Date().toISOString().split("T")[0];
+        a.href = url;
+        a.download = `journey_stats_${username}_${timestamp}.csv`;
+        a.style.display = "none";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        await SessionMaintenance.logBook("fullStats", "exportData", `Exported ${data.length} rows to CSV`);
+        alert("Export successful! Check your Downloads folder.");
+
+    } catch (err) {
+        console.error("Error exporting data:", err);
+        await SessionMaintenance.logBook("fullStats", "exportData", `Export failed: ${err}`, true);
+        alert("Failed to export data.");
     } finally {
         SessionMaintenance.hideLoader();
     }
@@ -256,21 +364,20 @@ getStatsBtn.addEventListener('click', async () => {
 
     if (displayType.value === 'figures') {
         await getStats(username, start, end);
-    }
-    else if (displayType.value === 'graph') {
+    } else if (displayType.value === 'graph') {
         const xAxis = document.getElementById('x-axis').value;
         const yAxis = document.getElementById('y-axis').value;
         await getGraph(username, start, end, xAxis, yAxis);
+    } else if (displayType.value === 'export') {
+        await exportData(username, start, end);
     }
-
 });
 
 // Display type changed --------------------------------------------------------------------------
 displayType.addEventListener('change', () => {
     if (displayType.value === 'figures') {
         axisFields.style.display = 'none';
-    }
-    else if (displayType.value === 'graph') {
+    } else if (displayType.value === 'graph') {
         axisFields.style.display = 'block';
     }
 })

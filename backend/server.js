@@ -113,6 +113,8 @@ async function startServer() {
                     fuelType: "Petrol",
                     userFont: "Lexend",
                     currency: "£",
+                    distanceUnit: "miles",
+                    speedUnit: "mph"
                 };
 
                 // insert the user into the database
@@ -681,6 +683,51 @@ async function startServer() {
             } catch (err) {
                 console.error("Error calculating budget:", err);
                 res.status(500).send("Error calculating budget");
+            }
+        });
+
+        // Export Data Endpoint --------------------------------------------------------------------
+        app.get('/api/export/:username', async (req, res) => {
+            try {
+                const {username} = req.params;
+                const {start, end} = req.query;
+
+                const db = client.db('journeyAppDb');
+
+                // convert date strings
+                const startDate = start ? new Date(start) : new Date("1970-01-01");
+                const endDate = end ? new Date(end) : new Date();
+
+                // Pull All journeys within date range
+                const jounreys = await db.collection('journeys')
+                    .find({
+                        user: username,
+                        dateTime: {$gte: startDate, $lte: endDate}
+                    })
+                    .project({
+                        _id: 0, // Exclude MongoDB _id Field
+                        user: 0
+                    })
+                    .sort({dateTime: 1})
+                    .toArray();
+
+                if (!journeys.length) {
+                    return res.json([]);
+                }
+
+                // Ensure All datetime values are formatted as readable strings
+                const formatted = journeys.map(j => ({
+                    ...j,
+                    dateTime: j.dateTime instanceof Date
+                        ? j.dateTime.toISOString()
+                        : j.dateTime
+                }));
+
+                return res.json(formatted);
+
+            } catch (err) {
+                console.error("Error exporting data:", err);
+                res.status(500).json({error: "Error exporting data"});
             }
         });
 

@@ -7,6 +7,8 @@ import {API_BASE_URL} from "./config.js";
 
 // Get Submit button
 const submit = document.getElementById('submit');
+const distanceUnit = localStorage.getItem('distanceUnit') || "miles";
+const speedUnit = localStorage.getItem('speedUnit') || "mph";
 
 // ==========================================================================================================
 // -- Operational Functions --
@@ -81,6 +83,7 @@ async function calculateValues({timeUnit = 'minutes'} = {}) {
     const costPerLitre = getValue('cost', 'number');
 
     // Calculate Helpers
+    const distanceMiles = distanceUnit === 'miles' ? distance : distance / 1.609;
     const gallon = localStorage.getItem('gallon');
     const hours = timeUnit === 'minutes' ? (timeDriven / 60) : timeDriven;
     const safeHours = hours > 0 ? hours : 1; // avoid division by zero
@@ -102,7 +105,7 @@ async function calculateValues({timeUnit = 'minutes'} = {}) {
         user,
         description,
         dateTime,
-        distance: round(distance, 2),
+        distance: round(distanceMiles, 2),
         mpg: round(mpg, 2),
         timeDriven: round(timeDriven, 2),
         temp: round(temp, 1),
@@ -113,6 +116,8 @@ async function calculateValues({timeUnit = 'minutes'} = {}) {
         costPerMile: round(costPerMile, 2),
         fuelUsedL: round(fuelUsedL, 2),
         percOfTank: round(percOfTank, 4),
+        distanceUnit,
+        speedUnit,
     };
 
     await SessionMaintenance.logBook("newJourney", "calculateValues", `Values Calculated: ${JSON.stringify(output, null, 2)}`);

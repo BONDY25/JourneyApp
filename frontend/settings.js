@@ -154,6 +154,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const fuelType = document.getElementById('fuel-select').value || 'Petrol';
         const userFont = document.getElementById('font-select').value || "Lexend";
         const currency = document.getElementById('currency-select').value || "£";
+        const distanceUnit = document.getElementById('distance-select').value || "miles";
+        const speedUnit = document.getElementById('speed-select-select').value || "mph";
         const newPassword = document.getElementById('new-password').value || "";
         const budgetEnabled = document.getElementById('budget-toggle').checked || false;
         const budgetRange = document.getElementById('budget-range').value || "Monthly";
@@ -179,6 +181,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             budgetRange,
             budgetAmount,
             resetDay,
+            distanceUnit,
+            speedUnit
         };
 
         // Handle password
@@ -200,7 +204,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             localStorage.setItem('gallon', gallon);
             localStorage.setItem('fuelType', fuelType.toString());
             localStorage.setItem('userFont', userFont);
-            localStorage.setItem('userFont', userFont);
+            localStorage.setItem('distanceUnit', distanceUnit.toString());
+            localStorage.setItem('speedUnit', speedUnit.toString());
             localStorage.setItem('currency', currency);
             localStorage.setItem('budgetEnabled', JSON.stringify(budgetEnabled));
             localStorage.setItem('budgetRange', budgetRange);
