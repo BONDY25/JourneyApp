@@ -20,7 +20,6 @@ As of right now, both the MongoDB atlas and Render web hosting services I used a
 * Add user setting for distance unit (Miles, KM)
 * Add user themes Light/dark/etc...
 * Add mileage/time targets/limits
-* Add ability to create graphical representations of stats, e.g. line graph, bar charts.
 * Add Ability to export data to CSV
 
 Links:
