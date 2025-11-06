@@ -26,8 +26,8 @@ async function getDefaults(username) {
         localStorage.setItem('gallon', user.gallon);
         localStorage.setItem('fuelType', user.fuelType);
         localStorage.setItem('currency', user.currency );
-        localStorage.setItem('distanceUnit', user.distanceUnit.toString() || "Miles");
-        localStorage.setItem('speedUnit', user.speedUnit.toString() || "mph");
+        localStorage.setItem('distanceUnit', user.distanceUnit || "Miles");
+        localStorage.setItem('speedUnit', user.speedUnit || "mph");
 
     }
 }
