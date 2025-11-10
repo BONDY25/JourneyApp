@@ -16,8 +16,6 @@ As of right now, both the MongoDB atlas and Render web hosting services I used a
 * Expand insights into Distance, Time and consuption sub headings and add more interesting facts:
     * percentage of time driving since first journey
     * Condition/percentage of times it was wet
-* Add user setting for Speed unit (MPH, KM/H)
-* Add user setting for distance unit (Miles, KM)
 * Add user themes Light/dark/etc...
 * Add mileage/time targets/limits
 * Add Ability to export data to CSV
