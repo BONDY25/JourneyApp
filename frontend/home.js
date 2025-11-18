@@ -241,6 +241,72 @@ async function load28DaySum(username) {
     }
 }
 
+// Get Period Percentage ---------------------------------------------------------------------------
+function getPeriodPercentage(period, resetDay) {
+    const now = new Date();
+    let periodStart, periodEnd;
+
+    switch (period.toLowerCase()) {
+
+        case "daily":
+            periodStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            periodEnd   = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+            break;
+
+        case "weekly":
+            const today = now.getDay();
+            let r = parseInt(resetDay);
+
+            const todayNorm = today === 0 ? 7 : today;
+            const resetNorm = r === 0 ? 7 : r;
+
+            // days since reset
+            let diff = todayNorm - resetNorm;
+            if (diff < 0) diff += 7;
+
+            periodStart = new Date(now);
+            periodStart.setDate(now.getDate() - diff);
+
+            periodEnd = new Date(periodStart);
+            periodEnd.setDate(periodStart.getDate() + 7);
+            break;
+
+        case "monthly":
+            const d = parseInt(resetDay);
+            const thisMonth = now.getMonth();
+            const thisYear = now.getFullYear();
+
+            // Start
+            periodStart = new Date(thisYear, thisMonth, d);
+
+            if (now < periodStart) {
+                periodStart = new Date(thisYear, thisMonth - 1, d);
+            }
+
+            periodEnd = new Date(periodStart);
+            periodEnd.setMonth(periodStart.getMonth() + 1);
+            break;
+
+        case "yearly":
+            const dayOfYear = parseInt(resetDay); // 1–365
+            const year = now.getFullYear();
+
+            periodStart = new Date(year, 0, dayOfYear);
+
+            if (now < periodStart) {
+                periodStart = new Date(year - 1, 0, dayOfYear);
+            }
+
+            periodEnd = new Date(periodStart);
+            periodEnd.setFullYear(periodStart.getFullYear() + 1);
+            break;
+    }
+
+    const elapsed = now - periodStart;
+    const total = periodEnd - periodStart;
+    return (elapsed / total) * 100;
+}
+
 // Load Budget ------------------------------------------------------------------------------------
 async function loadBudget(username) {
     try {
@@ -262,7 +328,12 @@ async function loadBudget(username) {
 
         // Start budget statement
         const summary = document.getElementById('budgetSummary');
+        const budgetProgressText = document.getElementById('budgetProgress');
+        const periodProgressText = document.getElementById('periodProgress');
+        const budgetStatusText = document.getElementById('budgetStatus');
         const currency = localStorage.getItem('currency') || "£";
+        const resetDay = localStorage.getItem('resetDay') || 1;
+
 
         // establish over/under
         const diffText =
@@ -279,8 +350,20 @@ async function loadBudget(username) {
             case 'daily': newPeriod = 'day'; break;
         }
 
+        const budgetProgress = (data.cost/data.budget) * 100;
+        const periodProgress = getPeriodPercentage(data.period, resetDay);
+
         // display statement
         summary.textContent = `This ${newPeriod}: ${currency}${data.cost.toFixed(2)} of ${currency}${data.budget.toFixed(2)} → ${diffText}.`;
+        budgetProgressText.textContent = `Budget Spent: ${budgetProgress.toFixed(2)}%`;
+        periodProgressText.textContent = `${newPeriod[0].toUpperCase() + newPeriod.slice(1)} Progress: ${periodProgress.toFixed(2)}%`;
+
+        if(budgetProgress <= periodProgress)
+        {
+            budgetStatusText.textContent = `You are under budget 👍`;
+        } else {
+            budgetStatusText.textContent = `You are over budget 👎`;
+        }
 
         let cumulativeCosts = [];
         let labels = [];
