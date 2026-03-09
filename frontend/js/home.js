@@ -250,7 +250,7 @@ function getPeriodPercentage(period, resetDay) {
 
         case "daily":
             periodStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            periodEnd   = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+            periodEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
             break;
 
         case "weekly":
@@ -343,14 +343,22 @@ async function loadBudget(username) {
 
         // Get period
         let newPeriod;
-        switch(data.period.toLowerCase()){
-            case 'monthly': newPeriod = 'month'; break;
-            case 'yearly': newPeriod = 'year'; break;
-            case 'weekly': newPeriod = 'week'; break;
-            case 'daily': newPeriod = 'day'; break;
+        switch (data.period.toLowerCase()) {
+            case 'monthly':
+                newPeriod = 'month';
+                break;
+            case 'yearly':
+                newPeriod = 'year';
+                break;
+            case 'weekly':
+                newPeriod = 'week';
+                break;
+            case 'daily':
+                newPeriod = 'day';
+                break;
         }
 
-        const budgetProgress = (data.cost/data.budget) * 100;
+        const budgetProgress = (data.cost / data.budget) * 100;
         const periodProgress = getPeriodPercentage(data.period, resetDay);
 
         // display statement
@@ -358,8 +366,7 @@ async function loadBudget(username) {
         budgetProgressText.textContent = `Budget Spent: ${budgetProgress.toFixed(2)}%`;
         periodProgressText.textContent = `${newPeriod[0].toUpperCase() + newPeriod.slice(1)} Progress: ${periodProgress.toFixed(2)}%`;
 
-        if(budgetProgress <= periodProgress)
-        {
+        if (budgetProgress <= periodProgress) {
             budgetStatusText.textContent = `You are under budget 👍`;
         } else {
             budgetStatusText.textContent = `You are over budget 👎`;
@@ -427,13 +434,13 @@ async function loadBudget(username) {
             },
             options: {
                 responsive: true,
-                layout: { padding: 8 },
+                layout: {padding: 8},
                 plugins: {
                     legend: {
                         display: true,
                         labels: {
                             color: '#222',
-                            font: { family: 'inherit', size: 12 },
+                            font: {family: 'inherit', size: 12},
                             boxWidth: 14,
                             usePointStyle: true
                         }
@@ -450,15 +457,15 @@ async function loadBudget(username) {
                     x: {
                         ticks: {
                             color: '#000000',
-                            font: { family: 'inherit' },
+                            font: {family: 'inherit'},
                             display: data.period.toLowerCase() === 'monthly' // only show labels for monthly
                         },
-                        grid: { color: 'rgba(0,0,0,0.05)' }
+                        grid: {color: 'rgba(0,0,0,0.05)'}
                     },
                     y: {
                         beginAtZero: true,
-                        ticks: { color: '#000000', font: { family: 'inherit' } },
-                        grid: { color: 'rgba(0,0,0,0.05)' }
+                        ticks: {color: '#000000', font: {family: 'inherit'}},
+                        grid: {color: 'rgba(0,0,0,0.05)'}
                     }
                 }
             }
@@ -466,8 +473,7 @@ async function loadBudget(username) {
     } catch (err) {
         await SessionMaintenance.logBook("home", "loadBudget", `Error fetching budget: ${err}`, true);
         console.error("Error loading budget data:", err);
-    }
-    finally {
+    } finally {
         SessionMaintenance.hideLoader();
     }
 }
