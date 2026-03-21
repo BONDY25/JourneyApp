@@ -148,15 +148,15 @@ export default class SessionMaintenance {
             btn2.style.display = "none";
 
             // Button Click
-            btn1.onClick = () => {
+            btn1.onclick = () => {
                 box.classList.add("hidden");
                 resolve();
             };
         });
     }
 
-    // Error Message ----------------------------------------------------
-    static cmbError(message){
+    // Error Message ------------------------------------------------------------------------------------
+    static cmbError(message) {
         return new Promise(resolve => {
             this.hideLoader();
 
@@ -176,14 +176,17 @@ export default class SessionMaintenance {
             btn1.textContent = "Okay";
 
             btn1.focus();
+
             btn2.style.display = "none";
 
-            btn2.onClick = () => {
-                box.classList.remove("hidden");
+            // Button click
+            btn1.onclick = () => {
+                box.classList.add("hidden");
                 resolve();
             };
         });
     }
+
 
     // Question Message (Yes/No) -----------------------------------------------------------
     static cmbQuestion(title, message) {
@@ -211,11 +214,11 @@ export default class SessionMaintenance {
             btn2.focus();
 
             // Button Click
-            btn1.onClick = () => {
+            btn1.onclick = () => {
                 box.classList.remove("hidden");
                 resolve(true);
             };
-            btn2.onClick = () => {
+            btn2.onclick = () => {
                 box.classList.remove("hidden");
                 resolve(false);
             };
