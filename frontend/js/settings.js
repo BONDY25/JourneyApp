@@ -33,6 +33,7 @@ async function getTotalJourneys(username) {
     } catch (err) {
         console.error("Error fetching total journeys:", err);
         await SessionMaintenance.logBook("settings", "getTotalJourneys", `Network Error: ${err}`, true);
+        await SessionMaintenance.cmbError(`Error fetching total journeys: ${err}`);
         return 0;
     }
 }
@@ -101,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const username = localStorage.getItem('username');
     if (!username) {
-        alert('No user logged in!');
+        await SessionMaintenance.cmbError('No user logged in!');
         return;
     }
 
@@ -134,6 +135,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     } catch (err) {
         await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", `Failed fetching user settings: ${err}`, true);
+        await SessionMaintenance.cmbError(`Failed fetching user settings: ${err}`);
     } finally {
         SessionMaintenance.hideLoader();
 
@@ -165,7 +167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Check if budget amount is valid
         if (budgetEnabled && (budgetAmount ?? 0) === 0)
         {
-            alert('Budget Amount must be greater than 0');
+            await SessionMaintenance.cmbError(`Budget Amount must be greater than 0`);
             return;
         }
 
@@ -214,14 +216,15 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             if (res.ok) {
                 await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", `Settings saved successfully {${JSON.stringify(payLoad)}}`);
-                alert("Settings saved successfully");
+                await SessionMaintenance.cmbInfo('Success',`Settings saved successfully`);
             } else {
                 const err = await res.text();
                 await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", `Failed to save user settings: ${err}`);
-                alert(`Failed to save user settings: ${err}`);
+                await SessionMaintenance.cmbError(`Failed to save user settings: ${err}`);
             }
         } catch (err) {
             await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", `Network Error: ${err}`, true);
+            await SessionMaintenance.cmbError(`Failed to save user settings: ${err}`);
         } finally {
             SessionMaintenance.hideLoader();
         }

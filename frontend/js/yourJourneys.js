@@ -41,6 +41,7 @@ async function getJourneys(tableBody, username) {
     } catch (err) {
         await SessionMaintenance.logBook("yourJourneys", "getJourneys", `Network Error: ${err}`, true);
         tableBody.innerHTML = `<tr><td colspan="3">Error loading journeys</td></tr>`;
+        await SessionMaintenance.cmbError(`Error loading journeys: ${err}`);
     } finally {
         SessionMaintenance.hideLoader();
     }

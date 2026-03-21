@@ -106,10 +106,10 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Edit button event listener -------------------------------------------------------------------------
-editButton.addEventListener("click", () => {
+editButton.addEventListener("click", async () => {
     if (journeyId) {
         window.location.href = `edit-journey.html?id=${journeyId}`;
     } else {
-        alert("No journey ID available to edit.");
+        await SessionMaintenance.cmbError(`No journey ID available to edit.`);
     }
 });

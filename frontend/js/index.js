@@ -45,7 +45,8 @@ async function loginUser(username, password){
         // Evaluate backend response
         if (!loginRes.ok) {
             const err = await loginRes.text();
-            alert(`Login failed: ${err}`);
+            await SessionMaintenance.cmbError(`Login failed: ${err}`);
+
             return;
         }
 
@@ -56,7 +57,7 @@ async function loginUser(username, password){
 
     } catch (error) {
         console.error('Network Error:', error);
-        alert(`Network Error: ${error}`);
+        await SessionMaintenance.cmbError(`Error logging in: ${error}`);
     }
 }
 
@@ -73,7 +74,8 @@ async function registerUser(username, password){
 
         // evaluate backend response
         if (res.ok) {
-            alert('User Registered!');
+            await SessionMaintenance.cmbInfo(`Success`,`User Registered successfully.`);
+
 
             // save username and open home page
             localStorage.setItem('username', username);
@@ -91,11 +93,11 @@ async function registerUser(username, password){
             window.location.href = "home.html";
         } else {
             const err = await res.text();
-            alert(`Registration Failed: ${err}`);
+            await SessionMaintenance.cmbError(`Registration Failed: ${err}`);
         }
     } catch (error) {
         console.error('Network Error:', error);
-        alert(`Network Error: ${error}`);
+        await SessionMaintenance.cmbError(`Error registering user: ${error}`);
     } finally {
         SessionMaintenance.hideLoader();
     }
@@ -166,7 +168,7 @@ submitReg.addEventListener('click', async (e) => {
     // Get Captcha token
     const captchaResponse = grecaptcha.getResponse();
     if (!captchaResponse) {
-        alert("Please verify that you are not a robot.");
+        await SessionMaintenance.cmbInfo("Beep Boop","Please verify that you are not a robot.");
         return;
     }
 

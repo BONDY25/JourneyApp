@@ -98,7 +98,7 @@ async function getStats(username, start, end) {
         sumStats.style.display = 'block';
     } catch (err) {
         await SessionMaintenance.logBook("fullStats", "getStats", `Error fetching stats: ${err}`, true);
-        alert("Failed to load stats");
+        await SessionMaintenance.cmbError(`Failed to load stats: ${err}`);
     } finally {
         SessionMaintenance.hideLoader();
     }
@@ -266,7 +266,7 @@ async function getGraph(username, start, end, xAxis, yAxis) {
 
     } catch (err) {
         await SessionMaintenance.logBook("fullStats", "getGraph", `Error fetching graph: ${err}`, true);
-        alert("Failed to load graph data.");
+        await SessionMaintenance.cmbError(`Failed to load graph data: ${err}`);
         console.error(err);
     } finally {
         SessionMaintenance.hideLoader();
@@ -285,7 +285,7 @@ async function exportData(username, start, end) {
         const data = await res.json();
 
         if (!data || !Array.isArray(data) || data.length === 0) {
-            alert("No data found.");
+            await SessionMaintenance.cmbError(`No data found.`);
             return;
         }
 
@@ -325,12 +325,12 @@ async function exportData(username, start, end) {
         URL.revokeObjectURL(url);
 
         await SessionMaintenance.logBook("fullStats", "exportData", `Exported ${data.length} rows to CSV`);
-        alert("Export successful! Check your Downloads folder.");
+        await SessionMaintenance.cmbInfo(`Success`, `Exported ${data.length} rows to CSV`);
 
     } catch (err) {
         console.error("Error exporting data:", err);
         await SessionMaintenance.logBook("fullStats", "exportData", `Export failed: ${err}`, true);
-        alert("Failed to export data.");
+        await SessionMaintenance.cmbError(`Failed to export data: ${err}`);
     } finally {
         SessionMaintenance.hideLoader();
     }

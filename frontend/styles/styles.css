@@ -511,4 +511,146 @@ input:checked + .slider:before {
     color: var(--card-text);
 }
 
+/* ================================================================ */
+/* Message Box */
+/* ================================================================ */
+
+.message-box-card {
+    font-family: var(--font), serif;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0,0,0,0.75);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 9999;
+}
+
+/* Hide by default */
+.message-box-card.hidden {
+    display: none;
+}
+
+/* actual message box */
+.message-box-header {
+
+    animation: messageBoxEnter 0.18s ease-out;
+    background: var(--theme-dark);
+    border-radius: 0.5rem;
+    max-width: 320px;
+    width: 90%;
+    padding: 1.25rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.25);
+}
+
+.message-box-content {
+    text-align: center;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.message-box-title {
+    color: var(--theme);
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.message-box-message {
+    color: #ffffff;
+    font-size: 1.2rem;
+}
+
+.message-box-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.message-box-btn1 {
+    display: inline-flex;
+    padding: 0.5rem 1rem;
+    background-color: var(--theme);
+    color: #000000;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 500;
+    justify-content: center;
+    width: 100%;
+    border-radius: 0.375rem;
+    border: none;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    font-family: var(--font);
+}
+
+.message-box-btn2 {
+    display: inline-flex;
+    margin-top: 0.75rem;
+    padding: 0.5rem 1rem;
+    color: #ffffff;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 500;
+    justify-content: center;
+    width: 100%;
+    border-radius: 0.375rem;
+    border: 0 solid #000000;
+    background-color: #000000;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    font-family: var(--font);
+}
+
+.message-box-btn1,
+.message-box-btn2 {
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+    cursor: pointer;
+}
+
+/* Hover feedback */
+.message-box-btn1:hover,
+.message-box-btn2:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+/* Click feedback */
+.message-box-btn1:active,
+.message-box-btn2:active {
+    transform: translateY(1px) scale(0.97);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+@keyframes animate {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.09);
+    }
+}
+
+@keyframes messageBoxEnter {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 

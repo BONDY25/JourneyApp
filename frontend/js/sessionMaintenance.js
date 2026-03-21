@@ -99,7 +99,7 @@ export default class SessionMaintenance {
 
     // Calculate Consumption -------------------------------------------------------------------------
     static calculateConsumption(mpg, mode = "lper100", fig = 'Useful') {
-        if(!mpg || mpg <=0) return 0;
+        if (!mpg || mpg <= 0) return 0;
 
         const fuelType = localStorage.getItem("fuelType") || 'Petrol';
         const gallon = localStorage.getItem("gallon") || 'UK';
@@ -119,4 +119,108 @@ export default class SessionMaintenance {
         }
         return lp100;
     }
+
+
+// ==========================================================================================================
+// -- Custom Message Box --
+// ==========================================================================================================
+
+    // Info Message ----------------------------------------------------------------
+    static cmbInfo(title, message) {
+        return new Promise(resolve => {
+            this.hideLoader();
+            const box = document.getElementById("message-box");
+            const titleEl = document.getElementById("message-box-title");
+            const messageEl = document.getElementById("message-box-message");
+            const btn1 = document.getElementById("message-box-btn1");
+            const btn2 = document.getElementById("message-box-btn2");
+
+            // Show message
+            box.classList.remove("hidden");
+
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+
+            btn1.style.display = "flex";
+            btn1.textContent = "Okay";
+
+            btn1.focus();
+            btn2.style.display = "none";
+
+            // Button Click
+            btn1.onClick = () => {
+                box.classList.add("hidden");
+                resolve();
+            };
+        });
+    }
+
+    // Error Message ----------------------------------------------------
+    static cmbError(message){
+        return new Promise(resolve => {
+            this.hideLoader();
+
+            const box = document.getElementById("message-box");
+            const titleEl = document.getElementById("message-box-title");
+            const messageEl = document.getElementById("message-box-message");
+            const btn1 = document.getElementById("message-box-btn1");
+            const btn2 = document.getElementById("message-box-btn2");
+
+            // Show message
+            box.classList.remove("hidden");
+
+            titleEl.textContent = "Error";
+            messageEl.textContent = message;
+
+            btn1.style.display = "flex";
+            btn1.textContent = "Okay";
+
+            btn1.focus();
+            btn2.style.display = "none";
+
+            btn2.onClick = () => {
+                box.classList.remove("hidden");
+                resolve();
+            };
+        });
+    }
+
+    // Question Message (Yes/No) -----------------------------------------------------------
+    static cmbQuestion(title, message) {
+        return new Promise(resolve => {
+            this.hideLoader();
+
+            const box = document.getElementById("message-box");
+            const titleEl = document.getElementById("message-box-title");
+            const messageEl = document.getElementById("message-box-message");
+            const btn1 = document.getElementById("message-box-btn1");
+            const btn2 = document.getElementById("message-box-btn2");
+
+            // Show message
+            box.classList.remove("hidden");
+
+            titleEl.textContent = title;
+            messageEl.textContent = message;
+
+            btn1.style.display = "flex";
+            btn1.textContent = "Yes";
+
+            btn2.style.display="flex";
+            btn2.textContent = "No";
+
+            btn2.focus();
+
+            // Button Click
+            btn1.onClick = () => {
+                box.classList.remove("hidden");
+                resolve(true);
+            };
+            btn2.onClick = () => {
+                box.classList.remove("hidden");
+                resolve(false);
+            };
+
+        });
+    }
+
 }

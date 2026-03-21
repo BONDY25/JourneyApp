@@ -44,12 +44,12 @@ async function insertJourney(journeyData){
                 "submit.click",
                 `Journey Submission Successful. ${JSON.stringify(journeyData, null, 2)}`
             );
-            alert('Journey Saved!');
+            await SessionMaintenance.cmbInfo('Success','Journey Saved!');
             window.location.href = "home.html";
         } else {
             const err = await res.text();
             await SessionMaintenance.logBook("newJourney", "submit.click", `Journey Submission failed. ${err}`);
-            alert(`Error: ${err}`);
+            await SessionMaintenance.cmbError(`Error: ${err}`);
         }
     } catch (error) {
         await SessionMaintenance.logBook("newJourney", "submit.click", `Network Error: ${error}`, true);
@@ -157,7 +157,7 @@ submit.addEventListener('click', async (event) => {
 
     // Check if a description has been entered
     if (!checkFields(description)) {
-        alert('Please enter a description');
+        await SessionMaintenance.cmbError('Please enter a description');
         return;
     }
 

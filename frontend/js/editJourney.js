@@ -111,7 +111,7 @@ async function saveJourney() {
         });
 
         if (res.ok) {
-            alert("Journey updated successfully!");
+            await SessionMaintenance.cmbInfo(`Success`,`Journey updated successfully!`);
             await SessionMaintenance.logBook("saveJourney", "saveJourney", `Journey Saved successfully! ${JSON.stringify(updated)}`);
             window.location.href = "your-journeys.html";
         } else {
@@ -119,7 +119,7 @@ async function saveJourney() {
         }
     } catch (err) {
         await SessionMaintenance.logBook("editJourney", "saveJourney", `Error saving journey ${err}`, true);
-        alert("Failed to save changes.");
+        await SessionMaintenance.cmbError(`Failed to update journey: ${err}`);
     } finally {
         SessionMaintenance.hideLoader();
     }
@@ -136,14 +136,14 @@ async function deleteJourney() {
         });
 
         if (res.ok) {
-            alert("Journey deleted");
+            await SessionMaintenance.cmbInfo(`Success`,`Journey Deleted successfully!`);
             window.location.href = "your-journeys.html";
         } else {
             throw new Error("Delete failed");
         }
     } catch (err) {
         await SessionMaintenance.logBook("editJourney", "deleteJourney", `Error deleting journey ${err}`, true);
-        alert("failed to delete the journey");
+        await SessionMaintenance.cmbError(`failed to delete the journey: ${err}`);
     } finally {
         SessionMaintenance.hideLoader();
     }

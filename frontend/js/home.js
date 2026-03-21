@@ -235,7 +235,7 @@ async function load28DaySum(username) {
 
     } catch (err) {
         await SessionMaintenance.logBook("home", "load28DaySum", `Error fetching stats: ${err}`, true);
-        alert("Failed to load stats");
+        await SessionMaintenance.cmbError("Failed to load stats");
     } finally {
         SessionMaintenance.hideLoader();
     }
@@ -494,7 +494,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     console.log(localStorage.getItem('tankVolume'));
     console.log(localStorage.getItem('fuelCost'));
     if (!username) {
-        alert('Please Login');
+        await SessionMaintenance.cmbError('Please Login');
         window.location.href = "index.html";
         return;
     }
