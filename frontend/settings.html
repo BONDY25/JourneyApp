@@ -4,7 +4,7 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Journey App - Settings</title>
-    <link href="styles/styles.css" rel="stylesheet"/>
+    <link href="styles/styles-settings.css" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="assets/JourneyApp-logo-1.png"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 </head>
@@ -34,6 +34,11 @@
 <div id="loader" class="loader-overlay">
     <span class="loader"></span>
 </div>
+
+<!-- =========================================================================================================== -->
+<!-- App Container -->
+<!-- =========================================================================================================== -->
+
 <div id="app" class="app">
     <h1>Settings</h1>
     <div id="prams" class="stats">
@@ -42,11 +47,11 @@
         <form id="settingsForm">
             <!-- Tank Volume -->
             <label for="tankVolume">Default Tank Volume (L):</label>
-            <input type="number" id="tankVolume" step="0.1" min="0"/>
+            <input type="number" id="tankVolume" step="0.1" min="0" autocomplete="off"/>
 
             <!-- Fuel Cost -->
             <label for="fuelCost">Default Fuel Cost (£/L):</label>
-            <input type="number" id="fuelCost" step="0.001" min="0"/>
+            <input type="number" id="fuelCost" step="0.001" min="0" autocomplete="off"/>
 
             <!-- Gallon -->
             <label for="gallon-select">Gallon (US/UK):</label>
@@ -96,7 +101,7 @@
 
             <!-- New Password -->
             <label for="new-password">Update Password</label>
-            <input type="password" id="new-password"/>
+            <input type="password" id="new-password" autocomplete="off"/>
 
             <!-- <label for="theme-select">Choose Theme:</label>
              <select id="theme-select">
@@ -127,22 +132,22 @@
                      </select>
 
                      <label for="budget-amount">Budget Amount:</label>
-                     <input type="number" id="budget-amount" step="0.01" min="0"/>
+                     <input type="number" id="budget-amount" step="0.01" min="0" autocomplete="off"/>
 
                      <div id="resetDayContainer">
                          <label for="reset-day">Reset Day:</label>
                          <select id="reset-day"></select>
                      </div>
                  </div>
-
              </div>
-
-
              <button type="submit" class="button">Save</button>
          </form>
      </div>
 
+    <!-- =========================================================================================================== -->
     <!-- Navigation Bar -->
+    <!-- =========================================================================================================== -->
+
      <div id="nav-bar">
          <a href="home.html" class="nav-item" id="nav-home">
              <span class="material-symbols-outlined">home</span>
@@ -166,7 +171,11 @@
          </a>
      </div>
  </div>
- <!-- Link to the JavaScript file -->
+
+<!-- =========================================================================================================== -->
+<!-- Scripts -->
+<!-- =========================================================================================================== -->
+
 <script type="module" src="js/settings.js"></script>
 </body>
 </html>

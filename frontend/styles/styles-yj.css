@@ -39,12 +39,13 @@ body {
 
     /* Make sure padding/border count in box size */
     box-sizing: border-box;
-    height: 100%;
     margin: 0;
     padding: env(safe-area-inset-top, 8px)
     env(safe-area-inset-right, 8px)
     env(safe-area-inset-bottom, 8px)
     env(safe-area-inset-left, 8px);
+
+    height: 100vh;
 }
 
 /* Constrain app width for mobile-first look */
@@ -53,7 +54,9 @@ body {
     max-width: 500px; /* Keeps content centered, not too wide on desktop */
     min-height: 100%;
     margin-bottom: 20%;
-    height: 1440px;
+    height: 100vh;
+    display : flex;
+    flex-direction: column;
 }
 
 /* --------------------------------------------------------------------------- */
@@ -67,43 +70,18 @@ h1 {
     color: var(--text-color);
 }
 
-p {
-    /* Consistent spacing for paragraphs */
-    margin: 0.3rem 0;
-    font-size: 1rem;
-}
-
-hr {
-    /* Custom divider style */
-    border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
-    margin: 1rem 0;
-}
 
 /* Stats Card Styles */
 .stats {
     background-color: var(--accent-color);
     color: var(--card-text);
     border-radius: 10px;
-    padding: 1rem;
     margin-bottom: 1rem;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Soft drop shadow */
-}
 
-.stats h3 {
-    margin-top: 0; /* Prevents extra space at top */
-}
-
-.numbers p:nth-child(odd) {
-    background-color: var(--stat-color-1);
-    border-radius: 6px;
-    padding: 4px 6px;
-}
-
-.numbers p:nth-child(even) {
-    background-color: var(--stat-color-2);
-    border-radius: 6px;
-    padding: 4px 6px;
+    flex: 1;              /* Take remaining space */
+    overflow-y: auto;
+    padding: 1rem 1rem 80px;
 }
 
 /* --------------------------------------------------------------------------- */
@@ -181,66 +159,74 @@ hr {
 }
 
 /* --------------------------------------------------------------------------- */
-/* Form Styles */
-/* --------------------------------------------------------------------------- */
-
-form {
-    /* Container styling for forms */
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-
-    /* Matches accent theme */
-    background-color: var(--accent-color);
-    color: black;
-
-    /* Padding & rounded look */
-    padding: 20px;
-    border-radius: 10px;
-
-    /* Fit within parent but stay centered */
-    max-width: 90%;
-    margin: 20px auto;
-}
-
-form input, form select, form button {
-    /* Shared input/button styles */
-    padding: 10px;
-    border-radius: 5px;
-    border: none;
-    font-size: 1em;
-    font-family: var(--default-font);
-}
-
-/* --------------------------------------------------------------------------- */
 /* Table Styles */
 /* --------------------------------------------------------------------------- */
 
 #journeys-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0 10px;
     margin-top: 0.5rem;
+    padding: 0.5rem;
 }
 
+/* Shared cell styles */
 #journeys-table th,
 #journeys-table td {
     padding: 0.75rem;
     text-align: left;
 }
 
-#journeys-table th {
-    background-color: rgba(0, 0, 0, 0.1);
+/* Header */
+#journeys-table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #000;
+    color: #fff;
     font-weight: bold;
-    color: var(--card-text);
+    z-index: 1;
 }
 
-#journeys-table tr:nth-child(even) {
-    background-color: rgba(0, 0, 0, 0.05);
+/* Row "card" look */
+#journeys-table tbody tr {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-#journeys-table tr:hover {
-    background-color: rgba(0, 0, 0, 0.15);
+/* Cells (acts as the visible card surface) */
+#journeys-table tbody td {
+    background-color: #fff;
+}
+
+/* Rounded corners */
+#journeys-table tbody td:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+#journeys-table tbody td:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+#journeys-table thead th:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+#journeys-table thead th:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+/* Hover effects */
+#journeys-table tbody tr:hover {
+    transform: translateY(-2px);
     cursor: pointer;
+}
+
+#journeys-table tbody tr:hover td {
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
 /* --------------------------------------------------------------------------- */
@@ -356,160 +342,6 @@ form input, form select, form button {
 
 .nav-item.active .material-symbols-outlined {
     color: white;
-}
-
-/* --------------------------------------------------------------------------- */
-/* Budget Settings */
-/* --------------------------------------------------------------------------- */
-
-/* --- Budget Settings --- */
-#budgetSettings {
-    background: var(--card-bg, #1e1e1e);
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-top: 20px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
-}
-
-#budgetSettings input[type="number"],
-#budgetSettings select {
-    width: 100%;
-    box-sizing: border-box; /* <-- add this line */
-    padding: 8px 10px;
-    margin-top: 4px;
-    border: 1px solid #555;
-    border-radius: 8px;
-    background: #2a2a2a;
-    color: #fff;
-    font-size: 0.95rem;
-}
-
-#budgetFields {
-    display: none;
-    transition: all 0.3s ease;
-}
-#budgetFields.active {
-    display: block;
-}
-
-#budgetFields {
-    display: none;
-}
-
-#resetDayContainer {
-    display: none;
-}
-
-#budgetSettings h3 {
-    font-size: 1.2rem;
-    margin-bottom: 10px;
-    color: var(--accent-color, #ffd966);
-}
-
-/* Layout the fields neatly */
-#budgetSettings label {
-    display: block;
-    margin-top: 10px;
-    font-weight: 500;
-    color: var(--accent-color, #ffd966);
-}
-
-#budgetSettings input[type="number"],
-#budgetSettings select {
-    width: 100%;
-    padding: 8px 10px;
-    margin-top: 4px;
-    border: 1px solid #555;
-    border-radius: 8px;
-    background: #2a2a2a;
-    color: #fff;
-    font-size: 0.95rem;
-}
-
-/* Toggle switch styling (optional) */
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 46px;
-    height: 24px;
-    margin-top: 8px;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0; left: 0;
-    right: 0; bottom: 0;
-    background-color: #555;
-    transition: 0.3s;
-    border-radius: 24px;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    border-radius: 50%;
-    transition: 0.3s;
-}
-
-input:checked + .slider {
-    background-color: var(--accent-color, #ffd966);
-}
-
-input:checked + .slider:before {
-    transform: translateX(22px);
-}
-
-/* --------------------------------------------------------------------------- */
-/* Budget & Chart Styling */
-/* --------------------------------------------------------------------------- */
-
-#budgetCard {
-    background: var(--accent-color, #ffd966);
-    color: #000000;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-#budgetCard h3 {
-    font-family: inherit;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--card-text);
-}
-
-#budgetCard .summary-text {
-    font-family: inherit;
-    margin-top: 12px;
-    text-align: left;
-    font-size: 0.95rem;
-    border-radius: 6px;
-    padding: 4px 6px;
-    background-color: var(--stat-color-2);
-    color: var(--card-text);
-}
-
-#budgetChart {
-    background-color: var(--stat-color-2);
-    border-radius: 8px;
-}
-
-#statsGraph {
-    background-color: var(--stat-color-2);
-    border-radius: 8px;
-    color: var(--card-text);
 }
 
 /* ================================================================ */
@@ -653,5 +485,3 @@ input:checked + .slider:before {
         transform: translateY(0) scale(1);
     }
 }
-
-

@@ -363,12 +363,30 @@ getStatsBtn.addEventListener('click', async () => {
     sumStats.style.display = 'none';
 
     if (displayType.value === 'figures') {
+        // Figures
+        if(!start || !end) {
+            await SessionMaintenance.cmbError(`Please select a start & end date.`);
+            return;
+        }
         await getStats(username, start, end);
+
     } else if (displayType.value === 'graph') {
+        // Graph
         const xAxis = document.getElementById('x-axis').value;
         const yAxis = document.getElementById('y-axis').value;
+
+        if(!start || !end) {
+            await SessionMaintenance.cmbError(`Please select a start & end date.`);
+            return;
+        } else if (!xAxis || !yAxis){
+            await SessionMaintenance.cmbError(`Please select a X & Y axis values`);
+            return;
+        }
+
         await getGraph(username, start, end, xAxis, yAxis);
+
     } else if (displayType.value === 'export') {
+        // Export
         await exportData(username, start, end);
     }
 });

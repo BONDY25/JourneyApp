@@ -7,6 +7,7 @@ import SessionMaintenance from "./sessionMaintenance.js";
 
 const params = new URLSearchParams(window.location.search);
 const journeyId = params.get("id");
+const btnDelete = document.getElementById('deleteBtn');
 
 // ==========================================================================================================
 // -- Operational Functions --
@@ -127,8 +128,6 @@ async function saveJourney() {
 
 // Delete Journey -----------------------------------------------------------------------------
 async function deleteJourney() {
-    if (!confirm("Are you sure you want to delete this journey?")) return;
-
     try {
         SessionMaintenance.showLoader();
         const res = await fetch(`${API_BASE_URL}/api/journeys/${journeyId}`, {
@@ -165,6 +164,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         e.preventDefault();
         await saveJourney();
     });
+});
 
-    document.getElementById("deleteBtn").addEventListener("click", deleteJourney);
+// Delete Button -------------------------------------------------------------------------
+btnDelete.addEventListener("click", async ()=>{
+    const confirmed = await SessionMaintenance.cmbQuestion('Delete?', 'Are you sure you want to delete this journey?');
+    if (!confirmed) return;
+    await deleteJourney();
 });

@@ -4,7 +4,7 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Journey App - Home</title>
-    <link href="styles/styles.css" rel="stylesheet"/>
+    <link href="styles/styles-home.css" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="assets/JourneyApp-logo-1.png"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 </head>
@@ -34,9 +34,19 @@
 <div id="loader" class="loader-overlay">
     <span class="loader"></span>
 </div>
+
+<!-- =========================================================================================================== -->
+<!-- App Container -->
+<!-- =========================================================================================================== -->
+
 <div id="app" class="app" style="height:2200px">
     <h1>Journey App</h1>
     <div id="stats">
+
+        <!-- =========================================================================================================== -->
+        <!-- Budget -->
+        <!-- =========================================================================================================== -->
+
         <div id="budgetCard" class="stats" style="display: none">
             <h3>Budget</h3>
             <p id="budgetStatus" class="summary-text"></p>
@@ -46,6 +56,11 @@
             <p id="periodProgress" class="summary-text"></p>
         </div>
         <hr>
+
+        <!-- =========================================================================================================== -->
+        <!-- Summary -->
+        <!-- =========================================================================================================== -->
+
         <div id="sum-stats" class="stats numbers">
             <h3>Summary</h3>
             <p>Total Miles: <span id="totalMiles">0</span></p>
@@ -58,6 +73,11 @@
             <p>Average kWh/100km (Total): <span id="avgKwhTotal">0</span></p>
         </div>
         <hr>
+
+        <!-- =========================================================================================================== -->
+        <!-- Past 28 days -->
+        <!-- =========================================================================================================== -->
+
         <div id="Past 28 days" class="stats numbers">
             <h3>Past 28 Days</h3>
             <p>Total Miles: <span id="28Miles">0</span></p>
@@ -67,6 +87,11 @@
             <p>Average MPG: <span id="28Mpg">0</span></p>
         </div>
         <hr>
+
+        <!-- =========================================================================================================== -->
+        <!-- Costing -->
+        <!-- =========================================================================================================== -->
+
         <div id="detail-stats" class="stats numbers">
             <h3>Costing</h3>
             <p>Last 7 Days: <span id="seven">0</span></p>
@@ -77,6 +102,11 @@
             <p>Last 365 Days: <span id="threeSixFive">0</span></p>
         </div>
         <hr>
+
+        <!-- =========================================================================================================== -->
+        <!-- Insights -->
+        <!-- =========================================================================================================== -->
+
         <div id="insight-stats" class="stats numbers">
             <h3>Insights</h3>
             <h4>Distance</h4>
@@ -97,7 +127,10 @@
     </div>
 </div>
 
+<!-- =========================================================================================================== -->
 <!-- Navigation Bar -->
+<!-- =========================================================================================================== -->
+
 <div id="nav-bar">
     <a href="home.html" class="nav-item" id="nav-home">
         <span class="material-symbols-outlined">home</span>
@@ -120,7 +153,11 @@
         <span class="label">Settings</span>
     </a>
 </div>
-<!-- Link to the JavaScript file -->
+
+<!-- =========================================================================================================== -->
+<!-- Scripts -->
+<!-- =========================================================================================================== -->
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script type="module" src="js/home.js"></script>
 </body>

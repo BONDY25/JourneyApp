@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Journey</title>
-    <link rel="stylesheet" href="styles/styles.css">
+    <link rel="stylesheet" href="styles/styles-ej.css">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 </head>
 <body>
@@ -33,23 +33,38 @@
 <div id="loader" class="loader-overlay">
     <span class="loader"></span>
 </div>
+
+<!-- =========================================================================================================== -->
+<!-- App Container -->
+<!-- =========================================================================================================== -->
+
 <div id="app" class="app">
+
+    <!-- =========================================================================================================== -->
+    <!-- Header -->
+    <!-- =========================================================================================================== -->
+
     <h1>Edit Journey</h1>
+
+    <!-- =========================================================================================================== -->
+    <!-- Form -->
+    <!-- =========================================================================================================== -->
+
     <form id="editJourneyForm">
       <label for="datetime">Date & Time:</label>
       <input type="datetime-local" id="datetime" required>
 
         <label for="distance">Distance:</label>
-        <input type="number" id="distance" name="distance" step="0.1" required>
+        <input type="number" id="distance" name="distance" step="0.1" autocomplete="off" required>
 
         <label for="mpg">MPG:</label>
-        <input type="number" id="mpg" name="mpg" step="0.1" required>
+        <input type="number" id="mpg" name="mpg" step="0.1" autocomplete="off" required>
 
         <label for="timedriven">Time Driving:</label>
-        <input type="number" id="timedriven" name="timedriven" step="0.1" required>
+        <input type="number" id="timedriven" name="timedriven" step="0.1" autocomplete="off" required>
 
         <label for="temp">Temperature (°C)</label>
-        <input type="number" id="temp" step="0.1">
+        <input type="number" id="temp" step="0.1" autocomplete="off">
 
         <label for="condition">Condition</label>
         <select id="condition">
@@ -59,7 +74,11 @@
         </select>
 
         <label for="cost">Cost per L(£)</label>
-        <input type="number" id="cost" step="0.001" required>
+        <input type="number" id="cost" step="0.001" autocomplete="off" required>
+
+        <!-- =========================================================================================================== -->
+        <!-- Buttons -->
+        <!-- =========================================================================================================== -->
 
         <div class="button-group">
             <button type="submit" class="button">Save Changes</button>
@@ -70,7 +89,11 @@
         </div>
     </form>
 </div>
-<!-- Link to the JavaScript file -->
+
+<!-- =========================================================================================================== -->
+<!-- Scripts -->
+<!-- =========================================================================================================== -->
+
 <script type="module" src="js/editJourney.js"></script>
 </body>
 </html>

@@ -10,8 +10,8 @@
     --text-color: white; /* Default text colour */
     --card-bg: #fff; /* White cards */
     --card-text: #000; /* Black text for cards */
-    --button-bg: #00d916; /* Bright green button background */
-    --button-text: #000000; /* Black button text */
+    --button-bg: #000000; /* Bright green button background */
+    --button-text: #ffffff; /* Black button text */
     --stat-color-1: #be4702;
     --stat-color-2: #ff5d00;
     --default-font: 'Lexend', sans-serif;
@@ -20,6 +20,7 @@
 /* --------------------------------------------------------------------------- */
 /* Global Styles */
 /* --------------------------------------------------------------------------- */
+
 body {
     /* Remove default margin from browser */
     /* Background and text styling */
@@ -139,8 +140,8 @@ hr {
 }
 
 .button:hover {
-    background-color: #000000;
-    color: white;
+    background-color: #00d916;
+    color: #000000;
 }
 
 /* Import Button Styles */
@@ -213,37 +214,6 @@ form input, form select, form button {
 }
 
 /* --------------------------------------------------------------------------- */
-/* Table Styles */
-/* --------------------------------------------------------------------------- */
-
-#journeys-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 0.5rem;
-}
-
-#journeys-table th,
-#journeys-table td {
-    padding: 0.75rem;
-    text-align: left;
-}
-
-#journeys-table th {
-    background-color: rgba(0, 0, 0, 0.1);
-    font-weight: bold;
-    color: var(--card-text);
-}
-
-#journeys-table tr:nth-child(even) {
-    background-color: rgba(0, 0, 0, 0.05);
-}
-
-#journeys-table tr:hover {
-    background-color: rgba(0, 0, 0, 0.15);
-    cursor: pointer;
-}
-
-/* --------------------------------------------------------------------------- */
 /* Loading Spinner */
 /* --------------------------------------------------------------------------- */
 
@@ -310,7 +280,6 @@ form input, form select, form button {
 @keyframes rotate {
     to{transform:rotate(360deg)   }
 }
-
 
 /* --------------------------------------------------------------------------- */
 /* Nav bar */
@@ -471,47 +440,6 @@ input:checked + .slider:before {
     transform: translateX(22px);
 }
 
-/* --------------------------------------------------------------------------- */
-/* Budget & Chart Styling */
-/* --------------------------------------------------------------------------- */
-
-#budgetCard {
-    background: var(--accent-color, #ffd966);
-    color: #000000;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-#budgetCard h3 {
-    font-family: inherit;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--card-text);
-}
-
-#budgetCard .summary-text {
-    font-family: inherit;
-    margin-top: 12px;
-    text-align: left;
-    font-size: 0.95rem;
-    border-radius: 6px;
-    padding: 4px 6px;
-    background-color: var(--stat-color-2);
-    color: var(--card-text);
-}
-
-#budgetChart {
-    background-color: var(--stat-color-2);
-    border-radius: 8px;
-}
-
-#statsGraph {
-    background-color: var(--stat-color-2);
-    border-radius: 8px;
-    color: var(--card-text);
-}
-
 /* ================================================================ */
 /* Message Box */
 /* ================================================================ */
@@ -653,5 +581,3 @@ input:checked + .slider:before {
         transform: translateY(0) scale(1);
     }
 }
-
-

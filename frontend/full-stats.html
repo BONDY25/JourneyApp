@@ -4,7 +4,7 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Journey App - Full Stats</title>
-    <link href="styles/styles.css" rel="stylesheet"/>
+    <link href="styles/styles-full.css" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="assets/JourneyApp-logo-1.png"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 </head>
@@ -34,6 +34,11 @@
 <div id="loader" class="loader-overlay">
     <span class="loader"></span>
 </div>
+
+<!-- =========================================================================================================== -->
+<!-- App Container -->
+<!-- =========================================================================================================== -->
+
 <div id="app" class="app">
     <h1>Full Statistics</h1>
 
@@ -48,6 +53,10 @@
                 <option value="graph">Graph</option>
 <!--                <option value="export">Export</option>-->
             </select>
+
+            <!-- =========================================================================================================== -->
+            <!-- Graph -->
+            <!-- =========================================================================================================== -->
 
             <!-- X-Axis -->
             <div id="axisFields" style="display: none">
@@ -93,7 +102,10 @@
         <canvas id="statsGraph" width="400" height="200"></canvas>
     </div>
 
+    <!-- =========================================================================================================== -->
     <!-- Figure Stats -->
+    <!-- =========================================================================================================== -->
+
     <div id="sum-stats" class="stats numbers" style="display: none">
         <p>Total Miles: <span id="totalMiles">0</span></p>
         <p>Total Time Driven: <span id="totalTime">0</span></p>
@@ -112,7 +124,10 @@
         <p>Average Time Driven: <span id="avgTimeDriven">0</span></p>
     </div>
 
+    <!-- =========================================================================================================== -->
     <!-- Navigation Bar -->
+    <!-- =========================================================================================================== -->
+
     <div id="nav-bar">
         <a href="home.html" class="nav-item" id="nav-home">
             <span class="material-symbols-outlined">home</span>
@@ -137,7 +152,10 @@
     </div>
 </div>
 
-<!-- Link to the JavaScript file -->
+<!-- =========================================================================================================== -->
+<!-- Scripts -->
+<!-- =========================================================================================================== -->
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-trendline"></script>
 <script type="module" src="js/fullStats.js"></script>

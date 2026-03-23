@@ -187,7 +187,6 @@ export default class SessionMaintenance {
         });
     }
 
-
     // Question Message (Yes/No) -----------------------------------------------------------
     static cmbQuestion(title, message) {
         return new Promise(resolve => {
@@ -208,22 +207,20 @@ export default class SessionMaintenance {
             btn1.style.display = "flex";
             btn1.textContent = "Yes";
 
-            btn2.style.display="flex";
+            btn2.style.display = "flex";
             btn2.textContent = "No";
 
             btn2.focus();
 
-            // Button Click
+            // Button click
             btn1.onclick = () => {
-                box.classList.remove("hidden");
+                box.classList.add("hidden");
                 resolve(true);
             };
             btn2.onclick = () => {
-                box.classList.remove("hidden");
+                box.classList.add("hidden");
                 resolve(false);
             };
-
         });
     }
-
 }
