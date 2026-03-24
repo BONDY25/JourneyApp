@@ -267,6 +267,7 @@ p {
     align-items: center;
     justify-content: center;
     z-index: 9999;
+    backdrop-filter: blur(4px);
 }
 
 /* Hide by default */
@@ -378,17 +379,39 @@ p {
     width: 100%;
     height: 100%;
 
-    background: rgba(0,0,0,0.75);
+    background: rgba(0, 0, 0, 0.75);
 
     display: flex;
     align-items: center;
     justify-content: center;
 
     z-index: 9999;
+    backdrop-filter: blur(4px);
 }
 
 .journey-details-overlay.hidden {
     display : none;
+}
+
+.close-button {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+
+    cursor: pointer;
+    font-size: 28px;
+
+    color: #ffffff;
+    transition: color 0.2s ease, transform 0.1s ease;
+}
+
+.close-button:hover {
+    color: #000;
+    transform: scale(1.1);
+}
+
+.close-button:active {
+    transform: scale(0.95);
 }
 
 /* ================================================================ */
@@ -410,6 +433,7 @@ p {
     justify-content: center;
 
     z-index: 9999;
+    backdrop-filter: blur(4px);
 }
 
 /* Hide by default */

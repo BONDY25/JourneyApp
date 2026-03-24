@@ -6,7 +6,7 @@ import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
 
 const editButton = document.getElementById("btnEdit");
-const backbutton = document.getElementById("btnBack");
+const backbutton = document.getElementById("close-button");
 const currency = localStorage.getItem('currency');
 let journeyId = null;
 
