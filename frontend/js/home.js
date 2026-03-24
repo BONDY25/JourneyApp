@@ -367,9 +367,9 @@ async function loadBudget(username) {
         periodProgressText.textContent = `${newPeriod[0].toUpperCase() + newPeriod.slice(1)} Progress: ${periodProgress.toFixed(2)}%`;
 
         if (budgetProgress <= periodProgress) {
-            budgetStatusText.textContent = `You are under budget 👍`;
+            budgetStatusText.textContent = `You are on target 👍`;
         } else {
-            budgetStatusText.textContent = `You are over budget 👎`;
+            budgetStatusText.textContent = `You are off target 👎`;
         }
 
         let cumulativeCosts = [];

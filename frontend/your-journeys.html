@@ -34,8 +34,40 @@
 <div id="loader" class="loader-overlay">
     <span class="loader"></span>
 </div>
-<div id="app" class="app">
 
+<!-- =========================================================================================================== -->
+<!-- Journey Details Overlay -->
+<!-- =========================================================================================================== -->
+
+<div id="journey-details" class="journey-details-overlay hidden">
+    <div id="stats">
+        <h1>Journey Details</h1>
+        <div id="sum-stats" class="stats numbers">
+            <p><span id="DateTime">0000-00-00 00:00:00</span></p>
+            <p>Description: <span id="description">If you're reading this, Something went wrong</span></p>
+            <p>Distance: <span id="distance">0</span></p>
+            <p>Time Driving: <span id="timeDriven">0</span></p>
+            <p>Fuel Used: <span id="fuelUsedL">0</span></p>
+            <p>Cost: <span id="cost">0</span></p>
+            <p>MPG: <span id="mpg">0</span></p>
+            <p>L/100km: <span id="lpkm">0</span></p>
+            <p>kWh/100km (Useful): <span id="kWh">0</span></p>
+            <p>kWh/100km (Total): <span id="kWhTotal">0</span></p>
+            <p>Temperature: <span id="temp">0</span></p>
+            <p>condition: <span id="condition">0</span></p>
+            <p>Average Speed: <span id="avgSpeed">0</span></p>
+            <p>Cost Per Mile: <span id="costPerMile">0</span></p>
+            <p>% of Tank: <span id="percOfTank">0</span></p>
+
+            <div class=button-group>
+                <button class="button" id="btnEdit">Edit</button>
+                <button class="button" id="btnBack">Back</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="app" class="app">
     <!-- =========================================================================================================== -->
     <!-- App Container -->
     <!-- =========================================================================================================== -->
