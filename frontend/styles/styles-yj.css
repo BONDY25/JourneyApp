@@ -415,6 +415,21 @@ p {
     transform: scale(0.95);
 }
 
+.journey-details-card{
+    animation: JourneyDetailsEnter 0.18s ease-out;
+}
+
+@keyframes JourneyDetailsEnter {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 /* ================================================================ */
 /* Message Box */
 /* ================================================================ */
