@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Lexend:wght@100..900&family=Monsieur+La+Doulaise&family=Permanent+Marker&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
+
+        @page {
+            margin: 2cm 2cm 3cm 2cm;
+        }
+
+        :root {
+            --bg-color: #3a3a3a; /* Dark grey background */
+            --accent-color: #d95000; /* Bright orange highlight (cards, form backgrounds) */
+            --text-color: white; /* Default text colour */
+            --card-bg: #fff; /* White cards */
+            --card-text: #000; /* Black text for cards */
+            --button-bg: #00d916; /* Bright green button background */
+            --button-text: #000000; /* Black button text */
+            --stat-color-1: #be4702;
+            --stat-color-2: #ff5d00;
+            --default-font: 'Lexend', sans-serif;
+        }
+
+
+        body {
+            font-family: 'Lexend', sans-serif;
+            font-size: 15px;
+            color: #333;
+            line-height: 1.5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1cm;
+        }
+
+        .header-left {
+            width: 60%;
+        }
+
+        .logo {
+            height: 250px;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .company-info {
+            line-height: 1.4;
+        }
+
+        .invoice-meta {
+            text-align: right;
+        }
+
+        .invoice-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .recipient {
+            margin-bottom: 1cm;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            /*border-bottom: 1px solid #4f4f4f; */
+            margin-bottom: 1.5cm;
+        }
+
+        td {
+            padding: 6px 4px;
+            text-align: left;
+            vertical-align: top;
+            background: Black;
+            color: var(--text-color);
+        }
+
+        th {
+            padding: 6px 4px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        /* Rounded corners */
+        td:first-child {
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+
+        td:last-child {
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+
+        th:first-child {
+          border-top-left-radius: 10px;
+          border-bottom-left-radius: 10px;
+        }
+
+        th:last-child {
+          border-top-right-radius: 10px;
+          border-bottom-right-radius: 10px;
+        }
+
+        th {
+            background: var(--accent-color);
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        .totals {
+            width: 40%;
+            float: right;
+            margin-bottom: 0.5cm;
+        }
+
+        .totals td {
+            padding: 10px 10px;
+        }
+
+        .bottom-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5cm;
+            margin-bottom: 1.5cm;
+            page-break-inside: avoid;
+        }
+
+        .sender-details,
+        .bank-info {
+            width: 48%;
+        }
+
+        .bank-info {
+            text-align: right;
+        }
+
+        .notes {
+            clear: both;
+            margin-bottom: 1.5cm;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="header">
+    <div class="header-left">
+        <img class="logo" src="JourneyApp-logo-1.png" alt="Logo">
+    </div>
+    <div class="invoice-meta">
+        <div class="invoice-title">Journey Breakdown</div>
+        <div><strong>Journey ID:</strong> {JourneyID}</div>
+        <div><strong>Date:</strong> {JourneyDate}</div>
+        <div><strong>Print Date:</strong> {PrintDate}</div>
+    </div>
+</div>
+
+<div class="recipient">
+    <strong>User Name:</strong><br>{Username}<br>
+</div>
+<table>
+    <thead>
+    <tr>
+        <th>Description</th>
+        <th style="text-align: right;">{JourneyDescription}</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+        <td>Time Driven</td>
+        <td style="text-align: right;">{Time}</td>
+    </tr>
+    <tr>
+        <td>Fuel Price</td>
+        <td style="text-align: right;">{FuelPrice}</td>
+    </tr>
+    <tr>
+        <td>Distance</td>
+        <td style="text-align: right;">{Distance}</td>
+    </tr>
+    <tr>
+        <td>Cost Per Mile</td>
+        <td style="text-align: right;">{JourneyCostPerMile}</td>
+    </tr>
+    <tr>
+        <td>Fuel Used</td>
+        <td style="text-align: right;">{FuelUsed}</td>
+    </tr>
+    </tbody>
+</table>
+
+<div class="totals">
+    <table>
+        <tr>
+            <td><strong>Total:</strong></td>
+            <td style="text-align:right;"><strong>{TotalCost}</strong></td>
+        </tr>
+    </table>
+</div>
+
+<div class="bottom-container">
+    <div class="sender-details">
+        <strong>Payment Details</strong><br>
+        Name:<br>
+        Bank:<br>
+        Account No:<br>
+        Sort Code:
+    </div>
+
+
+</div>
+</body>
+</html>
