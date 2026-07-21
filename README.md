@@ -13,7 +13,7 @@ As of right now, both the MongoDB atlas and Render web hosting services I used a
 
 ## Current "To Do"
 
-* Add CO2 & Carbon footprint for journeys and stats (Litres used X 2.68 = CO2 released)
+* Add CO2 & Carbon footprint for journeys and stats (Litres used X 2.68 = KG of CO2 released (2.31 for petrol))
 * Add Breakdown export for journeys
 
 Links:
