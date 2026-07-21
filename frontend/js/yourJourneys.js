@@ -8,6 +8,7 @@ import { API_BASE_URL } from "./config.js";
 const editButton = document.getElementById("btnEdit");
 const backbutton = document.getElementById("close-button");
 const currency = localStorage.getItem('currency');
+const fuelType = localStorage.getItem("fuelType") || 'Petrol';
 let journeyId = null;
 
 const journeyDetailsCard= document.getElementById('journey-details');
@@ -107,6 +108,7 @@ async function getJourneyDetails() {
         const lpkm = SessionMaintenance.calculateConsumption(journey.mpg);
         const kWh = SessionMaintenance.calculateConsumption(journey.mpg, 'kwhper100');
         const kWhTotal = SessionMaintenance.calculateConsumption(journey.mpg, 'kwhper100', 'Total');
+        const carbonFoorprint = journey.fuelUsedL * (fuelType === 'petrol' ? 2.31 : 2.68);
 
         await SessionMaintenance.logBook("journeyDetails", "getJourney", `journey Data: ${JSON.stringify(journey)}`);
 
@@ -126,6 +128,7 @@ async function getJourneyDetails() {
         document.getElementById("lpkm").textContent = lpkm ? `${formatNumber(lpkm,2)}` : "0";
         document.getElementById("kWh").textContent = kWh ? `${formatNumber(kWh, 2)}` : "0";
         document.getElementById("kWhTotal").textContent = kWhTotal ? `${formatNumber(kWhTotal, 2)}` : "0";
+        document.getElementById("carbonFootprint").textContent = `${formatNumber(carbonFoorprint, 2)} KG of CO²` || "0";
 
         journeyDetailsCard.classList.remove('hidden');
 

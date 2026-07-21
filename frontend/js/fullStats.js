@@ -12,6 +12,7 @@ const displayType = document.getElementById('display-type');
 const axisFields = document.getElementById('axisFields');
 const sumStats = document.getElementById('sum-stats');
 const graphStats = document.getElementById("graph-stats");
+const fuelType = localStorage.getItem("fuelType") || 'Petrol';
 
 // ==========================================================================================================
 // -- Operational Functions --
@@ -30,6 +31,7 @@ async function getStats(username, start, end) {
         const lpkm = SessionMaintenance.calculateConsumption(data.avgMpg);
         const kWh = SessionMaintenance.calculateConsumption(data.avgMpg, 'kwhper100');
         const kWhTotal = SessionMaintenance.calculateConsumption(data.avgMpg, 'kwhper100', 'Total');
+        const carbonFoorprint = data.totalFuel * (fuelType === 'petrol' ? 2.31 : 2.68);
 
         await SessionMaintenance.logBook("fullStats", "getStats", `Full Stats retrieved: ${JSON.stringify(data, null, 2)}`);
 
@@ -94,6 +96,11 @@ async function getStats(username, start, end) {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
+        // Total CO2
+        document.getElementById('carbonFootprint').textContent = `${carbonFoorprint.toLocaleString(undefined, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+        })} KG of CO²`;
 
         sumStats.style.display = 'block';
     } catch (err) {

@@ -7,6 +7,7 @@ import SessionMaintenance from "./sessionMaintenance.js";
 import {API_BASE_URL} from "./config.js";
 
 const currency = localStorage.getItem('currency');
+const fuelType = localStorage.getItem("fuelType") || 'Petrol';
 
 // ==========================================================================================================
 // -- Operational Functions --
@@ -23,6 +24,9 @@ async function loadSummary(username) {
         const lpkm = SessionMaintenance.calculateConsumption(summary.avgMpg);
         const kWh = SessionMaintenance.calculateConsumption(summary.avgMpg, 'kwhper100');
         const kWhTotal = SessionMaintenance.calculateConsumption(summary.avgMpg, 'kwhper100', 'Total');
+        const totalJourneys = await SessionMaintenance.getTotalJourneys(username);
+        const carbonFoorprint = summary.totalFuel * (fuelType === 'petrol' ? 2.31 : 2.68);
+        const avgCarbonFp = carbonFoorprint / totalJourneys;
 
         // Total Miles
         document.getElementById('totalMiles').textContent = summary.totalMiles.toLocaleString(undefined, {
@@ -68,6 +72,18 @@ async function loadSummary(username) {
             maximumFractionDigits: 1
         });
 
+        // Total CO2
+        document.getElementById('carbonFootprint').textContent = `${carbonFoorprint.toLocaleString(undefined, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+        })} KG of CO²`;
+
+        // Average CO2
+        document.getElementById('avgCarbonFp').textContent = `${avgCarbonFp.toLocaleString(undefined, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+        })} KG of CO²`;
+
         await SessionMaintenance.logBook("home", "loadSummary", `Summary Loaded: ${summary}`);
     } catch (err) {
         console.error("error loading summary:", err);
@@ -87,6 +103,8 @@ async function loadInsights(username) {
         const summary = await res.json();
 
         const tankVolume = localStorage.getItem('tankVolume') || 63;
+        const carbonFoorprint = summary.totalFuel * (fuelType === 'petrol' ? 2.31 : 2.68);
+        const offset = carbonFoorprint / 21;
 
         // Times around the world
         document.getElementById('aroundWorld').textContent = (summary.totalMiles / 29901).toLocaleString(undefined, {
@@ -139,6 +157,12 @@ async function loadInsights(username) {
 
         // Times Bohemian Rhapsody could have played whilst driving
         document.getElementById('bohemPlayed').textContent = (summary.totalTime / 5.916).toLocaleString(undefined, {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        });
+
+        // Years to Offset CO2
+        document.getElementById('yearsOffset').textContent = offset.toLocaleString(undefined, {
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
         });
@@ -208,6 +232,8 @@ async function load28DaySum(username) {
         const data = await res.json();
         const formattedTime = data.totalTime > 60 ? data.totalTime / 60 : data.totalTime;
         const timeUnit = data.totalTime > 60 ? "Hours" : "Minutes";
+        const carbonFoorprint = data.totalFuel * (fuelType === 'petrol' ? 2.31 : 2.68);
+
 
         await SessionMaintenance.logBook("home", "load28DaySum", `28 Day Sum retrieved: ${JSON.stringify(data, null, 2)}`);
 
@@ -232,6 +258,10 @@ async function load28DaySum(username) {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         });
+        document.getElementById('28CarbonFp').textContent = `${carbonFoorprint.toLocaleString(undefined, {
+            minimumFractionDigits: 1,
+            maximumFractionDigits: 1
+        })} KG of CO²`;
 
     } catch (err) {
         await SessionMaintenance.logBook("home", "load28DaySum", `Error fetching stats: ${err}`, true);
@@ -490,9 +520,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     SessionMaintenance.highlightActivePage(currentPage);
 
     const username = localStorage.getItem('username').toLowerCase();
-    console.log(username);
-    console.log(localStorage.getItem('tankVolume'));
-    console.log(localStorage.getItem('fuelCost'));
     if (!username) {
         await SessionMaintenance.cmbError('Please Login');
         window.location.href = "index.html";

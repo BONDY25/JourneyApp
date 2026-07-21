@@ -19,23 +19,7 @@ const resetDaySelect = document.getElementById('reset-day');
 // Get total number of journeys ----------------------------------------------------------
 async function getTotalJourneys(username) {
     const totalElem = document.getElementById('totalJourneys');
-
-    try {
-        const res = await fetch(`${API_BASE_URL}/api/getTotalJourneys/${username}`);
-        if (!res.ok) throw new Error("Failed to fetch journeys");
-
-        const data = await res.json();
-        totalElem.textContent = data.total; // update DOM
-
-        await SessionMaintenance.logBook("settings", "getTotalJourneys", `Journey Total retrieved: ${data.total}`);
-
-        return data.total;
-    } catch (err) {
-        console.error("Error fetching total journeys:", err);
-        await SessionMaintenance.logBook("settings", "getTotalJourneys", `Network Error: ${err}`, true);
-        await SessionMaintenance.cmbError(`Error fetching total journeys: ${err}`);
-        return 0;
-    }
+    totalElem.textContent = await SessionMaintenance.getTotalJourneys(username)
 }
 
 // Update UI for reset day ----------------------------------------------------------

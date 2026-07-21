@@ -120,6 +120,24 @@ export default class SessionMaintenance {
         return lp100;
     }
 
+    // Get total number of journeys ----------------------------------------------------------
+    static async getTotalJourneys(username) {
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/getTotalJourneys/${username}`);
+            if (!res.ok) throw new Error("Failed to fetch journeys");
+
+            const data = await res.json();
+            await SessionMaintenance.logBook("sessionMaintenance", "getTotalJourneys", `Journey Total retrieved: ${data.total}`);
+
+            return data.total;
+        } catch (err) {
+            console.error("Error fetching total journeys:", err);
+            await SessionMaintenance.logBook("sessionMaintenance", "getTotalJourneys", `Network Error: ${err}`, true);
+            await SessionMaintenance.cmbError(`Error fetching total journeys: ${err}`);
+            return 0;
+        }
+    }
+
 
 // ==========================================================================================================
 // -- Custom Message Box --
