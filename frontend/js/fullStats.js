@@ -5,14 +5,50 @@
 import SessionMaintenance from "./sessionMaintenance.js";
 import {API_BASE_URL} from "./config.js";
 
-const currency = localStorage.getItem('currency');
-const getStatsBtn = document.getElementById('getStats');
+const SM = SessionMaintenance;
 
-const displayType = document.getElementById('display-type');
-const axisFields = document.getElementById('axisFields');
-const sumStats = document.getElementById('sum-stats');
-const graphStats = document.getElementById("graph-stats");
+const currency = localStorage.getItem('currency');
 const fuelType = localStorage.getItem("fuelType") || 'Petrol';
+
+// DOM Elements --------------------------------------------------------------------------------------
+const containers = {
+    axisFields: SM.$("axisFields"),
+    sumStats: SM.$("sum-stats"),
+    graphStats: SM.$("graph-stats"),
+}
+
+const elements = {
+    totalMiles: SM.$("totalMiles"),
+    totalTime: SM.$("totalTime"),
+    totalFuel: SM.$("totalFuel"),
+    totalCost: SM.$("totalCost"),
+    avgMilesPerTank: SM.$("avgMilesPerTank"),
+    avgMpg: SM.$("avgMpg"),
+    avgSpeed: SM.$("avgSpeed"),
+    avgCostPerDay: SM.$("avgCostPerDay"),
+    avgCostPerMile: SM.$("avgCostPerMile"),
+    avgFuelPrice: SM.$("avgFuelPrice"),
+    avgTemp: SM.$("avgTemp"),
+    avgTimeDriven: SM.$("avgTimeDriven"),
+    avgKwhTotal: SM.$("avgKwhTotal"),
+    avgLpkm: SM.$("avgLpkm"),
+    avgKwh: SM.$("avgKwh"),
+    carbonFootprint: SM.$("carbonFootprint"),
+    graphTitle: SM.$('graph-title'),
+    ctx: SM.$('statsGraph'),
+}
+
+const inputs = {
+    displayType: SM.$('display-type'),
+    startInput: SM.$('start'),
+    endInput: SM.$('end'),
+    xAxis: SM.$('x-axis'),
+    yAxis: SM.$('y-axis'),
+}
+
+const buttons = {
+    btnGetStats: SM.$('getStats')
+}
 
 // ==========================================================================================================
 // -- Operational Functions --
@@ -36,73 +72,73 @@ async function getStats(username, start, end) {
         await SessionMaintenance.logBook("fullStats", "getStats", `Full Stats retrieved: ${JSON.stringify(data, null, 2)}`);
 
         // Populate UI with Data
-        document.getElementById('totalMiles').textContent = data.totalMiles.toLocaleString(undefined, {
+        elements.totalMiles.textContent = data.totalMiles.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        document.getElementById('totalTime').textContent = `${formattedTime.toLocaleString(undefined, {
+        elements.totalTime.textContent = `${formattedTime.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         })} ${timeUnit}`;
-        document.getElementById('totalFuel').textContent = data.totalFuel.toLocaleString(undefined, {
+        elements.totalFuel.textContent = data.totalFuel.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        document.getElementById('totalCost').textContent = `${currency}${data.totalCost.toLocaleString(undefined, {
+        elements.totalCost.textContent = `${currency}${data.totalCost.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         })}`;
-        document.getElementById('avgMilesPerTank').textContent = data.avgMilesPerTank.toLocaleString(undefined, {
+        elements.avgMilesPerTank.textContent = data.avgMilesPerTank.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        document.getElementById('avgMpg').textContent = data.avgMpg.toLocaleString(undefined, {
+        elements.avgMpg.textContent = data.avgMpg.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        document.getElementById('avgSpeed').textContent = data.avgSpeed.toLocaleString(undefined, {
+        elements.avgSpeed.textContent = data.avgSpeed.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        document.getElementById('avgCostPerDay').textContent = `${currency}${data.avgCostPerDay.toLocaleString(undefined, {
+        elements.avgCostPerDay.textContent = `${currency}${data.avgCostPerDay.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         })}`;
-        document.getElementById('avgCostPerMile').textContent = `${currency}${data.avgCostPerMile.toLocaleString(undefined, {
+        elements.avgCostPerMile.textContent = `${currency}${data.avgCostPerMile.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         })}`;
-        document.getElementById('avgFuelPrice').textContent = `${currency}${data.avgFuelPrice.toLocaleString(undefined, {
+        elements.avgFuelPrice.textContent = `${currency}${data.avgFuelPrice.toLocaleString(undefined, {
             minimumFractionDigits: 3,
             maximumFractionDigits: 3
         })}`;
-        document.getElementById('avgTemp').textContent = data.avgTemp.toLocaleString(undefined, {
+        elements.avgTemp.textContent = data.avgTemp.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         });
-        document.getElementById('avgTimeDriven').textContent = data.avgTimeDriven.toLocaleString(undefined, {
+        elements.avgTimeDriven.textContent = data.avgTimeDriven.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        document.getElementById('avgLpkm').textContent = lpkm.toLocaleString(undefined, {
+        elements.avgLpkm.textContent = lpkm.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        document.getElementById('avgKwh').textContent = kWh.toLocaleString(undefined, {
+        elements.avgKwh.textContent = kWh.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        document.getElementById('avgKwhTotal').textContent = kWhTotal.toLocaleString(undefined, {
+        elements.avgKwhTotal.textContent = kWhTotal.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
         // Total CO2
-        document.getElementById('carbonFootprint').textContent = `${carbonFoorprint.toLocaleString(undefined, {
+        elements.carbonFootprint.textContent = `${carbonFoorprint.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         })} KG of CO²`;
 
-        sumStats.style.display = 'block';
+        containers.sumStats.style.display = 'block';
     } catch (err) {
         await SessionMaintenance.logBook("fullStats", "getStats", `Error fetching stats: ${err}`, true);
         await SessionMaintenance.cmbError(`Failed to load stats: ${err}`);
@@ -153,9 +189,9 @@ async function getGraph(username, start, end, xAxis, yAxis) {
             `Graph data retrieved: ${JSON.stringify(data, null, 2)})`
         );
 
-        graphStats.style.display = "block";
+        containers.graphStats.style.display = "block";
 
-        const ctx = document.getElementById("statsGraph").getContext("2d");
+        const ctx = elements.ctx.getContext("2d");
 
         // If a chart already exists, destroy it to avoid overlap
         if (window.currentGraph) {
@@ -182,8 +218,8 @@ async function getGraph(username, start, end, xAxis, yAxis) {
             // Create Scatter Graph
             const trendlineData = calculateAveragedTrendline(sorted);
 
-            const graphTitle = document.getElementById('graph-title');
-            graphTitle.textContent = `${fieldMap[yAxis]} vs ${fieldMap[xAxis]}`;
+
+            elements.graphTitle.textContent = `${fieldMap[yAxis]} vs ${fieldMap[xAxis]}`;
 
             window.currentGraph = new Chart(ctx, {
                 type: "scatter",
@@ -358,51 +394,51 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Get Stats Button Click --------------------------------------------------------------------------
-getStatsBtn.addEventListener('click', async () => {
-    await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", `Get Stats button clicked (${displayType.value})`);
+buttons.btnGetStats.addEventListener('click', async () => {
+    await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", `Get Stats button clicked (${inputs.displayType.value})`);
 
     // Declare Variables
     const username = localStorage.getItem('username').toLowerCase();
-    const start = document.getElementById('start').value;
-    const end = document.getElementById('end').value;
+    const start = inputs.startInput.value;
+    const end = inputs.endInput.value;
 
-    graphStats.style.display = "none";
-    sumStats.style.display = 'none';
+    containers.graphStats.style.display = "none";
+    containers.sumStats.style.display = 'none';
 
-    if (displayType.value === 'figures') {
+    if (inputs.displayType.value === 'figures') {
         // Figures
-        if(!start || !end) {
+        if (!start || !end) {
             await SessionMaintenance.cmbError(`Please select a start & end date.`);
             return;
         }
         await getStats(username, start, end);
 
-    } else if (displayType.value === 'graph') {
+    } else if (inputs.displayType.value === 'graph') {
         // Graph
-        const xAxis = document.getElementById('x-axis').value;
-        const yAxis = document.getElementById('y-axis').value;
+        const xAxis = inputs.xAxis.value;
+        const yAxis = inputs.yAxis.value;
 
-        if(!start || !end) {
+        if (!start || !end) {
             await SessionMaintenance.cmbError(`Please select a start & end date.`);
             return;
-        } else if (!xAxis || !yAxis){
+        } else if (!xAxis || !yAxis) {
             await SessionMaintenance.cmbError(`Please select a X & Y axis values`);
             return;
         }
 
         await getGraph(username, start, end, xAxis, yAxis);
 
-    } else if (displayType.value === 'export') {
+    } else if (inputs.displayType.value === 'export') {
         // Export
         await exportData(username, start, end);
     }
 });
 
 // Display type changed --------------------------------------------------------------------------
-displayType.addEventListener('change', () => {
-    if (displayType.value === 'figures') {
-        axisFields.style.display = 'none';
-    } else if (displayType.value === 'graph') {
-        axisFields.style.display = 'block';
+inputs.displayType.addEventListener('change', () => {
+    if (inputs.displayType.value === 'figures') {
+        containers.axisFields.style.display = 'none';
+    } else if (inputs.displayType.value === 'graph') {
+        containers.axisFields.style.display = 'block';
     }
 })

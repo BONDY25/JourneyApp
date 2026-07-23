@@ -6,9 +6,25 @@ import SessionMaintenance from "./sessionMaintenance.js";
 import {API_BASE_URL} from "./config.js";
 
 // Get Submit button
-const submit = document.getElementById('submit');
 const distanceUnit = localStorage.getItem('distanceUnit') || "miles";
 const speedUnit = localStorage.getItem('speedUnit') || "mph";
+const SM = SessionMaintenance;
+
+// DOM Elements --------------------------------------------------------------------------------------
+const inputs = {
+    descriptionInput: SM.$("description"),
+    dateInput: SM.$("datetime"),
+    distanceInput: SM.$("distance"),
+    mpgInput: SM.$("mpg"),
+    timeDrivenInput: SM.$("timeDriven"),
+    tempInput: SM.$("temp"),
+    conditionInput: SM.$("condition"),
+    costInput: SM.$("cost"),
+}
+
+const buttons = {
+    btnSubmit: SM.$('submit'),
+}
 
 // ==========================================================================================================
 // -- Operational Functions --
@@ -66,21 +82,20 @@ async function calculateValues({timeUnit = 'minutes'} = {}) {
     const tankVolume = Number(localStorage.getItem('tankVolume')) || 64;
 
     // Get Elements safely
-    const getValue = (id, type = 'string') => {
-        const el = document.getElementById(id);
+    const getValue = (el, type = 'string') => {
         if (!el || el.value === '') return type === 'number' ? 0 : '';
         return type === 'number' ? Number(el.value) : String(el.value);
     };
 
-    const description = getValue('description');
-    const dateTimeRaw = getValue('datetime');
+    const description = getValue(inputs.descriptionInput);
+    const dateTimeRaw = getValue(inputs.dateInput);
     const dateTime = dateTimeRaw ? new Date(dateTimeRaw) : new Date();
-    const mpg = getValue('mpg', 'number');
-    const distance = getValue('distance', 'number');
-    const timeDriven = getValue('timeDriven', 'number');
-    const temp = getValue('temp', 'number');
-    const condition = getValue('condition');
-    const costPerLitre = getValue('cost', 'number');
+    const mpg = getValue(inputs.mpgInput, 'number');
+    const distance = getValue(inputs.distanceInput, 'number');
+    const timeDriven = getValue(inputs.timeDrivenInput, 'number');
+    const temp = getValue(inputs.tempInput, 'number');
+    const condition = getValue(inputs.conditionInput);
+    const costPerLitre = getValue(inputs.costInput, 'number');
 
     // Calculate Helpers
     //const distanceMiles = distanceUnit === 'miles' ? distance : distance / 1.609;
@@ -138,7 +153,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     SessionMaintenance.hideLoader();
 
-    const costField = document.getElementById('cost');
+    const costField = inputs.costInput;
     if (costField) {
         const storedCost = localStorage.getItem('fuelCost');
         costField.value = storedCost !== null ? parseFloat(storedCost) : 0;
@@ -148,12 +163,12 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Event Listener to submit form ---------------------------------------------------------------------
-submit.addEventListener('click', async (event) => {
+buttons.btnSubmit.addEventListener('click', async (event) => {
     event.preventDefault(); // Stop form reload
     await SessionMaintenance.logBook("newJourney", "submit.click", "Journey Submission attempted.");
 
     const journeyData = await calculateValues();
-    const description = String(document.getElementById('description').value);
+    const description = String(inputs.descriptionInput.value);
 
     // Check if a description has been entered
     if (!checkFields(description)) {

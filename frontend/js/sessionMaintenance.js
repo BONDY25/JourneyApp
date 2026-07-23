@@ -12,6 +12,7 @@ export default class SessionMaintenance {
     static appName = "journeyApp";
     static sessionId = null;
     static username = null;
+    static $ = (id) => document.getElementById(id);
 
     // ==========================================================================================================
     // -- Operational Functions --

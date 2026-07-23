@@ -8,6 +8,51 @@ import {API_BASE_URL} from "./config.js";
 
 const currency = localStorage.getItem('currency');
 const fuelType = localStorage.getItem("fuelType") || 'Petrol';
+const SM = SessionMaintenance;
+
+// DOM Elements --------------------------------------------------------------------------------------
+const containers = {
+    summaryStats: SM.$("sum-stats"),
+    budgetContainer: SM.$("budgetCard")
+}
+
+const elements = {
+    budgetSummary: SM.$("budgetSummary"),
+    budgetProgress: SM.$("budgetProgress"),
+    periodProgress: SM.$("periodProgress"),
+    totalMiles: SM.$("totalMiles"),
+    totalTime: SM.$("totalTime"),
+    totalFuel: SM.$("totalFuel"),
+    totalCost: SM.$("totalCost"),
+    carbonFootprint: SM.$("carbonFootprint"),
+    avgMpg: SM.$("avgMpg"),
+    avgLpkm: SM.$("avgLpkm"),
+    avgKwh: SM.$("avgKwh"),
+    avgKwhTotal: SM.$("avgKwhTotal"),
+    avgCarbonFp: SM.$("avgCarbonFp"),
+    TwntEtMiles:SM.$("28Miles"),
+    TwntEtTime:SM.$("28Time"),
+    TwntEtFuel:SM.$("28Fuel"),
+    TwntEtCost:SM.$("28Cost"),
+    TwntEtMpg:SM.$("28Mpg"),
+    TwntEtCarbonFp:SM.$("28CarbonFp"),
+    seven:SM.$("seven"),
+    fourteen:SM.$("fourteen"),
+    twentyEight:SM.$("twentyEight"),
+    ninty:SM.$("ninty"),
+    sixMonth:SM.$("sixMonth"),
+    threeSixFive: SM.$("threeSixFive"),
+    aroundWorld:SM.$("aroundWorld"),
+    longestDistance:SM.$("longestDistance"),
+    moonProgress:SM.$("moonProgress"),
+    yearsDriven:SM.$("yearsDriven"),
+    longestTime:SM.$("longestTime"),
+    bohemPlayed:SM.$("bohemPlayed"),
+    bestJourney:SM.$("bestJourney"),
+    tanksUsed:SM.$("tanksUsed"),
+    olympicPools:SM.$("olympicPools"),
+    yearsOffset:SM.$("yearsOffset"),
+}
 
 // ==========================================================================================================
 // -- Operational Functions --
@@ -29,57 +74,57 @@ async function loadSummary(username) {
         const avgCarbonFp = carbonFoorprint / totalJourneys;
 
         // Total Miles
-        document.getElementById('totalMiles').textContent = summary.totalMiles.toLocaleString(undefined, {
+        elements.totalMiles.textContent = summary.totalMiles.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         });
         // Total Time
-        document.getElementById('totalTime').textContent = `${formattedTime.toLocaleString(undefined, {
+        elements.totalTime.textContent = `${formattedTime.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         })} ${timeUnit}`;
         // Total Fuel
-        document.getElementById('totalFuel').textContent = summary.totalFuel.toLocaleString(undefined, {
+        elements.totalFuel.textContent = summary.totalFuel.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         }) + " L";
         // Total Cost
-        document.getElementById('totalCost').textContent = currency + summary.totalCost.toLocaleString(undefined, {
+        elements.totalCost.textContent = currency + summary.totalCost.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
         // Average MPG
-        document.getElementById('avgMpg').textContent = summary.avgMpg.toLocaleString(undefined, {
+        elements.avgMpg.textContent = summary.avgMpg.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         });
 
         // Average L/100km
-        document.getElementById('avgLpkm').textContent = lpkm.toLocaleString(undefined, {
+        elements.avgLpkm.textContent = lpkm.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         });
 
         // Average kWh/100km Useful
-        document.getElementById('avgKwh').textContent = kWh.toLocaleString(undefined, {
+        elements.avgKwh.textContent = kWh.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         });
 
         // Average kWh/100km Total
-        document.getElementById('avgKwhTotal').textContent = kWhTotal.toLocaleString(undefined, {
+        elements.avgKwhTotal.textContent = kWhTotal.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         });
 
         // Total CO2
-        document.getElementById('carbonFootprint').textContent = `${carbonFoorprint.toLocaleString(undefined, {
+        elements.carbonFootprint.textContent = `${carbonFoorprint.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         })} KG of CO²`;
 
         // Average CO2
-        document.getElementById('avgCarbonFp').textContent = `${avgCarbonFp.toLocaleString(undefined, {
+        elements.avgCarbonFp.textContent = `${avgCarbonFp.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         })} KG of CO²`;
@@ -107,62 +152,62 @@ async function loadInsights(username) {
         const offset = carbonFoorprint / 21;
 
         // Times around the world
-        document.getElementById('aroundWorld').textContent = (summary.totalMiles / 29901).toLocaleString(undefined, {
+        elements.aroundWorld.textContent = (summary.totalMiles / 29901).toLocaleString(undefined, {
             minimumFractionDigits: 3,
             maximumFractionDigits: 3
         });
 
         // Years Driving
-        document.getElementById('yearsDriven').textContent = (summary.totalTime / 525600).toLocaleString(undefined, {
+        elements.yearsDriven.textContent = (summary.totalTime / 525600).toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
 
         // Longest Distance
-        document.getElementById('longestDistance').textContent = `${summary.longestDistance.toLocaleString(undefined, {
+        elements.longestDistance.textContent = `${summary.longestDistance.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         })} Miles`;
 
         // Longest Time
-        document.getElementById('longestTime').textContent = `${summary.longestTime.toLocaleString(undefined, {
+        elements.longestTime.textContent = `${summary.longestTime.toLocaleString(undefined, {
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
         })} Minutes`;
 
         // Best Journey
-        document.getElementById('bestJourney').textContent = `${summary.bestMpg.toLocaleString(undefined, {
+        elements.bestJourney.textContent = `${summary.bestMpg.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         })} MPG`;
 
 
         // Tanks Used
-        document.getElementById('tanksUsed').textContent = (summary.totalFuel / tankVolume).toLocaleString(undefined, {
+        elements.tanksUsed.textContent = (summary.totalFuel / tankVolume).toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
 
         // Progress to the moon
-        document.getElementById('moonProgress').textContent = `${((summary.totalMiles / 238855) * 100).toLocaleString(undefined, {
+        elements.moonProgress.textContent = `${((summary.totalMiles / 238855) * 100).toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         })}%`;
 
         // Olympic Pools Used
-        document.getElementById('olympicPools').textContent = `${((summary.totalFuel / 2500000) * 100).toLocaleString(undefined, {
+        elements.olympicPools.textContent = `${((summary.totalFuel / 2500000) * 100).toLocaleString(undefined, {
             minimumFractionDigits: 3,
             maximumFractionDigits: 3
         })}%`;
 
         // Times Bohemian Rhapsody could have played whilst driving
-        document.getElementById('bohemPlayed').textContent = (summary.totalTime / 5.916).toLocaleString(undefined, {
+        elements.bohemPlayed.textContent = (summary.totalTime / 5.916).toLocaleString(undefined, {
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
         });
 
         // Years to Offset CO2
-        document.getElementById('yearsOffset').textContent = offset.toLocaleString(undefined, {
+        elements.yearsOffset.textContent = offset.toLocaleString(undefined, {
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
         });
@@ -184,27 +229,27 @@ async function loadCosts(username) {
 
         const data = await res.json();
 
-        document.getElementById("seven").textContent = currency + data.cost.seven.toLocaleString(undefined, {
+        elements.seven.textContent = currency + data.cost.seven.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        document.getElementById("fourteen").textContent = currency + data.cost.fourteen.toLocaleString(undefined, {
+        elements.fourteen.textContent = currency + data.cost.fourteen.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        document.getElementById("twentyEight").textContent = currency + data.cost.twentyEight.toLocaleString(undefined, {
+        elements.twentyEight.textContent = currency + data.cost.twentyEight.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        document.getElementById("ninty").textContent = currency + data.cost.ninty.toLocaleString(undefined, {
+        elements.ninty.textContent = currency + data.cost.ninty.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        document.getElementById("sixMonth").textContent = currency + data.cost.sixMonth.toLocaleString(undefined, {
+        elements.sixMonth.textContent = currency + data.cost.sixMonth.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        document.getElementById("threeSixFive").textContent = currency + data.cost.threeSixFive.toLocaleString(undefined, {
+        elements.threeSixFive.textContent = currency + data.cost.threeSixFive.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
@@ -238,27 +283,27 @@ async function load28DaySum(username) {
         await SessionMaintenance.logBook("home", "load28DaySum", `28 Day Sum retrieved: ${JSON.stringify(data, null, 2)}`);
 
         // Populate UI with Data
-        document.getElementById('28Miles').textContent = data.totalMiles.toLocaleString(undefined, {
+        elements.TwntEtMiles.textContent = data.totalMiles.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        document.getElementById('28Time').textContent = `${formattedTime.toLocaleString(undefined, {
+        elements.TwntEtTime.textContent = `${formattedTime.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         })} ${timeUnit}`;
-        document.getElementById('28Fuel').textContent = data.totalFuel.toLocaleString(undefined, {
+        elements.TwntEtFuel.textContent = data.totalFuel.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
-        document.getElementById('28Cost').textContent = `${currency}${data.totalCost.toLocaleString(undefined, {
+        elements.TwntEtCost.textContent = `${currency}${data.totalCost.toLocaleString(undefined, {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         })}`;
-        document.getElementById('28Mpg').textContent = data.avgMpg.toLocaleString(undefined, {
+        elements.TwntEtMpg.textContent = data.avgMpg.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         });
-        document.getElementById('28CarbonFp').textContent = `${carbonFoorprint.toLocaleString(undefined, {
+        elements.TwntEtCarbonFp.textContent = `${carbonFoorprint.toLocaleString(undefined, {
             minimumFractionDigits: 1,
             maximumFractionDigits: 1
         })} KG of CO²`;
@@ -348,12 +393,12 @@ async function loadBudget(username) {
 
         // Return if budget not enabled
         if (!data.enabled) {
-            document.getElementById('budgetCard').style.display = 'none';
+            containers.budgetContainer.style.display = 'none';
             return;
         }
 
         // show budget card
-        const card = document.getElementById('budgetCard');
+        const card = containers.budgetContainer;
         card.style.display = 'block';
 
         // Start budget statement
