@@ -11,10 +11,14 @@ As of right now, both the MongoDB atlas and Render web hosting services I used a
 
 **Currently in phase 2 After getting basic functionallity complete so users can view, add and edit journeys. Now for QoL imporvements and some more interesting features!**
 
+---
+
 ## Current "To Do"
 
-* Add CO2 & Carbon footprint for journeys and stats (Litres used X 2.68 = KG of CO2 released (2.31 for petrol))
+* Apply multi Vehicle support update to graphing on full stats page
 * Add Breakdown export for journeys
+
+---
 
 Links:
 
