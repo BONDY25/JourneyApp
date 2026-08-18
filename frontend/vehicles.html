@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Journey App - Your Journeys</title>
-    <link href="styles/styles-yj.css" rel="stylesheet"/>
+    <title>Journey App - Your Vehicles</title>
+    <link href="styles/styles-yv.css" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="assets/JourneyApp-logo-1.png"/>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
 </head>
@@ -31,7 +31,7 @@
 <!-- Loader Overlay -->
 <!-- =========================================================================================================== -->
 
-<div id="loader" class="loader-overlay">
+<div id="loader" class="loader-overlay hidden">
     <span class="loader"></span>
 </div>
 
@@ -39,34 +39,37 @@
 <!-- Journey Details Overlay -->
 <!-- =========================================================================================================== -->
 
-<div id="journey-details" class="journey-details-overlay hidden">
+<div id="vehicle-details" class="journey-details-overlay hidden">
     <div class="journey-details-card">
-        <span id="close-button" class="material-symbols-outlined close-button">close</span>
+        <span id="btnClose" class="material-symbols-outlined close-button">close</span>
         <div id="stats">
-            <h1>Journey Details</h1>
-            <div id="sum-stats" class="stats numbers">
-                <p><span id="DateTime">0000-00-00 00:00:00</span></p>
-                <p>Description: <span id="description">If you're reading this, Something went wrong</span></p>
-                <p>Vehicle: <span id="vehicle">Vroom</span></p>
-                <p>Distance: <span id="distance">0</span></p>
-                <p>Time Driving: <span id="timeDriven">0</span></p>
-                <p>Fuel Used: <span id="fuelUsedL">0</span></p>
-                <p>Cost: <span id="cost">0</span></p>
-                <p>MPG: <span id="mpg">0</span></p>
-                <p>L/100km: <span id="lpkm">0</span></p>
-                <p>kWh/100km (Useful): <span id="kWh">0</span></p>
-                <p>kWh/100km (Total): <span id="kWhTotal">0</span></p>
-                <p>Temperature: <span id="temp">0</span></p>
-                <p>condition: <span id="condition">0</span></p>
-                <p>Average Speed: <span id="avgSpeed">0</span></p>
-                <p>Cost Per Mile: <span id="costPerMile">0</span></p>
-                <p>% of Tank: <span id="percOfTank">0</span></p>
-                <p>Carbon Footprint: <span id="carbonFootprint">0</span></p>
+            <h1>Vehicle Details</h1>
+            <form id="journey-form">
+                <!-- Vehicle Name -->
+                <label for="vehicle-name">Name</label>
+                <input type="text" id="vehicle-name" autocomplete="off" required>
 
-                <div class=button-group>
-                    <button class="button" id="btnEdit">Edit</button>
-                </div>
-            </div>
+                <!-- Vehicle model -->
+                <label for="vehicle-model">Make & Model</label>
+                <input type="text" id="vehicle-model" autocomplete="off" required>
+
+                <!-- Fuel type -->
+                <label for="fuelType">Fuel Type</label>
+                <select id="fuelType">
+                    <option value="Petrol">Petrol</option>
+                    <option value="Diesel">Diesel</option>
+                </select>
+
+                <!-- Tank Volume -->
+                <label for="tankVolume">Tank Volume (L)</label>
+                <input type="number" id="tankVolume" step="0.1" min="0" autocomplete="off"/>
+
+                <!-- last Fuel Cost -->
+                <label for="lastCostPL">Last Cost per L(£)</label>
+                <input type="number" id="lastCostPL" step="0.001" autocomplete="off" required>
+
+                <button class="button" id="btnSave">Save</button>
+            </form>
         </div>
     </div>
 </div>
@@ -76,20 +79,17 @@
     <!-- App Container -->
     <!-- =========================================================================================================== -->
 
-    <h1>Your Journeys</h1>
+    <h1>Your Vehicles</h1>
     <div id="table-container" class="stats">
-        <table id="journeys-table">
-            <thead>
-            <tr>
-                <th>Date/Time</th>
-                <th>Description</th>
-                <th>Distance (miles)</th>
-            </tr>
-            </thead>
+        <table id="vehicle-table">
             <tbody>
             <!-- rows will go here dynamically -->
             </tbody>
         </table>
+    </div>
+    <div class=button-group>
+        <button class="button" id="btnAdd">New Vehicle</button>
+        <button class="button" id="btnBack">Back</button>
     </div>
 
     <!-- =========================================================================================================== -->
@@ -124,6 +124,6 @@
 <!-- Scripts -->
 <!-- =========================================================================================================== -->
 
-<script type="module" src="js/yourJourneys.js"></script>
+<script type="module" src="js/vehicles.js"></script>
 </body>
 </html>

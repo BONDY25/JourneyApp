@@ -3,17 +3,19 @@
 // ==========================================================================================================
 
 import SessionMaintenance from "./sessionMaintenance.js";
-
 import {API_BASE_URL} from "./config.js";
 
 const currency = localStorage.getItem('currency');
-const fuelType = localStorage.getItem("fuelType") || 'Petrol';
 const SM = SessionMaintenance;
 
 // DOM Elements --------------------------------------------------------------------------------------
 const containers = {
     summaryStats: SM.$("sum-stats"),
     budgetContainer: SM.$("budgetCard")
+}
+
+const buttons = {
+    btnLogOut: SM.$("btnLogOut"),
 }
 
 const elements = {
@@ -30,28 +32,28 @@ const elements = {
     avgKwh: SM.$("avgKwh"),
     avgKwhTotal: SM.$("avgKwhTotal"),
     avgCarbonFp: SM.$("avgCarbonFp"),
-    TwntEtMiles:SM.$("28Miles"),
-    TwntEtTime:SM.$("28Time"),
-    TwntEtFuel:SM.$("28Fuel"),
-    TwntEtCost:SM.$("28Cost"),
-    TwntEtMpg:SM.$("28Mpg"),
-    TwntEtCarbonFp:SM.$("28CarbonFp"),
-    seven:SM.$("seven"),
-    fourteen:SM.$("fourteen"),
-    twentyEight:SM.$("twentyEight"),
-    ninty:SM.$("ninty"),
-    sixMonth:SM.$("sixMonth"),
+    TwntEtMiles: SM.$("28Miles"),
+    TwntEtTime: SM.$("28Time"),
+    TwntEtFuel: SM.$("28Fuel"),
+    TwntEtCost: SM.$("28Cost"),
+    TwntEtMpg: SM.$("28Mpg"),
+    TwntEtCarbonFp: SM.$("28CarbonFp"),
+    seven: SM.$("seven"),
+    fourteen: SM.$("fourteen"),
+    twentyEight: SM.$("twentyEight"),
+    ninty: SM.$("ninty"),
+    sixMonth: SM.$("sixMonth"),
     threeSixFive: SM.$("threeSixFive"),
-    aroundWorld:SM.$("aroundWorld"),
-    longestDistance:SM.$("longestDistance"),
-    moonProgress:SM.$("moonProgress"),
-    yearsDriven:SM.$("yearsDriven"),
-    longestTime:SM.$("longestTime"),
-    bohemPlayed:SM.$("bohemPlayed"),
-    bestJourney:SM.$("bestJourney"),
-    tanksUsed:SM.$("tanksUsed"),
-    olympicPools:SM.$("olympicPools"),
-    yearsOffset:SM.$("yearsOffset"),
+    aroundWorld: SM.$("aroundWorld"),
+    longestDistance: SM.$("longestDistance"),
+    moonProgress: SM.$("moonProgress"),
+    yearsDriven: SM.$("yearsDriven"),
+    longestTime: SM.$("longestTime"),
+    bohemPlayed: SM.$("bohemPlayed"),
+    bestJourney: SM.$("bestJourney"),
+    tanksUsed: SM.$("tanksUsed"),
+    olympicPools: SM.$("olympicPools"),
+    yearsOffset: SM.$("yearsOffset"),
 }
 
 // ==========================================================================================================
@@ -61,169 +63,375 @@ const elements = {
 // Load summary --------------------------------------------------------------------------------------
 async function loadSummary(username) {
     try {
-        SessionMaintenance.showLoader();
-        const res = await fetch(`${API_BASE_URL}/api/summary/${username}`);
+        SM.showLoader();
+
+        // Get all vehicle stats
+        const res = await fetch(
+            `${API_BASE_URL}/api/fullStats/${username}`
+        );
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
         const summary = await res.json();
-        const formattedTime = summary.totalTime > 60 ? summary.totalTime / 60 : summary.totalTime;
-        const timeUnit = summary.totalTime > 60 ? "Hours" : "Minutes";
-        const lpkm = SessionMaintenance.calculateConsumption(summary.avgMpg);
-        const kWh = SessionMaintenance.calculateConsumption(summary.avgMpg, 'kwhper100');
-        const kWhTotal = SessionMaintenance.calculateConsumption(summary.avgMpg, 'kwhper100', 'Total');
-        const totalJourneys = await SessionMaintenance.getTotalJourneys(username);
-        const carbonFoorprint = summary.totalFuel * (fuelType === 'petrol' ? 2.31 : 2.68);
-        const avgCarbonFp = carbonFoorprint / totalJourneys;
+        window.summaryData = summary;
+        await SM.logBook(
+            "home",
+            "loadSummary",
+            `Summary Loaded: ${JSON.stringify(summary)}`
+        );
 
+        // --------------------------------------------------------------------------
+        // Derived Values
+        // --------------------------------------------------------------------------
+
+        const formattedTime =
+            summary.totalTime > 60
+                ? summary.totalTime / 60
+                : summary.totalTime;
+        const timeUnit =
+            summary.totalTime > 60
+                ? "Hours"
+                : "Minutes";
+        const lpkm =
+            SM.calculateConsumption(summary.avgMpg);
+        const kWh =
+            SM.calculateConsumption(
+                summary.avgMpg,
+                'kwhper100'
+            );
+        const kWhTotal =
+            SM.calculateConsumption(
+                summary.avgMpg,
+                'kwhper100',
+                'Total'
+            );
+
+        // --------------------------------------------------------------------------
+        // CO2 Calculation
+        //
+        // Calculate separately for each fuel type because the user may now
+        // have both petrol and diesel vehicles.
+        // --------------------------------------------------------------------------
+
+        let carbonFoorprint = 0;
+        if (summary.fuelBreakdown) {
+            Object.entries(summary.fuelBreakdown).forEach(
+                ([fuelType, fuelData]) => {
+
+                    const fuel = fuelType.toLowerCase();
+
+                    if (fuel === "petrol") {
+                        carbonFoorprint +=
+                            fuelData.totalFuel * 2.31;
+                    } else if (fuel === "diesel") {
+                        carbonFoorprint +=
+                            fuelData.totalFuel * 2.68;
+                    }
+                }
+            );
+        }
+        const avgCarbonFp =
+            summary.journeyCount > 0
+                ? carbonFoorprint / summary.journeyCount
+                : 0;
+
+        // --------------------------------------------------------------------------
         // Total Miles
-        elements.totalMiles.textContent = summary.totalMiles.toLocaleString(undefined, {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1
-        });
+        // --------------------------------------------------------------------------
+
+        elements.totalMiles.textContent =
+            summary.totalMiles.toLocaleString(undefined, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            });
+
+        // --------------------------------------------------------------------------
         // Total Time
-        elements.totalTime.textContent = `${formattedTime.toLocaleString(undefined, {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1
-        })} ${timeUnit}`;
+        // --------------------------------------------------------------------------
+
+        elements.totalTime.textContent =
+            `${formattedTime.toLocaleString(undefined, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            })} ${timeUnit}`;
+
+        // --------------------------------------------------------------------------
         // Total Fuel
-        elements.totalFuel.textContent = summary.totalFuel.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        }) + " L";
+        // --------------------------------------------------------------------------
+
+        elements.totalFuel.textContent =
+            summary.totalFuel.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }) + " L";
+
+        // --------------------------------------------------------------------------
         // Total Cost
-        elements.totalCost.textContent = currency + summary.totalCost.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
+        // --------------------------------------------------------------------------
+
+        elements.totalCost.textContent =
+            currency +
+            summary.totalCost.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+        // --------------------------------------------------------------------------
         // Average MPG
-        elements.avgMpg.textContent = summary.avgMpg.toLocaleString(undefined, {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1
-        });
+        // --------------------------------------------------------------------------
 
+        elements.avgMpg.textContent =
+            summary.avgMpg.toLocaleString(undefined, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            });
+
+        // --------------------------------------------------------------------------
         // Average L/100km
-        elements.avgLpkm.textContent = lpkm.toLocaleString(undefined, {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1
-        });
+        // --------------------------------------------------------------------------
 
+        elements.avgLpkm.textContent =
+            lpkm.toLocaleString(undefined, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            });
+
+        // --------------------------------------------------------------------------
         // Average kWh/100km Useful
-        elements.avgKwh.textContent = kWh.toLocaleString(undefined, {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1
-        });
+        // --------------------------------------------------------------------------
 
+        elements.avgKwh.textContent =
+            kWh.toLocaleString(undefined, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            });
+
+        // --------------------------------------------------------------------------
         // Average kWh/100km Total
-        elements.avgKwhTotal.textContent = kWhTotal.toLocaleString(undefined, {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1
-        });
+        // --------------------------------------------------------------------------
 
+        elements.avgKwhTotal.textContent =
+            kWhTotal.toLocaleString(undefined, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            });
+
+        // --------------------------------------------------------------------------
         // Total CO2
-        elements.carbonFootprint.textContent = `${carbonFoorprint.toLocaleString(undefined, {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1
-        })} KG of CO²`;
+        // --------------------------------------------------------------------------
 
+        elements.carbonFootprint.textContent =
+            `${carbonFoorprint.toLocaleString(undefined, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            })} KG of CO²`;
+
+        // --------------------------------------------------------------------------
         // Average CO2
-        elements.avgCarbonFp.textContent = `${avgCarbonFp.toLocaleString(undefined, {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1
-        })} KG of CO²`;
+        // --------------------------------------------------------------------------
 
-        await SessionMaintenance.logBook("home", "loadSummary", `Summary Loaded: ${summary}`);
+        elements.avgCarbonFp.textContent =
+            `${avgCarbonFp.toLocaleString(undefined, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            })} KG of CO²`;
+
     } catch (err) {
-        console.error("error loading summary:", err);
+        await SM.cmbError(
+            `Error loading summary: ${err}`
+        );
+        await SM.logBook(
+            "home",
+            "loadSummary",
+            `Error Loading Summary ${err}`,
+            true
+        );
     } finally {
-        SessionMaintenance.hideLoader();
+        SM.hideLoader();
     }
 }
 
 // Load Insights -----------------------------------------------------------------------------------------------
-async function loadInsights(username) {
+async function loadInsights() {
     try {
-        SessionMaintenance.showLoader();
+        SM.showLoader();
 
-        // get summary for totals
-        const res = await fetch(`${API_BASE_URL}/api/summary/${username}`);
-        if (!res.ok) throw new Error("Failed to fetch summary");
-        const summary = await res.json();
+        // Get all vehicle data
+        const summary = window.summaryData;
+        if (!summary) {
+            throw new Error("Summary data has not been loaded");
+        }
 
-        const tankVolume = localStorage.getItem('tankVolume') || 63;
-        const carbonFoorprint = summary.totalFuel * (fuelType === 'petrol' ? 2.31 : 2.68);
-        const offset = carbonFoorprint / 21;
+        await SM.logBook(
+            "home",
+            "loadInsights",
+            `Insights Summary Loaded: ${JSON.stringify(summary, null, 2)}`
+        );
 
-        // Times around the world
-        elements.aroundWorld.textContent = (summary.totalMiles / 29901).toLocaleString(undefined, {
-            minimumFractionDigits: 3,
-            maximumFractionDigits: 3
-        });
+        // --------------------------------------------------------------------------
+        // CO2 Calculation
+        //
+        // Calculate separately for each fuel type.
+        // --------------------------------------------------------------------------
 
+        let carbonFoorprint = 0;
+        if (summary.fuelBreakdown) {
+            Object.entries(summary.fuelBreakdown).forEach(
+                ([fuelType, fuelData]) => {
+                    const fuel = fuelType.toLowerCase();
+                    if (fuel === "petrol") {
+                        carbonFoorprint +=
+                            fuelData.totalFuel * 2.31;
+                    } else if (fuel === "diesel") {
+                        carbonFoorprint +=
+                            fuelData.totalFuel * 2.68;
+                    }
+                }
+            );
+        }
+
+        const offset =
+            carbonFoorprint / 21;
+
+        // --------------------------------------------------------------------------
+        // Times Around the World
+        // --------------------------------------------------------------------------
+
+        elements.aroundWorld.textContent =
+            (summary.totalMiles / 29901).toLocaleString(
+                undefined,
+                {
+                    minimumFractionDigits: 3,
+                    maximumFractionDigits: 3
+                }
+            );
+
+        // --------------------------------------------------------------------------
         // Years Driving
-        elements.yearsDriven.textContent = (summary.totalTime / 525600).toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
+        // --------------------------------------------------------------------------
 
+        elements.yearsDriven.textContent =
+            (summary.totalTime / 525600).toLocaleString(
+                undefined,
+                {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                }
+            );
+
+        // --------------------------------------------------------------------------
         // Longest Distance
-        elements.longestDistance.textContent = `${summary.longestDistance.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        })} Miles`;
+        // --------------------------------------------------------------------------
 
+        elements.longestDistance.textContent =
+            `${summary.longestDistance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Miles`;
+
+        // --------------------------------------------------------------------------
         // Longest Time
-        elements.longestTime.textContent = `${summary.longestTime.toLocaleString(undefined, {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        })} Minutes`;
+        // --------------------------------------------------------------------------
 
+        elements.longestTime.textContent =
+            `${summary.longestTime.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} Minutes`;
+
+        // --------------------------------------------------------------------------
         // Best Journey
-        elements.bestJourney.textContent = `${summary.bestMpg.toLocaleString(undefined, {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1
-        })} MPG`;
+        // --------------------------------------------------------------------------
 
+        elements.bestJourney.textContent =
+            `${summary.bestMpg.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MPG`;
 
+        // --------------------------------------------------------------------------
         // Tanks Used
-        elements.tanksUsed.textContent = (summary.totalFuel / tankVolume).toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
+        //
+        // Calculate separately for each vehicle because vehicles can
+        // have different tank sizes.
+        // --------------------------------------------------------------------------
 
-        // Progress to the moon
-        elements.moonProgress.textContent = `${((summary.totalMiles / 238855) * 100).toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        })}%`;
+        let tanksUsed = 0;
+        if (summary.vehicles) {
+            summary.vehicles.forEach(vehicle => {
+                const tankVolume =
+                    Number(vehicle.tankVolume) || 0;
+                const totalFuel =
+                    Number(vehicle.totalFuel) || 0;
+                if (tankVolume > 0) {
+                    tanksUsed +=
+                        totalFuel / tankVolume;
+                }
+            });
+        }
 
+        elements.tanksUsed.textContent =
+            tanksUsed.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+        // --------------------------------------------------------------------------
+        // Progress to the Moon
+        // --------------------------------------------------------------------------
+
+        elements.moonProgress.textContent =
+            `${(
+                (summary.totalMiles / 238855) * 100
+            ).toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}%`;
+
+        // --------------------------------------------------------------------------
         // Olympic Pools Used
-        elements.olympicPools.textContent = `${((summary.totalFuel / 2500000) * 100).toLocaleString(undefined, {
-            minimumFractionDigits: 3,
-            maximumFractionDigits: 3
-        })}%`;
+        // --------------------------------------------------------------------------
 
-        // Times Bohemian Rhapsody could have played whilst driving
-        elements.bohemPlayed.textContent = (summary.totalTime / 5.916).toLocaleString(undefined, {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        });
+        elements.olympicPools.textContent =
+            `${(
+                (summary.totalFuel / 2500000) * 100
+            ).toLocaleString(undefined, {
+                minimumFractionDigits: 3,
+                maximumFractionDigits: 3
+            })}%`;
 
+        // --------------------------------------------------------------------------
+        // Times Bohemian Rhapsody Could Have Played
+        // --------------------------------------------------------------------------
+
+        elements.bohemPlayed.textContent =
+            (
+                summary.totalTime / 5.916
+            ).toLocaleString(undefined, {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+
+        // --------------------------------------------------------------------------
         // Years to Offset CO2
-        elements.yearsOffset.textContent = offset.toLocaleString(undefined, {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        });
+        // --------------------------------------------------------------------------
 
-        await SessionMaintenance.logBook("home", "loadInsights", `Summary Loaded: ${summary}`);
+        elements.yearsOffset.textContent =
+            offset.toLocaleString(undefined, {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            });
+
     } catch (err) {
-        console.error("error loading insights:", err);
+        await SM.cmbError(
+            `Error loading insights: ${err}`
+        );
+        await SM.logBook(
+            "home",
+            "loadInsights",
+            `Error loading insights: ${err}`,
+            true
+        );
     } finally {
-        SessionMaintenance.hideLoader();
+        SM.hideLoader();
     }
 }
 
 // Load Costs -------------------------------------------------------------------------------------
 async function loadCosts(username) {
     try {
-        SessionMaintenance.showLoader();
+        SM.showLoader();
         const res = await fetch(`${API_BASE_URL}/api/costs/${username}`);
         if (!res.ok) throw new Error("Failed to fetch costs");
 
@@ -254,65 +462,135 @@ async function loadCosts(username) {
             maximumFractionDigits: 2
         });
 
-        await SessionMaintenance.logBook("home", "loadCosts", `Costs Loaded: ${data}`);
+        await SM.logBook("home", "loadCosts", `Costs Loaded: ${data}`);
     } catch (err) {
-        console.error("Error loading Costs:", err);
+        await SM.cmbError(`Error loading Costs:${err}`);
+        await SM.logBook("home", "loadCosts", `Error loading Costs: ${err}`, true);
     } finally {
-        SessionMaintenance.hideLoader();
+        SM.hideLoader();
     }
 }
 
 // Load 28 day summary --------------------------------------------------------------------------------------------------
 async function load28DaySum(username) {
+
     const start = new Date();
     const end = new Date();
+
     start.setDate(start.getDate() - 28);
     end.setDate(end.getDate());
 
     try {
-        SessionMaintenance.showLoader();
+        SM.showLoader();
+
         // Get Data Endpoint
-        await SessionMaintenance.logBook("home", "load28DaySum", `Getting 28 Day sum: (${start}, ${end})`);
-        const res = await fetch(`${API_BASE_URL}/api/stats/${username}?start=${start}&end=${end}`);
+        await SM.logBook(
+            "home",
+            "load28DaySum",
+            `Getting 28 Day sum: (${start}, ${end})`
+        );
+        const res = await fetch(
+            `${API_BASE_URL}/api/fullStats/${username}?start=${start.toISOString()}&end=${end.toISOString()}`
+        );
+        if (!res.ok) {
+            throw new Error(
+                `HTTP ${res.status}: ${res.statusText}`
+            );
+        }
         const data = await res.json();
-        const formattedTime = data.totalTime > 60 ? data.totalTime / 60 : data.totalTime;
-        const timeUnit = data.totalTime > 60 ? "Hours" : "Minutes";
-        const carbonFoorprint = data.totalFuel * (fuelType === 'petrol' ? 2.31 : 2.68);
+        await SM.logBook(
+            "home",
+            "load28DaySum",
+            `28 Day Sum retrieved: ${JSON.stringify(data, null, 2)}`
+        );
 
+        // --------------------------------------------------------------------------
+        // Derived Values
+        // --------------------------------------------------------------------------
 
-        await SessionMaintenance.logBook("home", "load28DaySum", `28 Day Sum retrieved: ${JSON.stringify(data, null, 2)}`);
+        const formattedTime =
+            data.totalTime > 60
+                ? data.totalTime / 60
+                : data.totalTime;
+        const timeUnit =
+            data.totalTime > 60
+                ? "Hours"
+                : "Minutes";
 
+        // --------------------------------------------------------------------------
+        // CO2 Calculation
+        //
+        // Calculate separately for each fuel type.
+        // --------------------------------------------------------------------------
+
+        let carbonFoorprint = 0;
+        if (data.fuelBreakdown) {
+            Object.entries(data.fuelBreakdown).forEach(
+                ([fuelType, fuelData]) => {
+                    const fuel = fuelType.toLowerCase();
+                    if (fuel === "petrol") {
+                        carbonFoorprint +=
+                            fuelData.totalFuel * 2.31;
+                    } else if (fuel === "diesel") {
+                        carbonFoorprint +=
+                            fuelData.totalFuel * 2.68;
+                    }
+                }
+            );
+        }
+
+        // --------------------------------------------------------------------------
         // Populate UI with Data
-        elements.TwntEtMiles.textContent = data.totalMiles.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-        elements.TwntEtTime.textContent = `${formattedTime.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        })} ${timeUnit}`;
-        elements.TwntEtFuel.textContent = data.totalFuel.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-        elements.TwntEtCost.textContent = `${currency}${data.totalCost.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        })}`;
-        elements.TwntEtMpg.textContent = data.avgMpg.toLocaleString(undefined, {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1
-        });
-        elements.TwntEtCarbonFp.textContent = `${carbonFoorprint.toLocaleString(undefined, {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1
-        })} KG of CO²`;
+        // --------------------------------------------------------------------------
+
+        elements.TwntEtMiles.textContent =
+            data.totalMiles.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+        elements.TwntEtTime.textContent =
+            `${formattedTime.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })} ${timeUnit}`;
+
+        elements.TwntEtFuel.textContent =
+            data.totalFuel.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+        elements.TwntEtCost.textContent =
+            `${currency}${data.totalCost.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}`;
+
+        elements.TwntEtMpg.textContent =
+            data.avgMpg.toLocaleString(undefined, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            });
+
+        elements.TwntEtCarbonFp.textContent =
+            `${carbonFoorprint.toLocaleString(undefined, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            })} KG of CO²`;
 
     } catch (err) {
-        await SessionMaintenance.logBook("home", "load28DaySum", `Error fetching stats: ${err}`, true);
-        await SessionMaintenance.cmbError("Failed to load stats");
+        await SM.logBook(
+            "home",
+            "load28DaySum",
+            `Error fetching stats: ${err}`,
+            true
+        );
+        await SM.cmbError(
+            "Failed to load stats"
+        );
     } finally {
-        SessionMaintenance.hideLoader();
+        SM.hideLoader();
     }
 }
 
@@ -385,11 +663,11 @@ function getPeriodPercentage(period, resetDay) {
 // Load Budget ------------------------------------------------------------------------------------
 async function loadBudget(username) {
     try {
-        SessionMaintenance.showLoader();
+        SM.showLoader();
         const res = await fetch(`${API_BASE_URL}/api/budget/${username}`);
         const data = await res.json();
 
-        await SessionMaintenance.logBook("home", "loadBudget", `Budget retrieved: ${JSON.stringify(data, null, 2)}`);
+        await SM.logBook("home", "loadBudget", `Budget retrieved: ${JSON.stringify(data, null, 2)}`);
 
         // Return if budget not enabled
         if (!data.enabled) {
@@ -546,10 +824,10 @@ async function loadBudget(username) {
             }
         });
     } catch (err) {
-        await SessionMaintenance.logBook("home", "loadBudget", `Error fetching budget: ${err}`, true);
-        console.error("Error loading budget data:", err);
+        await SM.logBook("home", "loadBudget", `Error fetching budget: ${err}`, true);
+        await SM.cmbError(`Error loading budget data: ${err}`);
     } finally {
-        SessionMaintenance.hideLoader();
+        SM.hideLoader();
     }
 }
 
@@ -559,23 +837,35 @@ async function loadBudget(username) {
 
 // window loaded event listener ------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
-    await SessionMaintenance.logBook("home", "window.DOMContentLoaded", "Home page loaded");
+    await SM.logBook("home", "window.DOMContentLoaded", "Home page loaded");
 
     const currentPage = window.location.pathname.split("/").pop();
-    SessionMaintenance.highlightActivePage(currentPage);
+    SM.highlightActivePage(currentPage);
 
     const username = localStorage.getItem('username').toLowerCase();
     if (!username) {
-        await SessionMaintenance.cmbError('Please Login');
+        await SM.cmbError('Please Login');
         window.location.href = "index.html";
         return;
     }
 
     // Call load functions
-    await loadCosts(username);
     await loadSummary(username);
-    await load28DaySum(username);
-    await loadInsights(username);
-    await loadBudget(username);
+    if (window.summaryData.length > 0) {
+        await loadCosts(username);
+        await load28DaySum(username);
+        await loadInsights(username);
+        await loadBudget(username);
+    }
 
+});
+
+// Log Out Button clicked ---------------------------------------------------------------------------
+buttons.btnLogOut.addEventListener('click', async (e) => {
+    await SM.logBook("home", "btnLogOut.click", "Log Out button clicked");
+
+    const confirmed = await SM.cmbQuestion('Logout?', `Are you sure you want to log out?`);
+    if (confirmed) {
+        window.location.href = "index.html";
+    }
 });

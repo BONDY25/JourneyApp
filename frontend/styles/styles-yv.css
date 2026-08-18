@@ -10,8 +10,8 @@
     --text-color: white; /* Default text colour */
     --card-bg: #fff; /* White cards */
     --card-text: #000; /* Black text for cards */
-    --button-bg: #00d916; /* Bright green button background */
-    --button-text: #000000; /* Black button text */
+    --button-bg: #000000; /* Bright green button background */
+    --button-text: #ffffff; /* Black button text */
     --stat-color-1: #be4702;
     --stat-color-2: #ff5d00;
     --default-font: 'Lexend', sans-serif;
@@ -20,7 +20,6 @@
 /* --------------------------------------------------------------------------- */
 /* Global Styles */
 /* --------------------------------------------------------------------------- */
-
 body {
     /* Remove default margin from browser */
     /* Background and text styling */
@@ -40,12 +39,13 @@ body {
 
     /* Make sure padding/border count in box size */
     box-sizing: border-box;
-    height: 100%;
     margin: 0;
     padding: env(safe-area-inset-top, 8px)
     env(safe-area-inset-right, 8px)
     env(safe-area-inset-bottom, 8px)
     env(safe-area-inset-left, 8px);
+
+    height: 100vh;
 }
 
 /* Constrain app width for mobile-first look */
@@ -53,8 +53,14 @@ body {
     width: 100%;
     max-width: 500px; /* Keeps content centered, not too wide on desktop */
     min-height: 100%;
-    margin-bottom: 35%;
-    height: 1440px;
+    margin-bottom: 20%;
+    height: 100vh;
+    display : flex;
+    flex-direction: column;
+}
+
+.hidden{
+    display: none;
 }
 
 /* --------------------------------------------------------------------------- */
@@ -72,13 +78,6 @@ p {
     /* Consistent spacing for paragraphs */
     margin: 0.3rem 0;
     font-size: 1rem;
-}
-
-hr {
-    /* Custom divider style */
-    border: none;
-    border-top: 1px solid rgba(255, 255, 255, 0.3);
-    margin: 1rem 0;
 }
 
 /* Stats Card Styles */
@@ -108,6 +107,65 @@ hr {
 }
 
 /* --------------------------------------------------------------------------- */
+/* Button Styles */
+/* --------------------------------------------------------------------------- */
+
+/* Global Button Styles */
+.button-group {
+    /* Vertical stack of buttons */
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.button {
+    /* Base button style */
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    font-weight: bold;
+    width: 100%;
+
+    /* Light shadow for depth */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+
+    /* Usability tweaks */
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.button:hover {
+    background-color: #00d916;
+    color: #000000;
+}
+
+/* Import Button Styles */
+#import-button {
+    /* Floating import button (top right) */
+    position: absolute;
+    top: 20px;
+    right: 20px;
+
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+
+    /* Rounded corners + pointer cursor */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#import-button:hover {
+    /* Darker blue hover */
+    background-color: #0056b3;
+}
+
+/* --------------------------------------------------------------------------- */
 /* Responsiveness */
 /* --------------------------------------------------------------------------- */
 
@@ -120,6 +178,77 @@ hr {
     .button {
         font-size: 0.95rem; /* Keeps buttons fitting */
     }
+}
+
+/* --------------------------------------------------------------------------- */
+/* Table Styles */
+/* --------------------------------------------------------------------------- */
+
+#journeys-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+}
+
+/* Shared cell styles */
+#journeys-table th,
+#journeys-table td {
+    padding: 0.75rem;
+    text-align: left;
+}
+
+/* Header */
+#journeys-table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #000;
+    color: #fff;
+    font-weight: bold;
+    z-index: 1;
+}
+
+/* Row "card" look */
+#journeys-table tbody tr {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+/* Cells (acts as the visible card surface) */
+#journeys-table tbody td {
+    background-color: #fff;
+}
+
+/* Rounded corners */
+#journeys-table tbody td:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+#journeys-table tbody td:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+#journeys-table thead th:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+#journeys-table thead th:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+/* Hover effects */
+#journeys-table tbody tr:hover {
+    transform: translateY(-2px);
+    cursor: pointer;
+}
+
+#journeys-table tbody tr:hover td {
+    background-color: rgba(0, 0, 0, 0.1);
 }
 
 /* --------------------------------------------------------------------------- */
@@ -192,6 +321,38 @@ hr {
 }
 
 /* --------------------------------------------------------------------------- */
+/* Form Styles */
+/* --------------------------------------------------------------------------- */
+
+form {
+    /* Container styling for forms */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    /* Matches accent theme */
+    background-color: var(--accent-color);
+    color: black;
+
+    /* Padding & rounded look */
+    padding: 20px;
+    border-radius: 10px;
+
+    /* Fit within parent but stay centered */
+    max-width: 90%;
+    margin: 20px auto;
+}
+
+form input, form select, form button {
+    /* Shared input/button styles */
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    font-size: 1em;
+    font-family: var(--default-font);
+}
+
+/* --------------------------------------------------------------------------- */
 /* Nav bar */
 /* --------------------------------------------------------------------------- */
 
@@ -237,104 +398,67 @@ hr {
     color: white;
 }
 
-/* --------------------------------------------------------------------------- */
-/* Budget & Chart Styling */
-/* --------------------------------------------------------------------------- */
+/* ================================================================ */
+/* Journey Details */
+/* ================================================================ */
 
-#budgetCard {
-    background: var(--accent-color, #ffd966);
-    color: #000000;
-    border-radius: 12px;
-    padding: 16px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-#budgetCard h3 {
-    font-family: inherit;
-    font-weight: 600;
-    margin-bottom: 8px;
-    color: var(--card-text);
-}
-
-#budgetCard .summary-text {
-    font-family: inherit;
-    margin-top: 12px;
-    text-align: left;
-    font-size: 0.95rem;
-    border-radius: 6px;
-    padding: 4px 6px;
-    background-color: var(--stat-color-2);
-    color: var(--card-text);
-}
-
-#budgetChart {
-    background-color: var(--stat-color-2);
-    border-radius: 8px;
-}
-
-#statsGraph {
-    background-color: var(--stat-color-2);
-    border-radius: 8px;
-    color: var(--card-text);
-}
-
-/* --------------------------------------------------------------------------- */
-/* Button Styles */
-/* --------------------------------------------------------------------------- */
-
-/* Global Button Styles */
-.button-group {
-    /* Vertical stack of buttons */
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    margin-top: 1rem;
-}
-
-.button {
-    /* Base button style */
-    background-color: var(--button-bg);
-    color: var(--button-text);
-    border: none;
-    border-radius: 8px;
-    padding: 0.8rem 1rem;
-    font-size: 1rem;
-    font-weight: bold;
+.journey-details-overlay {
+    font-family: var(--default-font), serif;
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
+    height: 100%;
 
-    /* Light shadow for depth */
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.75);
 
-    /* Usability tweaks */
-    cursor: pointer;
-    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 9000;
+    backdrop-filter: blur(4px);
 }
 
-.button:hover {
-    background-color: #00d916;
-    color: #000000;
+.journey-details-overlay.hidden {
+    display : none;
 }
 
-/* Import Button Styles */
-#import-button {
-    /* Floating import button (top right) */
+.close-button {
     position: absolute;
-    top: 20px;
-    right: 20px;
+    top: 1rem;
+    right: 1rem;
+    margin-top: 40px;
 
-    padding: 10px 15px;
-    background-color: #007bff;
-    color: white;
-
-    /* Rounded corners + pointer cursor */
-    border: none;
-    border-radius: 6px;
     cursor: pointer;
+    font-size: 28px;
+
+    color: #ffffff;
+    transition: color 0.2s ease, transform 0.1s ease;
 }
 
-#import-button:hover {
-    /* Darker blue hover */
-    background-color: #0056b3;
+.close-button:hover {
+    color: red;
+    transform: scale(1.1);
+}
+
+.close-button:active {
+    transform: scale(0.95);
+}
+
+.journey-details-card{
+    animation: JourneyDetailsEnter 0.18s ease-out;
+}
+
+@keyframes JourneyDetailsEnter {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
 }
 
 /* ================================================================ */

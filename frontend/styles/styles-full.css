@@ -512,4 +512,122 @@ form input, form select, form button {
     }
 }
 
+/* ------------------------------------------------------------------ */
+/* Vehicle Multi Select */
+/* ------------------------------------------------------------------ */
+
+.vehicle-selector {
+    position: relative;
+    width: 100%;
+}
+
+.multi-select-dropdown {
+    position: relative;
+    width: 100%;
+}
+
+/* Dropdown header */
+.multi-select-button {
+    width: 100%;
+    min-height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    text-align: left;
+
+    box-sizing: border-box;
+}
+
+.multi-select-button:hover {
+    border-color: #999;
+}
+
+/* Arrow */
+.multi-select-button .material-symbols-outlined {
+    transition: transform 0.2s ease;
+}
+
+/* Rotate arrow when open */
+.multi-select-dropdown.open .multi-select-button .material-symbols-outlined {
+    transform: rotate(180deg);
+}
+
+/* Dropdown options */
+.multi-select-options {
+    width: 100%;
+    max-height: 0;
+    overflow: hidden;
+
+    margin-top: 0;
+
+    background: #ffffff;
+
+    border: 1px solid transparent;
+    border-radius: 6px;
+
+    box-sizing: border-box;
+
+    opacity: 0;
+
+    transition:
+            max-height 0.2s ease,
+            margin-top 0.2s ease,
+            opacity 0.15s ease,
+            border-color 0.2s ease;
+
+}
+
+/* Open state */
+.multi-select-options.open {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-top: 4px;
+    border-color: #ccc;
+    opacity: 1;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+
+}
+
+/* Individual vehicle option */
+.vehicle-option {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    box-sizing: border-box;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.vehicle-option:hover {
+    background: #f5f5f5;
+}
+
+/* Checkboxes */
+.vehicle-option input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+/* Select All */
+.select-all-option {
+    border-bottom: 1px solid #ddd;
+    font-weight: bold;
+}
+
+/* Vehicle list */
+#vehicle-list {
+    width: 100%;
+}
+
+
 

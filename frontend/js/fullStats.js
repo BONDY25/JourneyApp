@@ -8,7 +8,6 @@ import {API_BASE_URL} from "./config.js";
 const SM = SessionMaintenance;
 
 const currency = localStorage.getItem('currency');
-const fuelType = localStorage.getItem("fuelType") || 'Petrol';
 
 // DOM Elements --------------------------------------------------------------------------------------
 const containers = {
@@ -36,6 +35,7 @@ const elements = {
     carbonFootprint: SM.$("carbonFootprint"),
     graphTitle: SM.$('graph-title'),
     ctx: SM.$('statsGraph'),
+    vehicleOptions: SM.$("vehicle-options"),
 }
 
 const inputs = {
@@ -44,10 +44,132 @@ const inputs = {
     endInput: SM.$('end'),
     xAxis: SM.$('x-axis'),
     yAxis: SM.$('y-axis'),
+    vehicleInput: SM.$('vehicle-input'),
 }
 
 const buttons = {
-    btnGetStats: SM.$('getStats')
+    btnGetStats: SM.$('getStats'),
+    btnVehicleDropdown: SM.$("vehicle-dropdown-button"),
+    selectAllCheckbox: SM.$("vehicle-select-all")
+}
+
+// ==========================================================================================================
+// -- Vehicle Selection Stuff--
+// ==========================================================================================================
+
+// Get Vehicles for Stats ------------------------------------------------------------
+async function getStatsVehicles(username) {
+    try {
+        SessionMaintenance.showLoader();
+
+        const vehicleList = document.getElementById("vehicle-list");
+
+        vehicleList.innerHTML = "";
+
+        const res = await fetch(
+            `${API_BASE_URL}/api/getVehicles?username=${username}`,
+            {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            }
+        );
+
+        const vehicles = await res.json();
+
+        if (vehicles.length === 0) {
+            await SessionMaintenance.cmbInfo(
+                `No vehicles`,
+                `You don't have any vehicles, add them in settings.`
+            );
+
+            window.location.href = "home.html";
+            return;
+        }
+
+        vehicles.forEach((vehicle) => {
+
+            const label = document.createElement("label");
+            label.classList.add("vehicle-option");
+
+            const checkbox = document.createElement("input");
+
+            checkbox.type = "checkbox";
+            checkbox.classList.add("vehicle-checkbox");
+            checkbox.value = vehicle._id;
+            checkbox.dataset.vehicleName = vehicle.name;
+
+            const name = document.createElement("span");
+            name.textContent = vehicle.name;
+
+            label.appendChild(checkbox);
+            label.appendChild(name);
+
+            vehicleList.appendChild(label);
+        });
+
+        updateVehicleDropdownText();
+
+    } catch (err) {
+        await SessionMaintenance.logBook(
+            "stats",
+            "getStatsVehicles",
+            `Network Error: ${err}`,
+            true
+        );
+
+        await SessionMaintenance.cmbError(
+            `Error loading vehicles: ${err}`
+        );
+
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+}
+
+// Update Dropdown Text ------------------------------------------------------------------------------------
+function updateVehicleDropdownText() {
+
+    const selectedVehicles = document.querySelectorAll(
+        ".vehicle-checkbox:checked"
+    );
+
+    const text = document.getElementById("vehicle-dropdown-text");
+
+    if (selectedVehicles.length === 0) {
+        text.textContent = "Select Vehicles";
+        return;
+    }
+
+    if (selectedVehicles.length === 1) {
+        text.textContent =
+            selectedVehicles[0].dataset.vehicleName;
+
+        return;
+    }
+
+    text.textContent =
+        `${selectedVehicles.length} vehicles selected`;
+}
+
+// Select All Function ------------------------------------------------
+function updateSelectAllState() {
+    const vehicleCheckboxes = document.querySelectorAll(".vehicle-checkbox");
+    const checkedVehicles = document.querySelectorAll(".vehicle-checkbox:checked");
+    const selectAll = document.getElementById("vehicle-select-all");
+    selectAll.checked =
+        vehicleCheckboxes.length > 0 &&
+        checkedVehicles.length === vehicleCheckboxes.length;
+}
+
+// Get Selected Vehicle IDs ----------------------------------------------------------
+function getSelectedVehicleIds() {
+
+    return Array.from(
+        document.querySelectorAll(".vehicle-checkbox:checked")
+    ).map(checkbox => checkbox.value);
+
 }
 
 // ==========================================================================================================
@@ -58,90 +180,195 @@ const buttons = {
 async function getStats(username, start, end) {
     try {
         SessionMaintenance.showLoader();
+
+        // Get selected vehicles
+        const selectedVehicleIds = getSelectedVehicleIds();
+        if (selectedVehicleIds.length === 0) {
+            await SessionMaintenance.cmbInfo(
+                "No Vehicles Selected",
+                "Please select at least one vehicle to view your stats."
+            );
+            return;
+        }
+        await SessionMaintenance.logBook(
+            "fullStats",
+            "getStats",
+            `Getting full stats: (${start}, ${end}) - Vehicles: ${selectedVehicleIds.join(", ")}`
+        );
+
         // Get Data Endpoint
-        await SessionMaintenance.logBook("fullStats", "getStats", `Getting full stats: (${start}, ${end})`);
-        const res = await fetch(`${API_BASE_URL}/api/stats/${username}?start=${start}&end=${end}`);
+        const res = await fetch(
+            `${API_BASE_URL}/api/fullStats/${username}?start=${start}&end=${end}&vehicleIds=${selectedVehicleIds.join(",")}`
+        );
+        if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
         const data = await res.json();
-        const formattedTime = data.totalTime > 60 ? data.totalTime / 60 : data.totalTime;
-        const timeUnit = data.totalTime > 60 ? "Hours" : "Minutes";
-        const lpkm = SessionMaintenance.calculateConsumption(data.avgMpg);
-        const kWh = SessionMaintenance.calculateConsumption(data.avgMpg, 'kwhper100');
-        const kWhTotal = SessionMaintenance.calculateConsumption(data.avgMpg, 'kwhper100', 'Total');
-        const carbonFoorprint = data.totalFuel * (fuelType === 'petrol' ? 2.31 : 2.68);
+        await SessionMaintenance.logBook(
+            "fullStats",
+            "getStats",
+            `Full Stats retrieved: ${JSON.stringify(data, null, 2)}`
+        );
 
-        await SessionMaintenance.logBook("fullStats", "getStats", `Full Stats retrieved: ${JSON.stringify(data, null, 2)}`);
+        // --------------------------------------------------------------------------
+        // Derived Values
+        // --------------------------------------------------------------------------
 
+        const formattedTime =
+            data.totalTime > 60
+                ? data.totalTime / 60
+                : data.totalTime;
+        const timeUnit =
+            data.totalTime > 60
+                ? "Hours"
+                : "Minutes";
+        const lpkm =
+            SessionMaintenance.calculateConsumption(
+                data.avgMpg
+            );
+        const kWh =
+            SessionMaintenance.calculateConsumption(
+                data.avgMpg,
+                'kwhper100'
+            );
+        const kWhTotal =
+            SessionMaintenance.calculateConsumption(
+                data.avgMpg,
+                'kwhper100',
+                'Total'
+            );
+
+        // --------------------------------------------------------------------------
+        // CO2 Calculation
+        // --------------------------------------------------------------------------
+
+        let carbonFootprint = 0;
+        if (data.fuelBreakdown) {
+            Object.entries(data.fuelBreakdown).forEach(
+                ([fuelType, fuelData]) => {
+                    const fuel = fuelType.toLowerCase();
+                    if (fuel === "petrol") {
+                        carbonFootprint +=
+                            fuelData.totalFuel * 2.31;
+                    } else if (fuel === "diesel") {
+                        carbonFootprint +=
+                            fuelData.totalFuel * 2.68;
+                    }
+                }
+            );
+        }
+        // --------------------------------------------------------------------------
         // Populate UI with Data
-        elements.totalMiles.textContent = data.totalMiles.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-        elements.totalTime.textContent = `${formattedTime.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        })} ${timeUnit}`;
-        elements.totalFuel.textContent = data.totalFuel.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-        elements.totalCost.textContent = `${currency}${data.totalCost.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        })}`;
-        elements.avgMilesPerTank.textContent = data.avgMilesPerTank.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-        elements.avgMpg.textContent = data.avgMpg.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-        elements.avgSpeed.textContent = data.avgSpeed.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-        elements.avgCostPerDay.textContent = `${currency}${data.avgCostPerDay.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        })}`;
-        elements.avgCostPerMile.textContent = `${currency}${data.avgCostPerMile.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        })}`;
-        elements.avgFuelPrice.textContent = `${currency}${data.avgFuelPrice.toLocaleString(undefined, {
-            minimumFractionDigits: 3,
-            maximumFractionDigits: 3
-        })}`;
-        elements.avgTemp.textContent = data.avgTemp.toLocaleString(undefined, {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1
-        });
-        elements.avgTimeDriven.textContent = data.avgTimeDriven.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-        elements.avgLpkm.textContent = lpkm.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-        elements.avgKwh.textContent = kWh.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
-        elements.avgKwhTotal.textContent = kWhTotal.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 2
-        });
+        // --------------------------------------------------------------------------
+
+        elements.totalMiles.textContent =
+            data.totalMiles.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+        elements.totalTime.textContent =
+            `${formattedTime.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })} ${timeUnit}`;
+
+        elements.totalFuel.textContent =
+            data.totalFuel.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+        elements.totalCost.textContent =
+            `${currency}${data.totalCost.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}`;
+
+        elements.avgMilesPerTank.textContent =
+            data.avgMilesPerTank.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+        elements.avgMpg.textContent =
+            data.avgMpg.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+        elements.avgSpeed.textContent =
+            data.avgSpeed.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+        elements.avgCostPerDay.textContent =
+            `${currency}${data.avgCostPerDay.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}`;
+
+        elements.avgCostPerMile.textContent =
+            `${currency}${data.avgCostPerMile.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })}`;
+
+        elements.avgFuelPrice.textContent =
+            `${currency}${data.avgFuelPrice.toLocaleString(undefined, {
+                minimumFractionDigits: 3,
+                maximumFractionDigits: 3
+            })}`;
+
+        elements.avgTemp.textContent =
+            data.avgTemp.toLocaleString(undefined, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            });
+
+        elements.avgTimeDriven.textContent =
+            data.avgTimeDriven.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+        elements.avgLpkm.textContent =
+            lpkm.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+        elements.avgKwh.textContent =
+            kWh.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
+        elements.avgKwhTotal.textContent =
+            kWhTotal.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+
         // Total CO2
-        elements.carbonFootprint.textContent = `${carbonFoorprint.toLocaleString(undefined, {
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1
-        })} KG of CO²`;
+        elements.carbonFootprint.textContent =
+            `${carbonFootprint.toLocaleString(undefined, {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1
+            })} KG of CO²`;
 
         containers.sumStats.style.display = 'block';
     } catch (err) {
-        await SessionMaintenance.logBook("fullStats", "getStats", `Error fetching stats: ${err}`, true);
-        await SessionMaintenance.cmbError(`Failed to load stats: ${err}`);
+        await SessionMaintenance.logBook(
+            "fullStats",
+            "getStats",
+            `Error fetching stats: ${err}`,
+            true
+        );
+        await SessionMaintenance.cmbError(
+            `Failed to load stats: ${err}`
+        );
     } finally {
         SessionMaintenance.hideLoader();
     }
@@ -390,6 +617,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const currentPage = window.location.pathname.split("/").pop();
     SessionMaintenance.highlightActivePage(currentPage);
 
+    await getStatsVehicles(localStorage.getItem("username"));
     SessionMaintenance.hideLoader();
 });
 
@@ -441,4 +669,39 @@ inputs.displayType.addEventListener('change', () => {
     } else if (inputs.displayType.value === 'graph') {
         containers.axisFields.style.display = 'block';
     }
-})
+});
+
+// Vehicle Dropdown --------------------------------------------------------------------------
+buttons.btnVehicleDropdown.addEventListener("click", () => {
+    elements.vehicleOptions.classList.toggle("open");
+});
+
+// Vehicle Dropdown close --------------------------------------------------------------------------
+document.addEventListener("click", (event) => {
+    const dropdown = document.getElementById("vehicle-dropdown");
+    if (!dropdown.contains(event.target)) {
+        elements.vehicleOptions.classList.remove("open");
+    }
+});
+
+// Checkbox change -------------------------------------------------------------------------------
+document.addEventListener("change", (event) => {
+    if (event.target.classList.contains("vehicle-checkbox")) {
+        updateVehicleDropdownText();
+        updateSelectAllState();
+    }
+
+});
+
+// Select All clicked ------------------------------------------------
+buttons.selectAllCheckbox.addEventListener("change", () => {
+
+    const vehicleCheckboxes =
+        document.querySelectorAll(".vehicle-checkbox");
+
+    vehicleCheckboxes.forEach((checkbox) => {
+        checkbox.checked = buttons.selectAllCheckbox.checked;
+    });
+
+    updateVehicleDropdownText();
+});

@@ -9,9 +9,12 @@ import {API_BASE_URL} from "./config.js";
 const distanceUnit = localStorage.getItem('distanceUnit') || "miles";
 const speedUnit = localStorage.getItem('speedUnit') || "mph";
 const SM = SessionMaintenance;
+let user;
+let vehicleDetails = {};
 
 // DOM Elements --------------------------------------------------------------------------------------
 const inputs = {
+    vehicleInput: SM.$("vehicle"),
     descriptionInput: SM.$("description"),
     dateInput: SM.$("datetime"),
     distanceInput: SM.$("distance"),
@@ -30,13 +33,59 @@ const buttons = {
 // -- Operational Functions --
 // ==========================================================================================================
 
+// Get Vehicles -------------------------------------------------------------------------
+async function getVehicles(username) {
+    try {
+        SessionMaintenance.showLoader();
+        inputs.vehicleInput.innerHTML = "";
+
+        // Default option
+        const defaultOption = document.createElement("option");
+        defaultOption.value = "";
+        defaultOption.textContent = "Select Vehicle";
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+
+        inputs.vehicleInput.appendChild(defaultOption);
+
+        const res = await fetch(`${API_BASE_URL}/api/getVehicles?username=${username}`, {
+            method: "GET",
+            headers: {"Content-Type": "application/json"}
+        })
+        const vehicles = await res.json();
+
+        if (vehicles.length === 0) {
+            SessionMaintenance.hideLoader();
+            await SessionMaintenance.cmbInfo(`No vehicles`, `You don't have any vehicles, add them in settings.`);
+            window.location.href = "home.html";
+        }
+
+        // add vehicles as options in drop down
+        vehicles.forEach((vehicle) => {
+            const option = document.createElement("option");
+            option.value = vehicle._id;
+            option.text = vehicle.name;
+
+            inputs.vehicleInput.appendChild(option);
+        });
+
+
+
+    } catch (err) {
+        await SessionMaintenance.logBook("newJourney", "getVehicles", `Network Error: ${err}`, true);
+        await SessionMaintenance.cmbError(`Error loading vehicles: ${err}`);
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+}
+
 // Check Fields --------------------------------------------------------------------------
 function checkFields(fields) {
     return fields && fields.length > 0;
 }
 
 // Insert Journey ------------------------------------------------------------------------
-async function insertJourney(journeyData){
+async function insertJourney(journeyData) {
     try {
         SessionMaintenance.showLoader();
 
@@ -60,7 +109,7 @@ async function insertJourney(journeyData){
                 "submit.click",
                 `Journey Submission Successful. ${JSON.stringify(journeyData, null, 2)}`
             );
-            await SessionMaintenance.cmbInfo('Success','Journey Saved!');
+            await SessionMaintenance.cmbInfo('Success', 'Journey Saved!');
             window.location.href = "home.html";
         } else {
             const err = await res.text();
@@ -78,8 +127,10 @@ async function insertJourney(journeyData){
 async function calculateValues({timeUnit = 'minutes'} = {}) {
     await SessionMaintenance.logBook("newJourney", "calculateValues", "Calculating Values");
 
-    // Get tank volume from user defaults
-    const tankVolume = Number(localStorage.getItem('tankVolume')) || 64;
+    const vehicleId = vehicleDetails._id;
+    const vehicleName = vehicleDetails.name;
+    const fuelType = vehicleDetails.fuelType;
+    const tankVolume = vehicleDetails.tankVolume;
 
     // Get Elements safely
     const getValue = (el, type = 'string') => {
@@ -112,12 +163,14 @@ async function calculateValues({timeUnit = 'minutes'} = {}) {
     const totalCost = costPerMile * distance;
     const percOfTank = tankVolume > 0 ? (fuelUsedL / tankVolume) : 0;
 
-    const user = localStorage.getItem('username') || 'unknown';
     const round = (n, dp = 3) => isNaN(n) ? 0 : Number(Number(n).toFixed(dp));
 
     // Construct Output
     const output = {
         user,
+        vehicleId,
+        vehicleName,
+        fuelType,
         description,
         dateTime,
         distance: round(distance, 2),
@@ -150,16 +203,37 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     const currentPage = window.location.pathname.split("/").pop();
     SessionMaintenance.highlightActivePage(currentPage);
-
     SessionMaintenance.hideLoader();
+    const username = localStorage.getItem('username').toLowerCase();
+    user = localStorage.getItem('username').toLowerCase();
+    if (!username) {
+        await SessionMaintenance.cmbError('Please Login');
+        window.location.href = "index.html";
+        return;
+    }
 
+    await getVehicles(username);
+
+    /*
     const costField = inputs.costInput;
     if (costField) {
         const storedCost = localStorage.getItem('fuelCost');
         costField.value = storedCost !== null ? parseFloat(storedCost) : 0;
     }
+     */
 
     console.log("Fuel cost from localStorage:", localStorage.getItem('fuelCost'));
+});
+
+// Vehicle Chosen -------------------------------------------------------------------------------------------
+inputs.vehicleInput.addEventListener('change', async () => {
+    const vehicleId = inputs.vehicleInput.value;
+    vehicleDetails = await SessionMaintenance.getVehicleDetails(vehicleId);
+
+    const costField = inputs.costInput;
+    if (costField) {
+        costField.value = Number(vehicleDetails.lastCostPL) || 0;
+    }
 });
 
 // Event Listener to submit form ---------------------------------------------------------------------

@@ -5,13 +5,65 @@
 import {API_BASE_URL} from "./config.js";
 import SessionMaintenance from "./sessionMaintenance.js";
 
+const SM = SessionMaintenance;
 const params = new URLSearchParams(window.location.search);
 const journeyId = params.get("id");
 const btnDelete = document.getElementById('deleteBtn');
+let vehicleDetails = {};
+
+const inputs = {
+    vehicleInput: SM.$("vehicle"),
+}
 
 // ==========================================================================================================
 // -- Operational Functions --
 // ==========================================================================================================
+
+// Get Vehicles -------------------------------------------------------------------------
+async function getVehicles(username) {
+    try {
+        SM.showLoader();
+        inputs.vehicleInput.innerHTML = "";
+
+        // Default option
+        const defaultOption = document.createElement("option");
+        defaultOption.value = "";
+        defaultOption.textContent = "Select Vehicle";
+        defaultOption.disabled = true;
+        defaultOption.selected = true;
+
+        inputs.vehicleInput.appendChild(defaultOption);
+
+        const res = await fetch(`${API_BASE_URL}/api/getVehicles?username=${username}`, {
+            method: "GET",
+            headers: {"Content-Type": "application/json"}
+        })
+        const vehicles = await res.json();
+
+        if (vehicles.length === 0) {
+            SessionMaintenance.hideLoader();
+            await SessionMaintenance.cmbInfo(`No vehicles`, `You don't have any vehicles, add them in settings.`);
+            window.location.href = "home.html";
+        }
+
+        // add vehicles as options in drop down
+        vehicles.forEach((vehicle) => {
+            const option = document.createElement("option");
+            option.value = vehicle._id;
+            option.text = vehicle.name;
+
+            inputs.vehicleInput.appendChild(option);
+        });
+
+
+
+    } catch (err) {
+        await SessionMaintenance.logBook("editJourney", "getVehicles", `Network Error: ${err}`, true);
+        await SessionMaintenance.cmbError(`Error loading vehicles: ${err}`);
+    } finally {
+        SessionMaintenance.hideLoader();
+    }
+}
 
 // format date time --------------------------------------------------------------------------
 function formatDatetime(isoString){
@@ -31,7 +83,11 @@ function formatDatetime(isoString){
 async function reCalculateValues({timeUnit = 'minutes'} = {}) {
     await SessionMaintenance.logBook("editJourney", "calculateValues", "Calculating Values");
 
-    const tankVolume = Number(localStorage.getItem('tankVolume')) || 64;
+    const vehicleId = vehicleDetails._id;
+    const vehicleName = vehicleDetails.name;
+    const fuelType = vehicleDetails.fuelType;
+    const tankVolume = vehicleDetails.tankVolume;
+
     const dateTime = document.getElementById("datetime").value || "";
     const distance = document.getElementById("distance").value || 0;
     const mpg = document.getElementById("mpg").value || 0;
@@ -58,6 +114,9 @@ async function reCalculateValues({timeUnit = 'minutes'} = {}) {
 
     const output = {
         dateTime,
+        vehicleId,
+        vehicleName,
+        fuelType,
         distance: round(distance, 2),
         mpg: round(mpg, 2),
         timeDriven: round(timeDriven, 2),
@@ -80,10 +139,13 @@ async function reCalculateValues({timeUnit = 'minutes'} = {}) {
 async function loadJourney() {
     try {
         SessionMaintenance.showLoader();
+
         const res = await fetch(`${API_BASE_URL}/api/journeys/${journeyId}`);
         if (!res.ok) throw new Error("Failed to fetch journey");
 
         const journey = await res.json();
+
+        inputs.vehicleInput.value = journey.vehicleId;
         document.getElementById("datetime").value = formatDatetime(journey.dateTime) || journey.dateTime?.split("T")[0] || ""
         document.getElementById("distance").value = journey.distance || "";
         document.getElementById("mpg").value = journey.mpg || "";
@@ -91,6 +153,7 @@ async function loadJourney() {
         document.getElementById("temp").value = journey.temp || "";
         document.getElementById("condition").value = journey.condition || "";
         document.getElementById("cost").value = journey.costPl || "";
+
     } catch (err) {
         await SessionMaintenance.logBook("editJourney", "loadJourney", `Error getting journey ${err}`, true);
     } finally {
@@ -157,7 +220,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     await SessionMaintenance.logBook("editJourney", "window.DOMContentLoaded", "Edit journey page loaded");
     SessionMaintenance.hideLoader();
 
+    await getVehicles(localStorage.getItem("username"));
     await loadJourney();
+
+    const vehicleId = inputs.vehicleInput.value;
+    vehicleDetails = await SessionMaintenance.getVehicleDetails(vehicleId);
 
     const form = document.getElementById("editJourneyForm");
     form.addEventListener("submit", async (e) => {

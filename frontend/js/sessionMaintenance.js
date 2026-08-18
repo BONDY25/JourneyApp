@@ -139,6 +139,35 @@ export default class SessionMaintenance {
         }
     }
 
+    // Get Vehicle Data ----------------------------------------------------------------------
+    static async getVehicleDetails(vehicleId) {
+        try {
+            this.showLoader();
+            if (!vehicleId) {
+                await SessionMaintenance.logBook("sessionMaintenance", "getVehicleDetails", `No vehicle Found ${vehicleId}`, true);
+                return;
+            }
+
+            // Log action
+            await SessionMaintenance.logBook("sessionMaintenance", "getVehicleDetails", `Getting vehicle ${vehicleId}`);
+
+            // Get Journey Details
+            const response = await fetch(`${API_BASE_URL}/api/getVehicle/${vehicleId}`, {
+                method: "GET",
+                headers: {"Content-Type": "application/json"}
+            });
+
+            if (!response.ok) throw new Error("Failed to get vehicle details");
+            return await response.json();
+
+        } catch (err) {
+            await this.logBook("sessionMaintenance", "getVehicleDetails", `Error getting vehicle details ${err}`, true);
+            await this.cmbError(`Error getting vehicle details: ${err}`);
+        } finally {
+            this.hideLoader();
+        }
+    }
+
 
 // ==========================================================================================================
 // -- Custom Message Box --

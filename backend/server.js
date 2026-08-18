@@ -43,6 +43,11 @@ async function startServer() {
         const db = client.db('journeyAppDb');
         const journeys = db.collection('journeys');
         const users = db.collection('users');
+        const vehicles = db.collection('vehicles');
+
+// ==========================================================================================================
+// -- Session Maintenance --
+// ==========================================================================================================
 
         // LogBook Endpoint ------------------------------------------------------------------------------------------
         app.post('/api/logBook', async (req, res) => {
@@ -58,17 +63,90 @@ async function startServer() {
             }
         });
 
-        // Insert Journey --------------------------------------------------------------------------------------------
-        app.post('/api/journeys', async (req, res) => {
+        // Get Users Endpoint -------------------------------------------------------------------
+        app.get('/api/getUsers/:username', async (req, res) => {
+            const username = req.params.username.toLowerCase();
             try {
-                await journeys.insertOne(req.body);
-                console.log('Journey saved:', req.body);
-                res.status(201).send('Journey saved');
+                const db = client.db('journeyAppDb');
+                const user = await db.collection('users').findOne({username}, {projection: {password: 0}});
+                if (!user) return res.status(404).send('No user found.');
+                res.json(user);
             } catch (err) {
-                console.error('Error saving journey:', err);
-                res.status(500).send('Error saving journey');
+                console.error("Error retrieving user:", err);
+                res.status(500).send("Error retrieving user");
             }
         });
+
+        // Save User Endpoint -----------------------------------------------------------------
+        app.put('/api/saveUsers/:username', async (req, res) => {
+            const username = req.params.username.toLowerCase();
+            const {
+                tankVolume,
+                defFuelCost,
+                gallon,
+                fuelType,
+                userFont,
+                currency,
+                budgetEnabled,
+                budgetRange,
+                budgetAmount,
+                resetDay,
+                newPassword
+            } = req.body;
+
+            try {
+                const db = client.db('journeyAppDb');
+                const updateFields = {
+                    tankVolume,
+                    defFuelCost,
+                    gallon,
+                    fuelType,
+                    userFont,
+                    currency,
+                    budgetEnabled,
+                    budgetRange,
+                    budgetAmount,
+                    resetDay
+                };
+
+                // Add Password if provided
+                if (newPassword && newPassword.trim() !== "") {
+                    updateFields.password = await bcryptjs.hash(newPassword, 10);
+                }
+
+                console.log(`Payload received: ${JSON.stringify(updateFields)}`);
+
+                const result = await db.collection('users').updateOne(
+                    {username},
+                    {$set: updateFields}
+                );
+
+                if (result.matchedCount === 0) {
+                    return res.status(404).send('No user found.');
+                }
+
+                res.send("Successfully updated user");
+            } catch (err) {
+                console.error("Error updating user:", err);
+                res.status(500).send("Error updating user");
+            }
+        });
+
+        // Get total journeys -------------------------------------------------------------
+        app.get('/api/getTotalJourneys/:username', async (req, res) => {
+            try {
+                const username = req.params.username.toLowerCase();
+                const count = await db.collection('journeys').countDocuments({user: username});
+                res.json({total: count});
+            } catch (error) {
+                console.error("Error fetching total journeys:", error);
+                res.status(500).json({error: "Failed to fetch total journeys"});
+            }
+        });
+
+// ==========================================================================================================
+// -- Login --
+// ==========================================================================================================
 
         // Insert User --------------------------------------------------------------------------------------------
         app.post('/api/users', async (req, res) => {
@@ -134,7 +212,7 @@ async function startServer() {
                 // Find user
                 const user = await users.findOne({username});
                 if (!user) {
-                    return res.status(400).send('Invalid username or password');
+                    return res.status(400).send('User Does not exist');
                 }
 
                 // Compare password
@@ -150,6 +228,10 @@ async function startServer() {
                 res.status(500).send('Error logging in:');
             }
         });
+
+// ==========================================================================================================
+// -- Home --
+// ==========================================================================================================
 
         // Get user totals ---------------------------------------------------------------------------------
         app.get('/api/summary/:username', async (req, res) => {
@@ -279,58 +361,6 @@ async function startServer() {
             }
         });
 
-
-        // Import Journey ---------------------------------------------------------------
-        app.post('/api/importJourneys', async (req, res) => {
-            try {
-                let journeys = req.body;
-                console.log(journeys);
-
-                // Check if Array has data
-                if (!Array.isArray(journeys) || journeys.length === 0) {
-                    return res.status(400).send("No journeys provided");
-                }
-
-                // Clean data before import
-                journeys = journeys.map(j => {
-                    const distance = Number(j.distance) || 0;
-                    const mpg = Number(j.mpg) || 0;
-
-                    const fuelUsedL = mpg > 0 ? distance / (mpg / 3.785) : 0;
-                    const percOfTank = tankVolume > 0 ? fuelUsedL / tankVolume : 0;
-
-                    return {
-                        user: j.user?.toLowerCase() || "unknown",
-                        description: j.description || "",
-                        dateTime: new Date(j.dateTime),
-                        distance,
-                        mpg,
-                        timeDriven: Number(j.timeDriven) || 0,
-                        temp: Number(j.temp) || 0,
-                        condition: j.condition || "Dry",
-                        costPl: Number(j.costPl) || 0,
-                        avgSpeed: Number(j.avgSpeed) || 0,
-                        totalCost: Number(j.totalCost) || 0,
-                        costPerMile: Number(j.costPerMile) || 0,
-                        fuelUsedL,
-                        percOfTank
-                    };
-                });
-
-
-                // Declare Db & Collection
-                const db = client.db('journeyAppDb');
-                const collection = db.collection('journeys');
-
-                // insert records
-                await collection.insertMany(journeys);
-                res.status(201).send("Journeys imported successfully");
-            } catch (err) {
-                console.error("Error importing journeys:", err);
-                res.status(500).send("Error importing journeys");
-            }
-        });
-
         // Full Stats Endpoint ---------------------------------------------------------------
         app.get('/api/stats/:username', async (req, res) => {
             // Declare Parameters
@@ -433,168 +463,6 @@ async function startServer() {
             }
         });
 
-        // Get Users Endpoint -------------------------------------------------------------------
-        app.get('/api/getUsers/:username', async (req, res) => {
-            const username = req.params.username.toLowerCase();
-            try {
-                const db = client.db('journeyAppDb');
-                const user = await db.collection('users').findOne({username}, {projection: {password: 0}});
-                if (!user) return res.status(404).send('No user found.');
-                res.json(user);
-            } catch (err) {
-                console.error("Error retrieving user:", err);
-                res.status(500).send("Error retrieving user");
-            }
-        });
-
-        // Save User Endpoint -----------------------------------------------------------------
-        app.put('/api/saveUsers/:username', async (req, res) => {
-            const username = req.params.username.toLowerCase();
-            const {
-                tankVolume,
-                defFuelCost,
-                gallon,
-                fuelType,
-                userFont,
-                currency,
-                budgetEnabled,
-                budgetRange,
-                budgetAmount,
-                resetDay,
-                newPassword
-            } = req.body;
-
-            try {
-                const db = client.db('journeyAppDb');
-                const updateFields = {
-                    tankVolume,
-                    defFuelCost,
-                    gallon,
-                    fuelType,
-                    userFont,
-                    currency,
-                    budgetEnabled,
-                    budgetRange,
-                    budgetAmount,
-                    resetDay
-                };
-
-                // Add Password if provided
-                if (newPassword && newPassword.trim() !== "") {
-                    updateFields.password = await bcryptjs.hash(newPassword, 10);
-                }
-
-                console.log(`Payload received: ${JSON.stringify(updateFields)}`);
-
-                const result = await db.collection('users').updateOne(
-                    {username},
-                    {$set: updateFields}
-                );
-
-                if (result.matchedCount === 0) {
-                    return res.status(404).send('No user found.');
-                }
-
-                res.send("Successfully updated user");
-            } catch (err) {
-                console.error("Error updating user:", err);
-                res.status(500).send("Error updating user");
-            }
-        });
-
-        // Your Journeys Endpoint ----------------------------------------------------------------
-        app.get('/api/getJourneys', async (req, res) => {
-            try {
-                const {username} = req.query; // safer to get from query
-
-                const journeys = await db.collection('journeys').aggregate([
-                    {
-                        $match: {user: username}
-                    },
-                    {
-                        $addFields: {
-                            dateTimeCorrected: {$toDate: "$dateTime"} // cast to Date
-                        }
-                    },
-                    {
-                        $sort: {dateTimeCorrected: -1} // newest first
-                    }
-                ]).toArray();
-
-                res.json(journeys);
-            } catch (err) {
-                console.error("Error retrieving journeys", err);
-                res.status(500).send("Error retrieving journeys");
-            }
-        });
-
-        // Journey Details Endpoint ------------------------------------------------------------------
-        app.get("/api/getJourney/:id", async (req, res) => {
-            try {
-                const journeyId = req.params.id;
-                const journey = await db.collection("journeys").findOne({_id: new ObjectId(journeyId)});
-
-                if (!journey) {
-                    return res.status(404).json({error: "Journey not found"});
-                }
-
-                res.json(journey);
-            } catch (error) {
-                console.error("Error fetching journey:", error);
-                res.status(500).json({error: "Failed to fetch journey"});
-            }
-        });
-
-        // Get total journeys -------------------------------------------------------------
-        app.get('/api/getTotalJourneys/:username', async (req, res) => {
-            try {
-                const username = req.params.username.toLowerCase();
-                const count = await db.collection('journeys').countDocuments({user: username});
-                res.json({total: count});
-            } catch (error) {
-                console.error("Error fetching total journeys:", error);
-                res.status(500).json({error: "Failed to fetch total journeys"});
-            }
-        });
-
-        // Get single journey ---------------------------------------------------------------
-        app.get('/api/journeys/:id', async (req, res) => {
-            try {
-                const {id} = req.params;
-                const journey = await db.collection('journeys').findOne({_id: new ObjectId(id)});
-                if (!journey) return res.status(404).send('No journey found.');
-                res.json(journey);
-            } catch (err) {
-                res.status(500).send("Error retrieving journeys");
-            }
-        });
-
-        // Update journey -------------------------------------------------------------------
-        app.put('/api/journeys/:id', async (req, res) => {
-            try {
-                const {id} = req.params;
-                const updated = req.body;
-                const result = await db.collection('journeys').updateOne(
-                    {_id: new ObjectId(id)},
-                    {$set: updated},
-                );
-                res.json(result);
-            } catch (err) {
-                res.status(500).send("Error updating journeys");
-            }
-        });
-
-        // Delete journey -------------------------------------------------------------------
-        app.delete('/api/journeys/:id', async (req, res) => {
-            try {
-                const {id} = req.params;
-                await db.collection('journeys').deleteOne({_id: new ObjectId(id)});
-                res.sendStatus(204);
-            } catch (err) {
-                res.status(500).send("Error deleting journeys");
-            }
-        });
-
         // Get Budget Summary ------------------------------------------------------------------
         app.get('/api/budget/:username', async (req, res) => {
             const username = req.params.username.toLowerCase();
@@ -602,12 +470,12 @@ async function startServer() {
 
             try {
                 // Fetch user's budget settings
-                const user = await db.collection('users').findOne({ username });
+                const user = await db.collection('users').findOne({username});
                 if (!user || !user.budgetEnabled) {
-                    return res.json({ enabled: false });
+                    return res.json({enabled: false});
                 }
 
-                const { budgetRange, budgetAmount, resetDay } = user;
+                const {budgetRange, budgetAmount, resetDay} = user;
 
                 // Determine start date for current budget period
                 const now = new Date();
@@ -644,8 +512,8 @@ async function startServer() {
                         $addFields: {
                             dateAsDate: {
                                 $cond: [
-                                    { $eq: [{ $type: "$dateTime" }, "string"] },
-                                    { $dateFromString: { dateString: "$dateTime" } },
+                                    {$eq: [{$type: "$dateTime"}, "string"]},
+                                    {$dateFromString: {dateString: "$dateTime"}},
                                     "$dateTime"
                                 ]
                             }
@@ -654,10 +522,10 @@ async function startServer() {
                     {
                         $match: {
                             user: username,
-                            dateAsDate: { $gte: startDate }
+                            dateAsDate: {$gte: startDate}
                         }
                     },
-                    { $sort: { dateAsDate: 1 } }, // sort chronologically
+                    {$sort: {dateAsDate: 1}}, // sort chronologically
                     {
                         $project: {
                             _id: 0,
@@ -683,6 +551,147 @@ async function startServer() {
             } catch (err) {
                 console.error("Error calculating budget:", err);
                 res.status(500).send("Error calculating budget");
+            }
+        });
+
+// ==========================================================================================================
+// -- New Journey --
+// ==========================================================================================================
+
+        // Insert Journey --------------------------------------------------------------------------------------------
+        app.post('/api/journeys', async (req, res) => {
+            try {
+                await journeys.insertOne(req.body);
+                console.log('Journey saved:', req.body);
+                res.status(201).send('Journey saved');
+            } catch (err) {
+                console.error('Error saving journey:', err);
+                res.status(500).send('Error saving journey');
+            }
+        });
+
+        // Import Journey ---------------------------------------------------------------
+        app.post('/api/importJourneys', async (req, res) => {
+            try {
+                let journeys = req.body;
+                console.log(journeys);
+
+                // Check if Array has data
+                if (!Array.isArray(journeys) || journeys.length === 0) {
+                    return res.status(400).send("No journeys provided");
+                }
+
+                // Clean data before import
+                journeys = journeys.map(j => {
+                    const distance = Number(j.distance) || 0;
+                    const mpg = Number(j.mpg) || 0;
+
+                    const fuelUsedL = mpg > 0 ? distance / (mpg / 3.785) : 0;
+                    const percOfTank = tankVolume > 0 ? fuelUsedL / tankVolume : 0;
+
+                    return {
+                        user: j.user?.toLowerCase() || "unknown",
+                        description: j.description || "",
+                        dateTime: new Date(j.dateTime),
+                        distance,
+                        mpg,
+                        timeDriven: Number(j.timeDriven) || 0,
+                        temp: Number(j.temp) || 0,
+                        condition: j.condition || "Dry",
+                        costPl: Number(j.costPl) || 0,
+                        avgSpeed: Number(j.avgSpeed) || 0,
+                        totalCost: Number(j.totalCost) || 0,
+                        costPerMile: Number(j.costPerMile) || 0,
+                        fuelUsedL,
+                        percOfTank
+                    };
+                });
+
+
+                // Declare Db & Collection
+                const db = client.db('journeyAppDb');
+                const collection = db.collection('journeys');
+
+                // insert records
+                await collection.insertMany(journeys);
+                res.status(201).send("Journeys imported successfully");
+            } catch (err) {
+                console.error("Error importing journeys:", err);
+                res.status(500).send("Error importing journeys");
+            }
+        });
+
+// ==========================================================================================================
+// -- Full Stats --
+// ==========================================================================================================
+
+        // Get Graph Endpoint ---------------------------------------------------------------------
+        app.get('/api/graph/:username', async (req, res) => {
+            try {
+                const {username} = req.params;
+                const {start, end, xAxis, yAxis} = req.query;
+
+                if (!xAxis || !yAxis) {
+                    return res.status(400).json({error: "xAxis and yAxis are required"});
+                }
+
+                const db = client.db('journeyAppDb');
+
+                // convert dates
+                const startDate = start ? new Date(start) : new Date("1970-01-01");
+                const endDate = end ? new Date(end) : new Date();
+
+                // Map front-end fields to db fields
+                const fieldMap = {
+                    date: "dateTime",
+                    distance: "distance",
+                    timeDriven: "timeDriven",
+                    avgSpeed: "avgSpeed",
+                    mpg: "mpg",
+                    cost: "totalCost",
+                    temp: "temp",
+                    costPerMile: "costPerMile",
+                    fuelUsedL: "fuelUsedL",
+                };
+
+                const xField = fieldMap[xAxis];
+                const yField = fieldMap[yAxis];
+
+                if (!xField || !yField) {
+                    return res.status(400).json({error: "Invalid xAxis or yAxis option"});
+                }
+
+                // Query journeys within date range
+                const journeys = await db.collection('journeys')
+                    .find({
+                        user: username,
+                        $expr: {
+                            $and: [
+                                {$gte: [{$toDate: "$dateTime"}, startDate]},
+                                {$lte: [{$toDate: "$dateTime"}, endDate]}
+                            ]
+                        }
+                    })
+                    .project({
+                        [xField]: 1,
+                        [yField]: 1,
+                        dateTime: 1,
+                        _id: 0
+                    })
+                    .sort({[xField]: 1})
+                    .toArray();
+
+                // Format response as array of { x, y }
+                const result = journeys.map(j => ({
+                    x: j[xField],
+                    y: j[yField]
+                }));
+
+                return res.json({data: result});
+
+            } catch (err) {
+                console.error("Error getting graph:", err);
+                res.status(500).send("Error getting graph");
             }
         });
 
@@ -731,75 +740,603 @@ async function startServer() {
             }
         });
 
-        // Get Graph Endpoint ---------------------------------------------------------------------
-        app.get('/api/graph/:username', async (req, res) => {
+        // Full Stats Endpoint ---------------------------------------------------------------
+        app.get('/api/fullStats/:username', async (req, res) => {
+            const username = req.params.username;
+            const {start, end, vehicleIds} = req.query;
+
             try {
-                const {username} = req.params;
-                const {start, end, xAxis, yAxis} = req.query;
+                // --------------------------------------------------------------------------
+                // Build Journey Match
+                // --------------------------------------------------------------------------
 
-                if (!xAxis || !yAxis) {
-                    return res.status(400).json({error: "xAxis and yAxis are required"});
-                }
-
-                const db = client.db('journeyAppDb');
-
-                // convert dates
-                const startDate = start ? new Date(start) : new Date("1970-01-01");
-                const endDate = end ? new Date(end) : new Date();
-
-                // Map front-end fields to db fields
-                const fieldMap = {
-                    date: "dateTime",
-                    distance: "distance",
-                    timeDriven: "timeDriven",
-                    avgSpeed: "avgSpeed",
-                    mpg: "mpg",
-                    cost: "totalCost",
-                    temp: "temp",
-                    costPerMile: "costPerMile",
-                    fuelUsedL: "fuelUsedL",
+                const matchQuery = {
+                    user: username
                 };
 
-                const xField = fieldMap[xAxis];
-                const yField = fieldMap[yAxis];
+                // Vehicle filter
+                // vehicleIds can be:
+                // - undefined = all vehicles
+                // - "vehicleId" = one vehicle
+                // - "id1,id2,id3" = multiple vehicles
 
-                if (!xField || !yField) {
-                    return res.status(400).json({ error: "Invalid xAxis or yAxis option" });
+                if (vehicleIds) {
+                    const selectedVehicleIds = vehicleIds
+                        .split(',')
+                        .map(id => id.trim())
+                        .filter(id => id.length > 0);
+                    if (selectedVehicleIds.length > 0) {
+                        matchQuery.vehicleId = {
+                            $in: selectedVehicleIds
+                        };
+                    }
                 }
 
-                // Query journeys within date range
-                const journeys = await db.collection('journeys')
-                    .find({
-                        user: username,
-                        $expr: {
-                            $and: [
-                                { $gte: [ { $toDate: "$dateTime" }, startDate ] },
-                                { $lte: [ { $toDate: "$dateTime" }, endDate ] }
-                            ]
+                // --------------------------------------------------------------------------
+                // Get Journey Data
+                // --------------------------------------------------------------------------
+
+                const aggregation = [
+                    {
+                        $match: matchQuery
+                    },
+                    // Convert dateTime to a proper Date
+                    {
+                        $addFields: {
+                            dateTimeCorrected: {
+                                $toDate: "$dateTime"
+                            }
                         }
-                    })
-                    .project({
-                        [xField]: 1,
-                        [yField]: 1,
-                        dateTime: 1,
-                        _id: 0
-                    })
-                    .sort({ [xField]: 1 })
+                    }
+                ];
+
+                // Date filtering
+                const dateFilter = {};
+                if (start) {
+                    dateFilter.$gte = new Date(start);
+                }
+                if (end) {
+                    const endDate = new Date(end);
+                    endDate.setHours(23, 59, 59, 999);
+                    dateFilter.$lte = endDate;
+                }
+                if (Object.keys(dateFilter).length > 0) {
+                    aggregation.push({
+                        $match: {
+                            dateTimeCorrected: dateFilter
+                        }
+                    });
+                }
+
+                const journeysData = await journeys
+                    .aggregate(aggregation)
                     .toArray();
 
-                // Format response as array of { x, y }
-                const result = journeys.map(j => ({
-                    x: j[xField],
-                    y: j[yField]
-                }));
+                console.log(
+                    `Stats retrieved for ${username}:`,
+                    journeysData.length,
+                    "journeys"
+                );
 
-                return res.json({ data: result });
+                // --------------------------------------------------------------------------
+                // Get Vehicle Data
+                // --------------------------------------------------------------------------
+
+                const vehicleIdsFound = [
+                    ...new Set(
+                        journeysData
+                            .map(j => j.vehicleId)
+                            .filter(Boolean)
+                    )
+                ];
+
+                const vehicleData = await vehicles
+                    .find({
+                        userId: username
+                    })
+                    .toArray();
+
+                // Create quick vehicle lookup
+                const vehicleMap = new Map();
+
+                vehicleData.forEach(vehicle => {
+                    vehicleMap.set(
+                        vehicle._id.toString(),
+                        vehicle
+                    );
+                });
+
+                // --------------------------------------------------------------------------
+                // Handle Empty Result
+                // --------------------------------------------------------------------------
+
+                if (!journeysData || journeysData.length === 0) {
+                    return res.json({
+                        totalMiles: 0,
+                        totalTime: 0,
+                        totalFuel: 0,
+                        totalCost: 0,
+                        journeyCount: 0,
+                        avgMilesPerTank: 0,
+                        avgMpg: 0,
+                        avgSpeed: 0,
+                        avgCostPerDay: 0,
+                        avgCostPerMile: 0,
+                        avgFuelPrice: 0,
+                        avgTemp: 0,
+                        avgTimeDriven: 0,
+                        fuelBreakdown: {},
+                        vehicles: []
+                    });
+                }
+
+                // --------------------------------------------------------------------------
+                // Base Totals
+                // --------------------------------------------------------------------------
+
+                const totalMiles =
+                    journeysData.reduce(
+                        (sum, j) => sum + (+j.distance || 0),
+                        0
+                    );
+                const totalTime =
+                    journeysData.reduce(
+                        (sum, j) => sum + (+j.timeDriven || 0),
+                        0
+                    );
+                const totalFuel =
+                    journeysData.reduce(
+                        (sum, j) => sum + (+j.fuelUsedL || 0),
+                        0
+                    );
+                const totalCost =
+                    journeysData.reduce(
+                        (sum, j) => sum + (+j.totalCost || 0),
+                        0
+                    );
+                const journeyCount = journeysData.length;
+
+                // --------------------------------------------------------------------------
+                // Standard Averages
+                // --------------------------------------------------------------------------
+
+                const avgTimeDriven =
+                    journeyCount > 0
+                        ? totalTime / journeyCount
+                        : 0;
+                const avgSpeed =
+                    journeyCount > 0
+                        ? journeysData.reduce(
+                        (sum, j) => sum + (+j.avgSpeed || 0),
+                        0
+                    ) / journeyCount
+                        : 0;
+                const avgFuelPrice =
+                    journeyCount > 0
+                        ? journeysData.reduce(
+                        (sum, j) => sum + (+j.costPl || 0),
+                        0
+                    ) / journeyCount
+                        : 0;
+                const avgTemp =
+                    journeyCount > 0
+                        ? journeysData.reduce(
+                        (sum, j) => sum + (+j.temp || 0),
+                        0
+                    ) / journeyCount
+                        : 0;
+
+                // --------------------------------------------------------------------------
+                // MPG
+                //
+                // Calculate this from total distance / total fuel
+                // --------------------------------------------------------------------------
+
+                const avgMpg =
+                    totalFuel > 0
+                        ? totalMiles / (totalFuel / 4.54609)
+                        : 0;
+
+                // --------------------------------------------------------------------------
+                // Fuel Breakdown
+                // --------------------------------------------------------------------------
+
+                const fuelBreakdown = {};
+
+                journeysData.forEach(journey => {
+
+                    const fuelType =
+                        (journey.fuelType || "Unknown").toLowerCase();
+
+                    if (!fuelBreakdown[fuelType]) {
+                        fuelBreakdown[fuelType] = {
+                            totalFuel: 0,
+                            totalCost: 0,
+                            totalMiles: 0,
+                            journeyCount: 0
+                        };
+                    }
+
+                    fuelBreakdown[fuelType].totalFuel +=
+                        +journey.fuelUsedL || 0;
+
+                    fuelBreakdown[fuelType].totalCost +=
+                        +journey.totalCost || 0;
+
+                    fuelBreakdown[fuelType].totalMiles +=
+                        +journey.distance || 0;
+
+                    fuelBreakdown[fuelType].journeyCount++;
+                });
+
+                // --------------------------------------------------------------------------
+                // Vehicle Breakdown
+                // --------------------------------------------------------------------------
+
+                const vehicleBreakdown = {};
+                journeysData.forEach(journey => {
+                    const vehicleId = journey.vehicleId || "unknown";
+                    if (!vehicleBreakdown[vehicleId]) {
+                        const vehicle =
+                            vehicleMap.get(vehicleId);
+                        vehicleBreakdown[vehicleId] = {
+                            vehicleId,
+                            vehicleName:
+                                journey.vehicleName ||
+                                vehicle?.name ||
+                                "Unknown",
+                            fuelType:
+                                journey.fuelType ||
+                                vehicle?.fuelType ||
+                                "Unknown",
+                            tankVolume:
+                                Number(vehicle?.tankVolume) || 0,
+                            totalMiles: 0,
+                            totalTime: 0,
+                            totalFuel: 0,
+                            totalCost: 0,
+                            journeyCount: 0
+                        };
+                    }
+
+                    vehicleBreakdown[vehicleId].totalMiles +=
+                        +journey.distance || 0;
+
+                    vehicleBreakdown[vehicleId].totalTime +=
+                        +journey.timeDriven || 0;
+
+                    vehicleBreakdown[vehicleId].totalFuel +=
+                        +journey.fuelUsedL || 0;
+
+                    vehicleBreakdown[vehicleId].totalCost +=
+                        +journey.totalCost || 0;
+
+                    vehicleBreakdown[vehicleId].journeyCount++;
+                });
+
+                // --------------------------------------------------------------------------
+                // Derived Statistics
+                // --------------------------------------------------------------------------
+
+                const avgCostPerMile =
+                    totalMiles > 0
+                        ? totalCost / totalMiles
+                        : 0;
+                const avgCostPerDay = (() => {
+                    const dates =
+                        journeysData.map(
+                            j => new Date(j.dateTime)
+                        );
+                    const minDate =
+                        start
+                            ? new Date(start)
+                            : new Date(
+                                Math.min(...dates)
+                            );
+                    const maxDate =
+                        end
+                            ? new Date(end)
+                            : new Date(
+                                Math.max(...dates)
+                            );
+                    const diffDays =
+                        Math.max(
+                            1,
+                            Math.ceil(
+                                (maxDate - minDate) /
+                                (1000 * 60 * 60 * 24)
+                            )
+                        );
+                    return totalCost / diffDays;
+                })();
+
+                // --------------------------------------------------------------------------
+                // Average Miles Per Tank
+                //
+                // Calculate this separately for each vehicle because vehicles can
+                // have different tank sizes.
+                // --------------------------------------------------------------------------
+
+                let totalTankDistance = 0;
+                let vehiclesWithTankData = 0;
+
+                Object.values(vehicleBreakdown).forEach(vehicle => {
+                    if (
+                        vehicle.tankVolume > 0 &&
+                        vehicle.totalFuel > 0
+                    ) {
+                        const vehicleMpg =
+                            vehicle.totalMiles /
+                            (vehicle.totalFuel / 4.54609);
+                        const vehicleMilesPerTank =
+                            vehicleMpg *
+                            vehicle.tankVolume /
+                            4.54609;
+                        totalTankDistance +=
+                            vehicleMilesPerTank;
+                        vehiclesWithTankData++;
+                    }
+                });
+                const avgMilesPerTank =
+                    vehiclesWithTankData > 0
+                        ? totalTankDistance /
+                        vehiclesWithTankData
+                        : 0;
+
+                // --------------------------------------------------------------------------
+                // Insight specifics
+                // --------------------------------------------------------------------------
+
+                const longestDistance =
+                    journeysData.length > 0
+                        ? Math.max(
+                            ...journeysData.map(
+                                j => +j.distance || 0
+                            )
+                        )
+                        : 0;
+
+                const longestTime =
+                    journeysData.length > 0
+                        ? Math.max(
+                            ...journeysData.map(
+                                j => +j.timeDriven || 0
+                            )
+                        )
+                        : 0;
+
+                const bestMpg =
+                    journeysData.length > 0
+                        ? Math.max(
+                            ...journeysData.map(
+                                j => +j.mpg || 0
+                            )
+                        )
+                        : 0;
+
+
+                // --------------------------------------------------------------------------
+                // Build Response
+                // --------------------------------------------------------------------------
+
+                res.json({
+                    totalMiles,
+                    totalTime,
+                    totalFuel,
+                    totalCost,
+                    journeyCount,
+                    avgMilesPerTank,
+                    avgMpg,
+                    avgSpeed,
+                    avgCostPerDay,
+                    avgCostPerMile,
+                    avgFuelPrice,
+                    avgTemp,
+                    avgTimeDriven,
+                    longestDistance,
+                    longestTime,
+                    bestMpg,
+                    fuelBreakdown,
+                    vehicles:
+                        Object.values(vehicleBreakdown)
+                });
 
             } catch (err) {
-                console.error("Error getting graph:", err);
-                res.status(500).send("Error getting graph");
+                console.error(
+                    "Error retrieving stats:",
+                    err
+                );
+                res.status(500).send(
+                    "Error retrieving stats"
+                );
             }
         });
+
+// ==========================================================================================================
+// -- Your Journeys --
+// ==========================================================================================================
+
+        // Your Journeys Endpoint ----------------------------------------------------------------
+        app.get('/api/getJourneys', async (req, res) => {
+            try {
+                const {username} = req.query; // safer to get from query
+
+                const journeys = await db.collection('journeys').aggregate([
+                    {
+                        $match: {user: username}
+                    },
+                    {
+                        $addFields: {
+                            dateTimeCorrected: {$toDate: "$dateTime"} // cast to Date
+                        }
+                    },
+                    {
+                        $sort: {dateTimeCorrected: -1} // newest first
+                    }
+                ]).toArray();
+
+                res.json(journeys);
+            } catch (err) {
+                console.error("Error retrieving journeys", err);
+                res.status(500).send("Error retrieving journeys");
+            }
+        });
+
+        // Journey Details Endpoint ------------------------------------------------------------------
+        app.get("/api/getJourney/:id", async (req, res) => {
+            try {
+                const journeyId = req.params.id;
+                const journey = await db.collection("journeys").findOne({_id: new ObjectId(journeyId)});
+
+                if (!journey) {
+                    return res.status(404).json({error: "Journey not found"});
+                }
+
+                res.json(journey);
+            } catch (error) {
+                console.error("Error fetching journey:", error);
+                res.status(500).json({error: "Failed to fetch journey"});
+            }
+        });
+
+// ==========================================================================================================
+// -- Edit Journey --
+// ==========================================================================================================
+
+        // Get single journey ---------------------------------------------------------------
+        app.get('/api/journeys/:id', async (req, res) => {
+            try {
+                const {id} = req.params;
+                const journey = await db.collection('journeys').findOne({_id: new ObjectId(id)});
+                if (!journey) return res.status(404).send('No journey found.');
+                res.json(journey);
+            } catch (err) {
+                res.status(500).send("Error retrieving journeys");
+            }
+        });
+
+        // Update journey -------------------------------------------------------------------
+        app.put('/api/journeys/:id', async (req, res) => {
+            try {
+                const {id} = req.params;
+                const updated = req.body;
+                const result = await db.collection('journeys').updateOne(
+                    {_id: new ObjectId(id)},
+                    {$set: updated},
+                );
+                res.json(result);
+            } catch (err) {
+                res.status(500).send("Error updating journeys");
+            }
+        });
+
+        // Delete journey -------------------------------------------------------------------
+        app.delete('/api/journeys/:id', async (req, res) => {
+            try {
+                const {id} = req.params;
+                await db.collection('journeys').deleteOne({_id: new ObjectId(id)});
+                res.sendStatus(204);
+            } catch (err) {
+                res.status(500).send("Error deleting journeys");
+            }
+        });
+
+// ==========================================================================================================
+// -- Vehicles --
+// ==========================================================================================================
+
+        // Get Vehicles ------------------------------------------------------------------------------------------------
+        app.get('/api/getVehicles', async (req, res) => {
+            try {
+                const {username} = req.query; // safer to get from query
+
+                const vehicles = await db.collection('vehicles').aggregate([
+                    {
+                        $match: {userId: username}
+                    },
+                ]).toArray();
+
+                res.json(vehicles);
+            } catch (err) {
+                console.error("Error retrieving vehicles", err);
+                res.status(500).send("Error retrieving vehicles");
+            }
+        });
+
+        // Get single Vehicle ---------------------------------------------------------------
+        app.get('/api/getVehicle/:id', async (req, res) => {
+            try {
+                const {id} = req.params;
+                const vehicle = await db.collection('vehicles').findOne({_id: new ObjectId(id)});
+                if (!vehicle) return res.status(404).send('No vehicle found.');
+                res.json(vehicle);
+            } catch (err) {
+                res.status(500).send("Error retrieving vehicle");
+            }
+        });
+
+        // Insert Vehicle --------------------------------------------------------------------------------------------
+        app.post('/api/addVehicle', async (req, res) => {
+            try {
+                await vehicles.insertOne(req.body);
+                console.log('Vehicle saved:', req.body);
+                res.status(201).send('Vehicle saved');
+            } catch (err) {
+                console.error('Error saving Vehicle:', err);
+                res.status(500).send('Error saving Vehicle');
+            }
+        });
+
+        // Update Vehicle ------------------------------------------------------------
+        app.put('/api/updateVehicle/:id', async (req, res) => {
+            try {
+                const {id} = req.params;
+
+                const updated = {
+                    userId: req.body.userId,
+                    name: req.body.name,
+                    fuelType: req.body.fuelType,
+                    tankVolume: req.body.tankVolume,
+                    makeAndModel: req.body.makeAndModel,
+                    lastCostPL: req.body.lastCostPL,
+                };
+
+                console.log("Updating vehicle:", id);
+                console.log("New details:", updated);
+
+                const result = await db.collection('vehicles').updateOne(
+                    {_id: new ObjectId(id)},
+                    {$set: updated}
+                );
+
+                console.log("Update result:", result);
+
+                if (result.matchedCount === 0) {
+                    return res.status(404).send("Vehicle not found");
+                }
+
+                res.json(result);
+
+            } catch (err) {
+                console.error("Error updating Vehicle:", err);
+                res.status(500).send(`Error updating Vehicle: ${err.message}`);
+            }
+        });
+
+        // Delete Vehicle -------------------------------------------------------------------
+        app.delete('/api/deleteVehicle/:id', async (req, res) => {
+            try {
+                const {id} = req.params;
+                await db.collection('vehicles').deleteOne({_id: new ObjectId(id)});
+                res.sendStatus(204);
+            } catch (err) {
+                res.status(500).send("Error deleting journeys");
+            }
+        });
+
+// ==========================================================================================================
+// -- Do the things with the stuff --
+// ==========================================================================================================
 
         app.listen(3000, () => {
             console.log('Server running at http://localhost:3000');

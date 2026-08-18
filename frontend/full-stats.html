@@ -54,6 +54,35 @@
 <!--                <option value="export">Export</option>-->
             </select>
 
+            <!-- Vehicle Select -->
+            <div class="vehicle-selector">
+                <label for="vehicle-dropdown">Vehicles:</label>
+
+                <div id="vehicle-dropdown" class="multi-select-dropdown">
+
+                    <!-- Dropdown header -->
+                    <button type="button" id="vehicle-dropdown-button" class="multi-select-button">
+                        <span id="vehicle-dropdown-text">Select Vehicles</span>
+                        <span class="material-symbols-outlined">expand_more</span>
+                    </button>
+
+                    <!-- Dropdown options -->
+                    <div id="vehicle-options" class="multi-select-options">
+
+                        <!-- Select All -->
+                        <label class="vehicle-option select-all-option">
+                            <input type="checkbox" id="vehicle-select-all">
+                            <span>All Vehicles</span>
+                        </label>
+
+                        <div id="vehicle-list">
+                            <!-- Vehicles populated by JavaScript -->
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
             <!-- =========================================================================================================== -->
             <!-- Graph -->
             <!-- =========================================================================================================== -->
