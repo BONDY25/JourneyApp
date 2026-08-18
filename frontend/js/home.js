@@ -324,21 +324,27 @@ async function loadInsights() {
         // --------------------------------------------------------------------------
 
         elements.longestDistance.textContent =
-            `${summary.longestDistance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Miles`;
+            `${summary.longestDistance.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })} Miles`;
 
         // --------------------------------------------------------------------------
         // Longest Time
         // --------------------------------------------------------------------------
 
         elements.longestTime.textContent =
-            `${summary.longestTime.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })} Minutes`;
+            `${summary.longestTime.toLocaleString(undefined, {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            })} Minutes`;
 
         // --------------------------------------------------------------------------
         // Best Journey
         // --------------------------------------------------------------------------
 
         elements.bestJourney.textContent =
-            `${summary.bestMpg.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })} MPG`;
+            `${summary.bestMpg.toLocaleString(undefined, {minimumFractionDigits: 1, maximumFractionDigits: 1})} MPG`;
 
         // --------------------------------------------------------------------------
         // Tanks Used
@@ -851,13 +857,13 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // Call load functions
     await loadSummary(username);
-    if (window.summaryData.length > 0) {
+    const totalJourneys = window.summaryData.journeyCount;
+    if (totalJourneys > 0) {
         await loadCosts(username);
         await load28DaySum(username);
         await loadInsights(username);
         await loadBudget(username);
     }
-
 });
 
 // Log Out Button clicked ---------------------------------------------------------------------------
