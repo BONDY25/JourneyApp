@@ -7,8 +7,9 @@ import {API_BASE_URL} from "./config.js";
 
 const currency = localStorage.getItem('currency');
 const SM = SessionMaintenance;
+let eeCount = 0;
 
-// DOM Elements --------------------------------------------------------------------------------------
+// DOM Elements ---------------------------------------------------------------------------------------------
 const containers = {
     summaryStats: SM.$("sum-stats"),
     budgetContainer: SM.$("budgetCard")
@@ -19,6 +20,7 @@ const buttons = {
 }
 
 const elements = {
+    title: SM.$("title"),
     budgetSummary: SM.$("budgetSummary"),
     budgetProgress: SM.$("budgetProgress"),
     periodProgress: SM.$("periodProgress"),
@@ -60,7 +62,7 @@ const elements = {
 // -- Operational Functions --
 // ==========================================================================================================
 
-// Load summary --------------------------------------------------------------------------------------
+// Load summary ---------------------------------------------------------------------------------------------
 async function loadSummary(username) {
     try {
         SM.showLoader();
@@ -251,7 +253,7 @@ async function loadSummary(username) {
     }
 }
 
-// Load Insights -----------------------------------------------------------------------------------------------
+// Load Insights --------------------------------------------------------------------------------------------
 async function loadInsights() {
     try {
         SM.showLoader();
@@ -434,7 +436,7 @@ async function loadInsights() {
     }
 }
 
-// Load Costs -------------------------------------------------------------------------------------
+// Load Costs -----------------------------------------------------------------------------------------------
 async function loadCosts(username) {
     try {
         SM.showLoader();
@@ -477,7 +479,7 @@ async function loadCosts(username) {
     }
 }
 
-// Load 28 day summary --------------------------------------------------------------------------------------------------
+// Load 28 day summary --------------------------------------------------------------------------------------
 async function load28DaySum(username) {
 
     const start = new Date();
@@ -600,7 +602,7 @@ async function load28DaySum(username) {
     }
 }
 
-// Get Period Percentage ---------------------------------------------------------------------------
+// Get Period Percentage ------------------------------------------------------------------------------------
 function getPeriodPercentage(period, resetDay) {
     const now = new Date();
     let periodStart, periodEnd;
@@ -666,7 +668,7 @@ function getPeriodPercentage(period, resetDay) {
     return (elapsed / total) * 100;
 }
 
-// Load Budget ------------------------------------------------------------------------------------
+// Load Budget ----------------------------------------------------------------------------------------------
 async function loadBudget(username) {
     try {
         SM.showLoader();
@@ -841,7 +843,7 @@ async function loadBudget(username) {
 // -- Event Listeners --
 // ==========================================================================================================
 
-// window loaded event listener ------------------------------------------------------------------------
+// window loaded event listener -----------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
     await SM.logBook("home", "window.DOMContentLoaded", "Home page loaded");
 
@@ -866,7 +868,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Log Out Button clicked ---------------------------------------------------------------------------
+// Log Out Button clicked -----------------------------------------------------------------------------------
 buttons.btnLogOut.addEventListener('click', async (e) => {
     await SM.logBook("home", "btnLogOut.click", "Log Out button clicked");
 
@@ -874,4 +876,15 @@ buttons.btnLogOut.addEventListener('click', async (e) => {
     if (confirmed) {
         window.location.href = "index.html";
     }
+});
+
+// title click (Easter Egg) ---------------------------------------------------------------------------------
+elements.title.addEventListener('click', async (e) => {
+   eeCount++;
+   const randomNumber = Math.floor(Math.random() * 15);
+
+   if(eeCount > randomNumber){
+       await SM.cmbInfo('Journey App',`This is the journey app, where you can track your journeys, fuel usage and more!`);
+       eeCount = 0;
+   }
 });

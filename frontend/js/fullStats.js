@@ -9,7 +9,7 @@ const SM = SessionMaintenance;
 
 const currency = localStorage.getItem('currency');
 
-// DOM Elements --------------------------------------------------------------------------------------
+// DOM Elements ---------------------------------------------------------------------------------------------
 const containers = {
     axisFields: SM.$("axisFields"),
     sumStats: SM.$("sum-stats"),
@@ -57,10 +57,10 @@ const buttons = {
 // -- Vehicle Selection Stuff--
 // ==========================================================================================================
 
-// Get Vehicles for Stats ------------------------------------------------------------
+// Get Vehicles for Stats -----------------------------------------------------------------------------------
 async function getStatsVehicles(username) {
     try {
-        SessionMaintenance.showLoader();
+        SM.showLoader();
 
         const vehicleList = document.getElementById("vehicle-list");
 
@@ -79,7 +79,7 @@ async function getStatsVehicles(username) {
         const vehicles = await res.json();
 
         if (vehicles.length === 0) {
-            await SessionMaintenance.cmbInfo(
+            await SM.cmbInfo(
                 `No vehicles`,
                 `You don't have any vehicles, add them in settings.`
             );
@@ -112,23 +112,23 @@ async function getStatsVehicles(username) {
         updateVehicleDropdownText();
 
     } catch (err) {
-        await SessionMaintenance.logBook(
+        await SM.logBook(
             "stats",
             "getStatsVehicles",
             `Network Error: ${err}`,
             true
         );
 
-        await SessionMaintenance.cmbError(
+        await SM.cmbError(
             `Error loading vehicles: ${err}`
         );
 
     } finally {
-        SessionMaintenance.hideLoader();
+        SM.hideLoader();
     }
 }
 
-// Update Dropdown Text ------------------------------------------------------------------------------------
+// Update Dropdown Text -------------------------------------------------------------------------------------
 function updateVehicleDropdownText() {
 
     const selectedVehicles = document.querySelectorAll(
@@ -153,7 +153,7 @@ function updateVehicleDropdownText() {
         `${selectedVehicles.length} vehicles selected`;
 }
 
-// Select All Function ------------------------------------------------
+// Select All Function --------------------------------------------------------------------------------------
 function updateSelectAllState() {
     const vehicleCheckboxes = document.querySelectorAll(".vehicle-checkbox");
     const checkedVehicles = document.querySelectorAll(".vehicle-checkbox:checked");
@@ -163,7 +163,7 @@ function updateSelectAllState() {
         checkedVehicles.length === vehicleCheckboxes.length;
 }
 
-// Get Selected Vehicle IDs ----------------------------------------------------------
+// Get Selected Vehicle IDs ---------------------------------------------------------------------------------
 function getSelectedVehicleIds() {
 
     return Array.from(
@@ -176,21 +176,21 @@ function getSelectedVehicleIds() {
 // -- Operational Functions --
 // ==========================================================================================================
 
-// Get Stats -------------------------------------------------------------------------------------------
+// Get Stats ------------------------------------------------------------------------------------------------
 async function getStats(username, start, end) {
     try {
-        SessionMaintenance.showLoader();
+        SM.showLoader();
 
         // Get selected vehicles
         const selectedVehicleIds = getSelectedVehicleIds();
         if (selectedVehicleIds.length === 0) {
-            await SessionMaintenance.cmbInfo(
+            await SM.cmbInfo(
                 "No Vehicles Selected",
                 "Please select at least one vehicle to view your stats."
             );
             return;
         }
-        await SessionMaintenance.logBook(
+        await SM.logBook(
             "fullStats",
             "getStats",
             `Getting full stats: (${start}, ${end}) - Vehicles: ${selectedVehicleIds.join(", ")}`
@@ -204,7 +204,7 @@ async function getStats(username, start, end) {
             throw new Error(`HTTP ${res.status}: ${res.statusText}`);
         }
         const data = await res.json();
-        await SessionMaintenance.logBook(
+        await SM.logBook(
             "fullStats",
             "getStats",
             `Full Stats retrieved: ${JSON.stringify(data, null, 2)}`
@@ -223,16 +223,16 @@ async function getStats(username, start, end) {
                 ? "Hours"
                 : "Minutes";
         const lpkm =
-            SessionMaintenance.calculateConsumption(
+            SM.calculateConsumption(
                 data.avgMpg
             );
         const kWh =
-            SessionMaintenance.calculateConsumption(
+            SM.calculateConsumption(
                 data.avgMpg,
                 'kwhper100'
             );
         const kWhTotal =
-            SessionMaintenance.calculateConsumption(
+            SM.calculateConsumption(
                 data.avgMpg,
                 'kwhper100',
                 'Total'
@@ -360,21 +360,21 @@ async function getStats(username, start, end) {
 
         containers.sumStats.style.display = 'block';
     } catch (err) {
-        await SessionMaintenance.logBook(
+        await SM.logBook(
             "fullStats",
             "getStats",
             `Error fetching stats: ${err}`,
             true
         );
-        await SessionMaintenance.cmbError(
+        await SM.cmbError(
             `Failed to load stats: ${err}`
         );
     } finally {
-        SessionMaintenance.hideLoader();
+        SM.hideLoader();
     }
 }
 
-// Calculate Trend Line --------------------------------------------------------------------------------
+// Calculate Trend Line -------------------------------------------------------------------------------------
 function calculateAveragedTrendline(data) {
     const grouped = {};
 
@@ -395,12 +395,12 @@ function calculateAveragedTrendline(data) {
     return averaged.sort((a, b) => a.x - b.x);
 }
 
-// Get Graph --------------------------------------------------------------------------------
+// Get Graph ------------------------------------------------------------------------------------------------
 async function getGraph(username, start, end, xAxis, yAxis) {
     try {
-        SessionMaintenance.showLoader();
+        SM.showLoader();
 
-        await SessionMaintenance.logBook("fullStats", "getGraph", `Getting graph: (${start}, ${end}, ${xAxis}, ${yAxis})`);
+        await SM.logBook("fullStats", "getGraph", `Getting graph: (${start}, ${end}, ${xAxis}, ${yAxis})`);
 
         // Fetch data
         const res = await fetch(
@@ -410,7 +410,7 @@ async function getGraph(username, start, end, xAxis, yAxis) {
         if (!res.ok) throw new Error(`Server returned ${res.status}`);
         const {data} = await res.json();
 
-        await SessionMaintenance.logBook(
+        await SM.logBook(
             "fullStats",
             "getGraph",
             `Graph data retrieved: ${JSON.stringify(data, null, 2)})`
@@ -535,18 +535,18 @@ async function getGraph(username, start, end, xAxis, yAxis) {
         }
 
     } catch (err) {
-        await SessionMaintenance.logBook("fullStats", "getGraph", `Error fetching graph: ${err}`, true);
-        await SessionMaintenance.cmbError(`Failed to load graph data: ${err}`);
+        await SM.logBook("fullStats", "getGraph", `Error fetching graph: ${err}`, true);
+        await SM.cmbError(`Failed to load graph data: ${err}`);
         console.error(err);
     } finally {
-        SessionMaintenance.hideLoader();
+        SM.hideLoader();
     }
 }
 
-// Export the data ------------------------------------------------------------------------
+// Export the data ------------------------------------------------------------------------------------------
 async function exportData(username, start, end) {
-    SessionMaintenance.showLoader();
-    await SessionMaintenance.logBook("fullStats", "exportData", `Exporting full stats: (${start}, ${end})`);
+    SM.showLoader();
+    await SM.logBook("fullStats", "exportData", `Exporting full stats: (${start}, ${end})`);
 
     try {
         // Fetch the data
@@ -555,7 +555,7 @@ async function exportData(username, start, end) {
         const data = await res.json();
 
         if (!data || !Array.isArray(data) || data.length === 0) {
-            await SessionMaintenance.cmbError(`No data found.`);
+            await SM.cmbError(`No data found.`);
             return;
         }
 
@@ -594,15 +594,15 @@ async function exportData(username, start, end) {
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
 
-        await SessionMaintenance.logBook("fullStats", "exportData", `Exported ${data.length} rows to CSV`);
-        await SessionMaintenance.cmbInfo(`Success`, `Exported ${data.length} rows to CSV`);
+        await SM.logBook("fullStats", "exportData", `Exported ${data.length} rows to CSV`);
+        await SM.cmbInfo(`Success`, `Exported ${data.length} rows to CSV`);
 
     } catch (err) {
         console.error("Error exporting data:", err);
-        await SessionMaintenance.logBook("fullStats", "exportData", `Export failed: ${err}`, true);
-        await SessionMaintenance.cmbError(`Failed to export data: ${err}`);
+        await SM.logBook("fullStats", "exportData", `Export failed: ${err}`, true);
+        await SM.cmbError(`Failed to export data: ${err}`);
     } finally {
-        SessionMaintenance.hideLoader();
+        SM.hideLoader();
     }
 }
 
@@ -610,20 +610,20 @@ async function exportData(username, start, end) {
 // -- Event Listeners --
 // ==========================================================================================================
 
-// window loaded event listener ------------------------------------------------------------------------
+// window loaded event listener -----------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
-    await SessionMaintenance.logBook("fullStats", "window.DOMContentLoaded", "Full Stats page loaded");
+    await SM.logBook("fullStats", "window.DOMContentLoaded", "Full Stats page loaded");
 
     const currentPage = window.location.pathname.split("/").pop();
-    SessionMaintenance.highlightActivePage(currentPage);
+    SM.highlightActivePage(currentPage);
 
     await getStatsVehicles(localStorage.getItem("username"));
-    SessionMaintenance.hideLoader();
+    SM.hideLoader();
 });
 
-// Get Stats Button Click --------------------------------------------------------------------------
+// Get Stats Button Click -----------------------------------------------------------------------------------
 buttons.btnGetStats.addEventListener('click', async () => {
-    await SessionMaintenance.logBook("fullStats", "getStatsBtn.click", `Get Stats button clicked (${inputs.displayType.value})`);
+    await SM.logBook("fullStats", "getStatsBtn.click", `Get Stats button clicked (${inputs.displayType.value})`);
 
     // Declare Variables
     const username = localStorage.getItem('username').toLowerCase();
@@ -636,7 +636,7 @@ buttons.btnGetStats.addEventListener('click', async () => {
     if (inputs.displayType.value === 'figures') {
         // Figures
         if (!start || !end) {
-            await SessionMaintenance.cmbError(`Please select a start & end date.`);
+            await SM.cmbError(`Please select a start & end date.`);
             return;
         }
         await getStats(username, start, end);
@@ -647,10 +647,10 @@ buttons.btnGetStats.addEventListener('click', async () => {
         const yAxis = inputs.yAxis.value;
 
         if (!start || !end) {
-            await SessionMaintenance.cmbError(`Please select a start & end date.`);
+            await SM.cmbError(`Please select a start & end date.`);
             return;
         } else if (!xAxis || !yAxis) {
-            await SessionMaintenance.cmbError(`Please select a X & Y axis values`);
+            await SM.cmbError(`Please select a X & Y axis values`);
             return;
         }
 
@@ -662,7 +662,7 @@ buttons.btnGetStats.addEventListener('click', async () => {
     }
 });
 
-// Display type changed --------------------------------------------------------------------------
+// Display type changed -------------------------------------------------------------------------------------
 inputs.displayType.addEventListener('change', () => {
     if (inputs.displayType.value === 'figures') {
         containers.axisFields.style.display = 'none';
@@ -671,12 +671,12 @@ inputs.displayType.addEventListener('change', () => {
     }
 });
 
-// Vehicle Dropdown --------------------------------------------------------------------------
+// Vehicle Dropdown -----------------------------------------------------------------------------------------
 buttons.btnVehicleDropdown.addEventListener("click", () => {
     elements.vehicleOptions.classList.toggle("open");
 });
 
-// Vehicle Dropdown close --------------------------------------------------------------------------
+// Vehicle Dropdown close -----------------------------------------------------------------------------------
 document.addEventListener("click", (event) => {
     const dropdown = document.getElementById("vehicle-dropdown");
     if (!dropdown.contains(event.target)) {
@@ -684,7 +684,7 @@ document.addEventListener("click", (event) => {
     }
 });
 
-// Checkbox change -------------------------------------------------------------------------------
+// Checkbox change ------------------------------------------------------------------------------------------
 document.addEventListener("change", (event) => {
     if (event.target.classList.contains("vehicle-checkbox")) {
         updateVehicleDropdownText();
@@ -693,7 +693,7 @@ document.addEventListener("change", (event) => {
 
 });
 
-// Select All clicked ------------------------------------------------
+// Select All clicked ---------------------------------------------------------------------------------------
 buttons.selectAllCheckbox.addEventListener("change", () => {
 
     const vehicleCheckboxes =

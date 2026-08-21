@@ -3,18 +3,13 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Login</title>
-    <link href="styles/styles.css" rel="stylesheet"/>
+    <title>Journey App - Welcome</title>
+    <link href="styles/styles-index.css" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="assets/JourneyApp-logo-1.png"/>
 </head>
 <body>
-
-<!-- =========================================================================================================== -->
-<!-- Message Box Overlay -->
-<!-- =========================================================================================================== -->
-
 <div id="message-box" class="message-box-card hidden">
-    <div class="message-box-header">
+    <div  class="message-box-header">
         <div class="message-box-content">
             <span id="message-box-title" class="message-box-title">Title</span>
             <p id="message-box-message" class="message-box-message">Message</p>
@@ -25,46 +20,12 @@
         </div>
     </div>
 </div>
-
-<!-- =========================================================================================================== -->
-<!-- Loader Overlay -->
-<!-- =========================================================================================================== -->
-
-<div id="loader" class="loader-overlay">
-    <span class="loader"></span>
-</div>
-
-<!-- =========================================================================================================== -->
-<!-- App Container -->
-<!-- =========================================================================================================== -->
-
 <div id="app" class="app">
-    <h1>Login</h1>
-    <hr>
-    <form id="login-form">
-        <label for="username">Username</label>
-        <input type="text" id="username" required>
-
-        <label for="password">Password</label>
-        <input type="password" id="password" required>
-
-        <!-- reCAPTCHA widget -->
-        <div id="captcha-container" style="display: none;">
-            <div class="g-recaptcha" data-sitekey="6LeMocsrAAAAAGa0ER9K4NhRHVkZeMOv7Csfs3aQ"></div>
-        </div>
-    </form>
-    <div class=button-group>
-        <button type="submit" id="submitLogin" class="button">Login</button>
-        <button type="submit" id="submitRegister" class="button" style="display: none">Register</button>
-    </div>
+    <img src="assets/JourneyApp-logo-1.png" alt="Journey App logo" class="logo">
+    <h1>Welcome</h1>
+    <a href="login.html" class="button">Proceed</a>
 </div>
-
-<!-- =========================================================================================================== -->
-<!-- Scripts -->
-<!-- =========================================================================================================== -->
-
-<script src="https://www.google.com/recaptcha/api.js" async defer></script>
-<script type="module" src="js/index.js"></script>
-
+<!--<script type="module" src="js/index.js"></script>-->
+<script>console.log('⚠️ This is property of Aiden Bond. Any attempt to copy it will result in a stern talking to by the rozzers!👮⚠️');</script>
 </body>
 </html>

@@ -8,17 +8,17 @@ export default class SessionMaintenance {
 
     // Global Variables
     static debugMode = false;
-    static currentVersion = "1.0.0";
+    static currentVersion = "1.1.1";
     static appName = "journeyApp";
     static sessionId = null;
     static username = null;
     static $ = (id) => document.getElementById(id);
 
-    // ==========================================================================================================
+    // ======================================================================================================
     // -- Operational Functions --
-    // ==========================================================================================================
+    // ======================================================================================================
 
-    // Start Session Function -------------------------------------------
+    // Start Session Function -------------------------------------------------------------------------------
     static startSession(username) {
         this.sessionId = crypto.randomUUID();
         this.username = username;
@@ -44,28 +44,29 @@ export default class SessionMaintenance {
             notes
         };
 
+        // Show logs in console when in debug
         if (this.debugMode) {
-            // Show as console error if error
             if (error) {
                 console.error(entry);
             } else {
                 console.log(entry);
             }
-        } else {
-            console.log(entry);
-            try {
-                await fetch(`${API_BASE_URL}/api/logBook`, {
-                    method: "POST",
-                    headers: {"content-type": "application/json"},
-                    body: JSON.stringify(entry)
-                });
-            } catch (err) {
-                console.error("Failed to send log", err);
-            }
         }
+
+        // log entry to database
+        try {
+            await fetch(`${API_BASE_URL}/api/logBook`, {
+                method: "POST",
+                headers: {"content-type": "application/json"},
+                body: JSON.stringify(entry)
+            });
+        } catch (err) {
+            console.error("Failed to send log", err);
+        }
+
     }
 
-    // show & hide Loader -------------------------------------------------------------------------------------
+    // show & hide Loader -----------------------------------------------------------------------------------
     static showLoader() {
         document.getElementById("loader").classList.remove("hidden");
     }
@@ -74,7 +75,7 @@ export default class SessionMaintenance {
         document.getElementById("loader").classList.add("hidden");
     }
 
-    // Highlight active page on navbar -----------------------------------------------------------------------
+    // Highlight active page on navbar ----------------------------------------------------------------------
     static highlightActivePage(currentPage) {
 
         // Map of pages
@@ -98,7 +99,7 @@ export default class SessionMaintenance {
         if (activeEl) activeEl.classList.add("active");
     }
 
-    // Calculate Consumption -------------------------------------------------------------------------
+    // Calculate Consumption --------------------------------------------------------------------------------
     static calculateConsumption(mpg, mode = "lper100", fig = 'Useful') {
         if (!mpg || mpg <= 0) return 0;
 
@@ -121,7 +122,7 @@ export default class SessionMaintenance {
         return lp100;
     }
 
-    // Get total number of journeys ----------------------------------------------------------
+    // Get total number of journeys -------------------------------------------------------------------------
     static async getTotalJourneys(username) {
         try {
             const res = await fetch(`${API_BASE_URL}/api/getTotalJourneys/${username}`);
@@ -139,7 +140,7 @@ export default class SessionMaintenance {
         }
     }
 
-    // Get Vehicle Data ----------------------------------------------------------------------
+    // Get Vehicle Data -------------------------------------------------------------------------------------
     static async getVehicleDetails(vehicleId) {
         try {
             this.showLoader();
@@ -168,12 +169,11 @@ export default class SessionMaintenance {
         }
     }
 
-
 // ==========================================================================================================
 // -- Custom Message Box --
 // ==========================================================================================================
 
-    // Info Message ----------------------------------------------------------------
+    // Info Message -----------------------------------------------------------------------------------------
     static cmbInfo(title, message) {
         return new Promise(resolve => {
             this.hideLoader();
@@ -203,7 +203,7 @@ export default class SessionMaintenance {
         });
     }
 
-    // Error Message ------------------------------------------------------------------------------------
+    // Error Message ----------------------------------------------------------------------------------------
     static cmbError(message) {
         return new Promise(resolve => {
             this.hideLoader();
@@ -235,7 +235,7 @@ export default class SessionMaintenance {
         });
     }
 
-    // Question Message (Yes/No) -----------------------------------------------------------
+    // Question Message (Yes/No) ----------------------------------------------------------------------------
     static cmbQuestion(title, message) {
         return new Promise(resolve => {
             this.hideLoader();

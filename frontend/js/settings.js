@@ -6,7 +6,7 @@ import SessionMaintenance from "./sessionMaintenance.js";
 import {API_BASE_URL} from "./config.js";
 const SM = SessionMaintenance;
 
-// DOM Elements --------------------------------------------------------------------------------------
+// DOM Elements ---------------------------------------------------------------------------------------------
 const buttons = {
     btnVehicles: SM.$("btnVehicles")
 }
@@ -32,13 +32,13 @@ const resetDaySelect = document.getElementById('reset-day');
 // -- Operational Functions --
 // ==========================================================================================================
 
-// Get total number of journeys ----------------------------------------------------------
+// Get total number of journeys -----------------------------------------------------------------------------
 async function getTotalJourneys(username) {
     const totalElem = document.getElementById('totalJourneys');
-    totalElem.textContent = await SessionMaintenance.getTotalJourneys(username)
+    totalElem.textContent = await SM.getTotalJourneys(username)
 }
 
-// Update UI for reset day ----------------------------------------------------------
+// Update UI for reset day ----------------------------------------------------------------------------------
 function updateResetDayOptions() {
     const range = rangeSelect.value;
     resetDaySelect.innerHTML = ''; // Clear previous options
@@ -76,7 +76,7 @@ buttons.btnVehicles.addEventListener('click', async () =>{
     window.location.href = "vehicles.html";
 });
 
-// Font Select -----------------------------------------------------------------------
+// Font Select ----------------------------------------------------------------------------------------------
 fontSelect.addEventListener('change', (e) => {
     document.documentElement.style.setProperty(
         '--default-font',
@@ -84,29 +84,29 @@ fontSelect.addEventListener('change', (e) => {
     );
 });
 
-// Budget Tracking ------------------------------------------------------------
+// Budget Tracking ------------------------------------------------------------------------------------------
 budgetToggle.addEventListener('change', () => {
     budgetFields.style.display = budgetToggle.checked ? 'block' : 'none';
     if (budgetToggle.checked) updateResetDayOptions();
 });
 
-// Range Select ---------------------------------------------------------------
+// Range Select ---------------------------------------------------------------------------------------------
 rangeSelect.addEventListener('change', () => {
     if (budgetToggle.checked) updateResetDayOptions();
 });
 
-// window loaded event listener ------------------------------------------------------------------------
+// window loaded event listener -----------------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', async () => {
-    await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Settings page loaded");
+    await SM.logBook("settings", "window.DOMContentLoaded", "Settings page loaded");
 
     const currentPage = window.location.pathname.split("/").pop();
-    SessionMaintenance.highlightActivePage(currentPage);
+    SM.highlightActivePage(currentPage);
 
-    SessionMaintenance.hideLoader();
+    SM.hideLoader();
 
     const username = localStorage.getItem('username');
     if (!username) {
-        await SessionMaintenance.cmbError('No user logged in!');
+        await SM.cmbError('No user logged in!');
         return;
     }
 
@@ -117,8 +117,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Fetch current user settings
     try {
-        SessionMaintenance.showLoader();
-        await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Getting current user settings");
+        SM.showLoader();
+        await SM.logBook("settings", "window.DOMContentLoaded", "Getting current user settings");
         const res = await fetch(`${API_BASE_URL}/api/getUsers/${username}`);
 
         if (res.ok) {
@@ -135,13 +135,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('reset-day').value = user.reset ?? "";
 
         } else {
-            await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", "Failed fetching user settings", true);
+            await SM.logBook("settings", "window.DOMContentLoaded", "Failed fetching user settings", true);
         }
     } catch (err) {
-        await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", `Failed fetching user settings: ${err}`, true);
-        await SessionMaintenance.cmbError(`Failed fetching user settings: ${err}`);
+        await SM.logBook("settings", "window.DOMContentLoaded", `Failed fetching user settings: ${err}`, true);
+        await SM.cmbError(`Failed fetching user settings: ${err}`);
     } finally {
-        SessionMaintenance.hideLoader();
+        SM.hideLoader();
 
         budgetFields.style.display = budgetToggle.checked ? 'block' : 'none';
         if (budgetToggle.checked) updateResetDayOptions();
@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Check if budget amount is valid
         if (budgetEnabled && (budgetAmount ?? 0) === 0)
         {
-            await SessionMaintenance.cmbError(`Budget Amount must be greater than 0`);
+            await SM.cmbError(`Budget Amount must be greater than 0`);
             return;
         }
 
@@ -197,7 +197,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            SessionMaintenance.showLoader();
+            SM.showLoader();
             const res = await fetch(`${API_BASE_URL}/api/saveUsers/${username}`, {
                 method: 'PUT',
                 headers: {'Content-Type': 'application/json'},
@@ -219,18 +219,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             localStorage.setItem('resetDay', resetDay);
 
             if (res.ok) {
-                await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", `Settings saved successfully {${JSON.stringify(payLoad)}}`);
-                await SessionMaintenance.cmbInfo('Success',`Settings saved successfully`);
+                await SM.logBook("settings", "window.DOMContentLoaded", `Settings saved successfully {${JSON.stringify(payLoad)}}`);
+                await SM.cmbInfo('Success',`Settings saved successfully`);
             } else {
                 const err = await res.text();
-                await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", `Failed to save user settings: ${err}`);
-                await SessionMaintenance.cmbError(`Failed to save user settings: ${err}`);
+                await SM.logBook("settings", "window.DOMContentLoaded", `Failed to save user settings: ${err}`);
+                await SM.cmbError(`Failed to save user settings: ${err}`);
             }
         } catch (err) {
-            await SessionMaintenance.logBook("settings", "window.DOMContentLoaded", `Network Error: ${err}`, true);
-            await SessionMaintenance.cmbError(`Failed to save user settings: ${err}`);
+            await SM.logBook("settings", "window.DOMContentLoaded", `Network Error: ${err}`, true);
+            await SM.cmbError(`Failed to save user settings: ${err}`);
         } finally {
-            SessionMaintenance.hideLoader();
+            SM.hideLoader();
         }
     });
 });

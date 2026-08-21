@@ -13,7 +13,7 @@ const importBtn = document.getElementById("importBtn");
 // -- Operational Functions --
 // ==========================================================================================================
 
-// Chunk Array helper method ------------------------------------------------------------------------------
+// Chunk Array helper method --------------------------------------------------------------------------------
 function chunkArray(arr, size) {
     const result = [];
     for (let i = 0; i < arr.length; i += size) {
@@ -22,7 +22,7 @@ function chunkArray(arr, size) {
     return result;
 }
 
-// Import Process -----------------------------------------------------------------------------------------
+// Import Process -------------------------------------------------------------------------------------------
 function importJourneys(file){
 
     window.Papa.parse(file, {
@@ -78,13 +78,13 @@ function importJourneys(file){
 // -- Event Listeners --
 // ==========================================================================================================
 
-// window loaded event listener ------------------------------------------------------------------------
+// window loaded event listener -----------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
     await SessionMaintenance.logBook("import", "window.DOMContentLoaded", "Import page loaded");
     SessionMaintenance.hideLoader();
 });
 
-// Import button Clicked -------------------------------------------------------------------
+// Import button Clicked ------------------------------------------------------------------------------------
 importBtn.addEventListener('click',  () => {
 
     // Open file dialog

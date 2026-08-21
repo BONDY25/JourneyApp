@@ -12,7 +12,7 @@ const SM = SessionMaintenance;
 let user;
 let vehicleDetails = {};
 
-// DOM Elements --------------------------------------------------------------------------------------
+// DOM Elements ---------------------------------------------------------------------------------------------
 const inputs = {
     vehicleInput: SM.$("vehicle"),
     descriptionInput: SM.$("description"),
@@ -33,10 +33,10 @@ const buttons = {
 // -- Operational Functions --
 // ==========================================================================================================
 
-// Get Vehicles -------------------------------------------------------------------------
+// Get Vehicles ---------------------------------------------------------------------------------------------
 async function getVehicles(username) {
     try {
-        SessionMaintenance.showLoader();
+        SM.showLoader();
         inputs.vehicleInput.innerHTML = "";
 
         // Default option
@@ -55,8 +55,8 @@ async function getVehicles(username) {
         const vehicles = await res.json();
 
         if (vehicles.length === 0) {
-            SessionMaintenance.hideLoader();
-            await SessionMaintenance.cmbInfo(`No vehicles`, `You don't have any vehicles, add them in settings.`);
+            SM.hideLoader();
+            await SM.cmbInfo(`No vehicles`, `You don't have any vehicles, add them in settings.`);
             window.location.href = "home.html";
         }
 
@@ -70,24 +70,23 @@ async function getVehicles(username) {
         });
 
 
-
     } catch (err) {
-        await SessionMaintenance.logBook("newJourney", "getVehicles", `Network Error: ${err}`, true);
-        await SessionMaintenance.cmbError(`Error loading vehicles: ${err}`);
+        await SM.logBook("newJourney", "getVehicles", `Network Error: ${err}`, true);
+        await SM.cmbError(`Error loading vehicles: ${err}`);
     } finally {
-        SessionMaintenance.hideLoader();
+        SM.hideLoader();
     }
 }
 
-// Check Fields --------------------------------------------------------------------------
+// Check Fields ---------------------------------------------------------------------------------------------
 function checkFields(fields) {
     return fields && fields.length > 0;
 }
 
-// Insert Journey ------------------------------------------------------------------------
+// Insert Journey -------------------------------------------------------------------------------------------
 async function insertJourney(journeyData) {
     try {
-        SessionMaintenance.showLoader();
+        SM.showLoader();
 
         const res = await fetch(`${API_BASE_URL}/api/journeys`, {
             method: 'POST',
@@ -104,110 +103,153 @@ async function insertJourney(journeyData) {
         }
 
         if (res.ok) {
-            await SessionMaintenance.logBook(
+            await SM.logBook(
                 "newJourney",
                 "submit.click",
                 `Journey Submission Successful. ${JSON.stringify(journeyData, null, 2)}`
             );
-            await SessionMaintenance.cmbInfo('Success', 'Journey Saved!');
+            await SM.cmbInfo('Success', 'Journey Saved!');
             window.location.href = "home.html";
         } else {
             const err = await res.text();
-            await SessionMaintenance.logBook("newJourney", "submit.click", `Journey Submission failed. ${err}`);
-            await SessionMaintenance.cmbError(`Error: ${err}`);
+            await SM.logBook("newJourney", "submit.click", `Journey Submission failed. ${err}`);
+            await SM.cmbError(`Error: ${err}`);
         }
     } catch (error) {
-        await SessionMaintenance.logBook("newJourney", "submit.click", `Network Error: ${error}`, true);
+        await SM.logBook("newJourney", "submit.click", `Network Error: ${error}`, true);
     } finally {
-        SessionMaintenance.hideLoader();
+        SM.hideLoader();
     }
 }
 
-// Calculate values -----------------------------------------------
+// Calculate values -----------------------------------------------------------------------------------------
 async function calculateValues({timeUnit = 'minutes'} = {}) {
-    await SessionMaintenance.logBook("newJourney", "calculateValues", "Calculating Values");
+    await SM.logBook("newJourney", "calculateValues", "Calculating Values");
 
-    const vehicleId = vehicleDetails._id;
-    const vehicleName = vehicleDetails.name;
-    const fuelType = vehicleDetails.fuelType;
-    const tankVolume = vehicleDetails.tankVolume;
+    try {
 
-    // Get Elements safely
-    const getValue = (el, type = 'string') => {
-        if (!el || el.value === '') return type === 'number' ? 0 : '';
-        return type === 'number' ? Number(el.value) : String(el.value);
-    };
+        const vehicleId = vehicleDetails._id;
+        const vehicleName = vehicleDetails.name;
+        const fuelType = vehicleDetails.fuelType;
+        const tankVolume = vehicleDetails.tankVolume;
 
-    const description = getValue(inputs.descriptionInput);
-    const dateTimeRaw = getValue(inputs.dateInput);
-    const dateTime = dateTimeRaw ? new Date(dateTimeRaw) : new Date();
-    const mpg = getValue(inputs.mpgInput, 'number');
-    const distance = getValue(inputs.distanceInput, 'number');
-    const timeDriven = getValue(inputs.timeDrivenInput, 'number');
-    const temp = getValue(inputs.tempInput, 'number');
-    const condition = getValue(inputs.conditionInput);
-    const costPerLitre = getValue(inputs.costInput, 'number');
+        // Get Elements safely
+        const getValue = (el, type = 'string') => {
+            if (!el || el.value === '') return type === 'number' ? 0 : '';
+            return type === 'number' ? Number(el.value) : String(el.value);
+        };
 
-    // Calculate Helpers
-    //const distanceMiles = distanceUnit === 'miles' ? distance : distance / 1.609;
-    const gallon = localStorage.getItem('gallon');
-    const hours = timeUnit === 'minutes' ? (timeDriven / 60) : timeDriven;
-    const safeHours = hours > 0 ? hours : 1; // avoid division by zero
-    const GALLON_L = (gallon === 'US') ? 3.79541 : 4.54609;
-    const milesPerLitre = mpg > 0 ? (mpg / GALLON_L) : 1; // avoid division by zero
+        const description = getValue(inputs.descriptionInput);
+        const dateTimeRaw = getValue(inputs.dateInput);
+        const dateTime = dateTimeRaw ? new Date(dateTimeRaw) : new Date();
+        const mpg = getValue(inputs.mpgInput, 'number');
+        const distance = getValue(inputs.distanceInput, 'number');
+        const timeDriven = parseDuration(inputs.timeDrivenInput.value);
+        const temp = getValue(inputs.tempInput, 'number');
+        const condition = getValue(inputs.conditionInput);
+        const costPerLitre = getValue(inputs.costInput, 'number');
 
-    // Calculate Values
-    const avgSpeed = distance / safeHours;
-    const fuelUsedL = distance / milesPerLitre;
-    const costPerMile = costPerLitre / milesPerLitre;
-    const totalCost = costPerMile * distance;
-    const percOfTank = tankVolume > 0 ? (fuelUsedL / tankVolume) : 0;
+        // Calculate Helpers
+        //const distanceMiles = distanceUnit === 'miles' ? distance : distance / 1.609;
+        const gallon = localStorage.getItem('gallon');
+        const hours = timeUnit === 'minutes' ? (timeDriven / 60) : timeDriven;
+        const safeHours = hours > 0 ? hours : 1; // avoid division by zero
+        const GALLON_L = (gallon === 'US') ? 3.79541 : 4.54609;
+        const milesPerLitre = mpg > 0 ? (mpg / GALLON_L) : 1; // avoid division by zero
 
-    const round = (n, dp = 3) => isNaN(n) ? 0 : Number(Number(n).toFixed(dp));
+        // Calculate Values
+        const avgSpeed = distance / safeHours;
+        const fuelUsedL = distance / milesPerLitre;
+        const costPerMile = costPerLitre / milesPerLitre;
+        const totalCost = costPerMile * distance;
+        const percOfTank = tankVolume > 0 ? (fuelUsedL / tankVolume) : 0;
 
-    // Construct Output
-    const output = {
-        user,
-        vehicleId,
-        vehicleName,
-        fuelType,
-        description,
-        dateTime,
-        distance: round(distance, 2),
-        mpg: round(mpg, 2),
-        timeDriven: round(timeDriven, 2),
-        temp: round(temp, 1),
-        condition,
-        costPl: round(costPerLitre, 3),
-        avgSpeed: round(avgSpeed, 2),
-        totalCost: round(totalCost, 2),
-        costPerMile: round(costPerMile, 2),
-        fuelUsedL: round(fuelUsedL, 2),
-        percOfTank: round(percOfTank, 4),
-        distanceUnit,
-        speedUnit,
-    };
+        const round = (n, dp = 3) => isNaN(n) ? 0 : Number(Number(n).toFixed(dp));
 
-    await SessionMaintenance.logBook("newJourney", "calculateValues", `Values Calculated: ${JSON.stringify(output, null, 2)}`);
+        // Construct Output
+        const output = {
+            user,
+            vehicleId,
+            vehicleName,
+            fuelType,
+            description,
+            dateTime,
+            distance: round(distance, 2),
+            mpg: round(mpg, 2),
+            timeDriven: round(timeDriven, 2),
+            temp: round(temp, 1),
+            condition,
+            costPl: round(costPerLitre, 3),
+            avgSpeed: round(avgSpeed, 2),
+            totalCost: round(totalCost, 2),
+            costPerMile: round(costPerMile, 2),
+            fuelUsedL: round(fuelUsedL, 2),
+            percOfTank: round(percOfTank, 4),
+            distanceUnit,
+            speedUnit,
+        };
 
-    return output;
+        await SM.logBook("newJourney", "calculateValues", `Values Calculated: ${JSON.stringify(output, null, 2)}`);
+
+        return output;
+
+    } catch (error) {
+        await SM.logBook("newJourney", "calculateValues", `Error Calculating Values: ${error}`, true);
+        await SM.cmbError(`Error Calculating Values: ${error}`);
+    }
+}
+
+// Parse Duration function ----------------------------------------------------------------------------------
+function parseDuration(duration) {
+    if (typeof duration !== "string") {
+        throw new Error("Time driven must be entered as text.");
+    }
+
+    duration = duration.trim().toLowerCase();
+    if (!duration) {
+        throw new Error("Please enter a journey duration.");
+    }
+
+    console.log(duration);
+
+    const match = duration.match(/^(?:(\d+)\s*h)?\s*(?:(\d+)s*m)?$/);
+    if (!match || (match[1 === undefined && match[2] === undefined])) {
+        throw new Error(`Invalid duration format, please use something like "1h 20m"`);
+    }
+
+    const hours = match[1] ? parseInt(match[1], 10) : 0;
+    const minutes = match[2] ? parseInt(match[2], 10) : 0;
+
+    console.log(`${hours}:${minutes}`);
+
+    if (match[1] && minutes >= 60) {
+        throw new Error(`Minutes must be less that 60 when using hours.`);
+    }
+
+    const totalMinutes = (hours * 60) + minutes;
+    if (totalMinutes <= 0) {
+        throw new Error(`Time driven must be more that zero`);
+    }
+
+    console.log(totalMinutes);
+    return totalMinutes;
 }
 
 // ==========================================================================================================
 // -- Event Listeners --
 // ==========================================================================================================
 
-// window loaded event listener ------------------------------------------------------------------------
+// window loaded event listener -----------------------------------------------------------------------------
 window.addEventListener('DOMContentLoaded', async () => {
-    await SessionMaintenance.logBook("newJourney", "window.DOMContentLoaded", "New Journey page loaded");
+    await SM.logBook("newJourney", "window.DOMContentLoaded", "New Journey page loaded");
 
     const currentPage = window.location.pathname.split("/").pop();
-    SessionMaintenance.highlightActivePage(currentPage);
-    SessionMaintenance.hideLoader();
+    SM.highlightActivePage(currentPage);
+    SM.hideLoader();
     const username = localStorage.getItem('username').toLowerCase();
     user = localStorage.getItem('username').toLowerCase();
     if (!username) {
-        await SessionMaintenance.cmbError('Please Login');
+        await SM.cmbError('Please Login');
         window.location.href = "index.html";
         return;
     }
@@ -228,7 +270,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 // Vehicle Chosen -------------------------------------------------------------------------------------------
 inputs.vehicleInput.addEventListener('change', async () => {
     const vehicleId = inputs.vehicleInput.value;
-    vehicleDetails = await SessionMaintenance.getVehicleDetails(vehicleId);
+    vehicleDetails = await SM.getVehicleDetails(vehicleId);
 
     const costField = inputs.costInput;
     if (costField) {
@@ -236,17 +278,31 @@ inputs.vehicleInput.addEventListener('change', async () => {
     }
 });
 
-// Event Listener to submit form ---------------------------------------------------------------------
+// Time Driven Field ----------------------------------------------------------------------------------------
+inputs.timeDrivenInput.addEventListener('change', async () => {
+   try{
+       const timeDriven = parseDuration(inputs.timeDrivenInput.value);
+       if (!timeDriven) {
+           throw new Error("Time driven must be entered.");
+       }
+   } catch (error) {
+       await SM.cmbError(`${error}`);
+       inputs.timeDrivenInput.value = "";
+       inputs.timeDrivenInput.focus();
+   }
+});
+
+// Event Listener to submit form ----------------------------------------------------------------------------
 buttons.btnSubmit.addEventListener('click', async (event) => {
     event.preventDefault(); // Stop form reload
-    await SessionMaintenance.logBook("newJourney", "submit.click", "Journey Submission attempted.");
+    await SM.logBook("newJourney", "submit.click", "Journey Submission attempted.");
 
     const journeyData = await calculateValues();
     const description = String(inputs.descriptionInput.value);
 
     // Check if a description has been entered
     if (!checkFields(description)) {
-        await SessionMaintenance.cmbError('Please enter a description');
+        await SM.cmbError('Please enter a description');
         return;
     }
 

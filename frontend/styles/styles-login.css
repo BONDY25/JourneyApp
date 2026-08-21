@@ -1,0 +1,425 @@
+@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&family=Lexend:wght@100..900&family=Monsieur+La+Doulaise&family=Permanent+Marker&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
+
+/* --------------------------------------------------------------------------- */
+/* Root Variables */
+/* --------------------------------------------------------------------------- */
+
+:root {
+    --bg-color: #3a3a3a; /* Dark grey background */
+    --accent-color: #d95000; /* Bright orange highlight (cards, form backgrounds) */
+    --text-color: white; /* Default text colour */
+    --card-bg: #fff; /* White cards */
+    --card-text: #000; /* Black text for cards */
+    --button-bg: #00d916; /* Bright green button background */
+    --button-text: #000000; /* Black button text */
+    --stat-color-1: #be4702;
+    --stat-color-2: #ff5d00;
+    --default-font: 'Lexend', sans-serif;
+}
+
+/* --------------------------------------------------------------------------- */
+/* Global Styles */
+/* --------------------------------------------------------------------------- */
+body {
+    /* Remove default margin from browser */
+    /* Background and text styling */
+    background-color: var(--bg-color);
+    color: var(--text-color);
+
+    /* Font family chosen for readability */
+    font-family: var(--default-font), sans-serif;
+
+    /* Flex centers content horizontally; aligns content to top vertically */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    /* Ensure body fills full viewport height */
+    min-height: 100%;
+
+    /* Make sure padding/border count in box size */
+    box-sizing: border-box;
+    height: 100%;
+    margin: 0;
+    padding: env(safe-area-inset-top, 8px)
+    env(safe-area-inset-right, 8px)
+    env(safe-area-inset-bottom, 8px)
+    env(safe-area-inset-left, 8px);
+}
+
+/* Constrain app width for mobile-first look */
+#app {
+    width: 100%;
+    max-width: 420px; /* Keeps content centered, not too wide on desktop */
+    min-height: 100%;
+    margin-bottom: 20%;
+    height: 1000px;
+}
+
+/* --------------------------------------------------------------------------- */
+/* Text Container Styles */
+/* --------------------------------------------------------------------------- */
+
+/* Center titles and give spacing below */
+h1 {
+    text-align: center;
+    margin: 10% 10px 1rem;
+    color: var(--text-color);
+}
+
+p {
+    /* Consistent spacing for paragraphs */
+    margin: 0.3rem 0;
+    font-size: 1rem;
+}
+
+hr {
+    /* Custom divider style */
+    border: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    margin: 1rem 0;
+}
+
+/* Stats Card Styles */
+.stats {
+    background-color: var(--accent-color);
+    color: var(--card-text);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); /* Soft drop shadow */
+}
+
+.stats h3 {
+    margin-top: 0; /* Prevents extra space at top */
+}
+
+.numbers p:nth-child(odd) {
+    background-color: var(--stat-color-1);
+    border-radius: 6px;
+    padding: 4px 6px;
+}
+
+.numbers p:nth-child(even) {
+    background-color: var(--stat-color-2);
+    border-radius: 6px;
+    padding: 4px 6px;
+}
+
+/* --------------------------------------------------------------------------- */
+/* Button Styles */
+/* --------------------------------------------------------------------------- */
+
+/* Global Button Styles */
+.button-group {
+    /* Vertical stack of buttons */
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.button {
+    /* Base button style */
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    border: none;
+    border-radius: 8px;
+    padding: 0.8rem 1rem;
+    font-size: 1rem;
+    font-weight: bold;
+    width: 100%;
+
+    /* Light shadow for depth */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+
+    /* Usability tweaks */
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.button:hover {
+    background-color: #000000;
+    color: white;
+}
+
+/* Import Button Styles */
+#import-button {
+    /* Floating import button (top right) */
+    position: absolute;
+    top: 20px;
+    right: 20px;
+
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+
+    /* Rounded corners + pointer cursor */
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+#import-button:hover {
+    /* Darker blue hover */
+    background-color: #0056b3;
+}
+
+/* --------------------------------------------------------------------------- */
+/* Responsiveness */
+/* --------------------------------------------------------------------------- */
+
+/* Responsive adjustments for very small screens */
+@media (max-width: 400px) {
+    p {
+        font-size: 0.9rem; /* Slightly smaller text */
+    }
+
+    .button {
+        font-size: 0.95rem; /* Keeps buttons fitting */
+    }
+}
+
+/* --------------------------------------------------------------------------- */
+/* Form Styles */
+/* --------------------------------------------------------------------------- */
+
+form {
+    /* Container styling for forms */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    /* Matches accent theme */
+    background-color: var(--accent-color);
+    color: black;
+
+    /* Padding & rounded look */
+    padding: 20px;
+    border-radius: 10px;
+
+    /* Fit within parent but stay centered */
+    max-width: 90%;
+    margin: 20px auto;
+}
+
+form input, form select, form button {
+    /* Shared input/button styles */
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    font-size: 1em;
+    font-family: var(--default-font);
+}
+
+/* --------------------------------------------------------------------------- */
+/* Loading Spinner */
+/* --------------------------------------------------------------------------- */
+
+/* Overlay background */
+.loader-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.75); /* semi-transparent black */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+/* Hide by default */
+.loader-overlay.hidden {
+    display: none;
+}
+
+.loader {
+    position: relative;
+    width: 164px;
+    height: 164px;
+    border-radius: 50%;
+    animation: rotate 1.25s linear infinite;
+}
+.loader::before {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 40px;
+    border: 1px solid #d95000;
+    border-width: 12px 2px 7px;
+    border-radius: 2px 2px 1px 1px;
+    box-sizing: border-box;
+    transform: rotate(45deg) translate(24px, -10px);
+    background-image: linear-gradient(#d95000 20px, transparent 0),
+    linear-gradient(#d95000 30px, transparent 0),
+    linear-gradient(#d95000 30px, transparent 0);
+    background-size: 10px 12px , 1px 30px, 1px 30px;
+    background-repeat: no-repeat;
+    background-position: center , 12px 0px , 3px 0px;
+}
+.loader::after {
+    content: '';
+    position: absolute;
+    height: 4px;
+    width: 4px;
+    left: 20px;
+    top: 47px;
+    border-radius: 50%;
+    color: #Fff;
+    box-shadow: -4px 7px 2px, -7px 16px 3px 1px,
+    -11px 24px 4px 1px, -6px 24px 4px 1px,
+    -14px 35px 6px 2px, -5px 36px 8px 2px,
+    -5px 45px 8px 2px, -14px 49px 8px 2px,
+    6px 60px 11px 1px, -11px 66px 11px 1px,
+    11px 75px 13px, -1px 82px 15px;
+}
+
+@keyframes rotate {
+    to{transform:rotate(360deg)   }
+}
+
+/* ================================================================ */
+/* Message Box */
+/* ================================================================ */
+
+.message-box-card {
+    font-family: var(--default-font), serif;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+
+    background: rgba(0,0,0,0.75);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    z-index: 9999;
+}
+
+/* Hide by default */
+.message-box-card.hidden {
+    display: none;
+}
+
+/* actual message box */
+.message-box-header {
+
+    animation: messageBoxEnter 0.18s ease-out;
+    background: var(--accent-color, #ffd966);
+    border-radius: 0.5rem;
+    max-width: 320px;
+    width: 90%;
+    padding: 1.25rem;
+
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.25);
+}
+
+.message-box-content {
+    text-align: center;
+
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.message-box-title {
+    color: white;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.message-box-message {
+    color: #ffffff;
+    font-size: 1.2rem;
+}
+
+.message-box-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.message-box-btn1 {
+    display: inline-flex;
+    padding: 0.5rem 1rem;
+    background-color: white;
+    color: #000000;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 500;
+    justify-content: center;
+    width: 100%;
+    border-radius: 0.375rem;
+    border: none;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    font-family: var(--default-font);
+}
+
+.message-box-btn2 {
+    display: inline-flex;
+    margin-top: 0.75rem;
+    padding: 0.5rem 1rem;
+    color: #ffffff;
+    font-size: 1rem;
+    line-height: 1.5rem;
+    font-weight: 500;
+    justify-content: center;
+    width: 100%;
+    border-radius: 0.375rem;
+    border: 0 solid #000000;
+    background-color: #000000;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    font-family: var(--default-font);
+}
+
+.message-box-btn1,
+.message-box-btn2 {
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+    cursor: pointer;
+}
+
+/* Hover feedback */
+.message-box-btn1:hover,
+.message-box-btn2:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+}
+
+/* Click feedback */
+.message-box-btn1:active,
+.message-box-btn2:active {
+    transform: translateY(1px) scale(0.97);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+@keyframes animate {
+    from {
+        transform: scale(1);
+    }
+
+    to {
+        transform: scale(1.09);
+    }
+}
+
+@keyframes messageBoxEnter {
+    from {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+

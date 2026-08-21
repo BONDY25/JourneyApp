@@ -19,7 +19,7 @@ const inputs = {
 // -- Operational Functions --
 // ==========================================================================================================
 
-// Get Vehicles -------------------------------------------------------------------------
+// Get Vehicles ---------------------------------------------------------------------------------------------
 async function getVehicles(username) {
     try {
         SM.showLoader();
@@ -41,8 +41,8 @@ async function getVehicles(username) {
         const vehicles = await res.json();
 
         if (vehicles.length === 0) {
-            SessionMaintenance.hideLoader();
-            await SessionMaintenance.cmbInfo(`No vehicles`, `You don't have any vehicles, add them in settings.`);
+            SM.hideLoader();
+            await SM.cmbInfo(`No vehicles`, `You don't have any vehicles, add them in settings.`);
             window.location.href = "home.html";
         }
 
@@ -58,14 +58,14 @@ async function getVehicles(username) {
 
 
     } catch (err) {
-        await SessionMaintenance.logBook("editJourney", "getVehicles", `Network Error: ${err}`, true);
-        await SessionMaintenance.cmbError(`Error loading vehicles: ${err}`);
+        await SM.logBook("editJourney", "getVehicles", `Network Error: ${err}`, true);
+        await SM.cmbError(`Error loading vehicles: ${err}`);
     } finally {
-        SessionMaintenance.hideLoader();
+        SM.hideLoader();
     }
 }
 
-// format date time --------------------------------------------------------------------------
+// format date time -----------------------------------------------------------------------------------------
 function formatDatetime(isoString){
     const date = new Date(isoString);
     const pad = (num) => num.toString().padStart(2,'0');
@@ -79,9 +79,9 @@ function formatDatetime(isoString){
     return `${yyyy}-${MM}-${dd}T${hh}:${mm}` || "";
 }
 
-//Calculate Values ----------------------------------------------------------------------------
+//Calculate Values ------------------------------------------------------------------------------------------
 async function reCalculateValues({timeUnit = 'minutes'} = {}) {
-    await SessionMaintenance.logBook("editJourney", "calculateValues", "Calculating Values");
+    await SM.logBook("editJourney", "calculateValues", "Calculating Values");
 
     const vehicleId = vehicleDetails._id;
     const vehicleName = vehicleDetails.name;
@@ -130,15 +130,15 @@ async function reCalculateValues({timeUnit = 'minutes'} = {}) {
         percOfTank: round(percOfTank, 4),
     }
 
-    await SessionMaintenance.logBook("editJourney", "calculateValues", `Values Calculated: ${JSON.stringify(output, null, 2)}`);
+    await SM.logBook("editJourney", "calculateValues", `Values Calculated: ${JSON.stringify(output, null, 2)}`);
 
     return output;
 }
 
-// Load Journey -----------------------------------------------------------------------------
+// Load Journey ---------------------------------------------------------------------------------------------
 async function loadJourney() {
     try {
-        SessionMaintenance.showLoader();
+        SM.showLoader();
 
         const res = await fetch(`${API_BASE_URL}/api/journeys/${journeyId}`);
         if (!res.ok) throw new Error("Failed to fetch journey");
@@ -155,19 +155,19 @@ async function loadJourney() {
         document.getElementById("cost").value = journey.costPl || "";
 
     } catch (err) {
-        await SessionMaintenance.logBook("editJourney", "loadJourney", `Error getting journey ${err}`, true);
+        await SM.logBook("editJourney", "loadJourney", `Error getting journey ${err}`, true);
     } finally {
-        SessionMaintenance.hideLoader();
+        SM.hideLoader();
     }
 }
 
-// Save Journey -----------------------------------------------------------------------------
+// Save Journey ---------------------------------------------------------------------------------------------
 async function saveJourney() {
 
     const updated = await reCalculateValues();
 
     try {
-        SessionMaintenance.showLoader();
+        SM.showLoader();
         const res = await fetch(`${API_BASE_URL}/api/journeys/${journeyId}`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
@@ -175,39 +175,39 @@ async function saveJourney() {
         });
 
         if (res.ok) {
-            await SessionMaintenance.cmbInfo(`Success`,`Journey updated successfully!`);
-            await SessionMaintenance.logBook("saveJourney", "saveJourney", `Journey Saved successfully! ${JSON.stringify(updated)}`);
+            await SM.cmbInfo(`Success`,`Journey updated successfully!`);
+            await SM.logBook("saveJourney", "saveJourney", `Journey Saved successfully! ${JSON.stringify(updated)}`);
             window.location.href = "your-journeys.html";
         } else {
             throw new Error("Update failed");
         }
     } catch (err) {
-        await SessionMaintenance.logBook("editJourney", "saveJourney", `Error saving journey ${err}`, true);
-        await SessionMaintenance.cmbError(`Failed to update journey: ${err}`);
+        await SM.logBook("editJourney", "saveJourney", `Error saving journey ${err}`, true);
+        await SM.cmbError(`Failed to update journey: ${err}`);
     } finally {
-        SessionMaintenance.hideLoader();
+        SM.hideLoader();
     }
 }
 
-// Delete Journey -----------------------------------------------------------------------------
+// Delete Journey -------------------------------------------------------------------------------------------
 async function deleteJourney() {
     try {
-        SessionMaintenance.showLoader();
+        SM.showLoader();
         const res = await fetch(`${API_BASE_URL}/api/journeys/${journeyId}`, {
             method: "DELETE",
         });
 
         if (res.ok) {
-            await SessionMaintenance.cmbInfo(`Success`,`Journey Deleted successfully!`);
+            await SM.cmbInfo(`Success`,`Journey Deleted successfully!`);
             window.location.href = "your-journeys.html";
         } else {
             throw new Error("Delete failed");
         }
     } catch (err) {
-        await SessionMaintenance.logBook("editJourney", "deleteJourney", `Error deleting journey ${err}`, true);
-        await SessionMaintenance.cmbError(`failed to delete the journey: ${err}`);
+        await SM.logBook("editJourney", "deleteJourney", `Error deleting journey ${err}`, true);
+        await SM.cmbError(`failed to delete the journey: ${err}`);
     } finally {
-        SessionMaintenance.hideLoader();
+        SM.hideLoader();
     }
 }
 
@@ -215,16 +215,16 @@ async function deleteJourney() {
 // -- Event Listeners --
 // ==========================================================================================================
 
-// Page loaded -----------------------------------------------------------------------------
+// Page loaded ----------------------------------------------------------------------------------------------
 document.addEventListener("DOMContentLoaded", async () => {
-    await SessionMaintenance.logBook("editJourney", "window.DOMContentLoaded", "Edit journey page loaded");
-    SessionMaintenance.hideLoader();
+    await SM.logBook("editJourney", "window.DOMContentLoaded", "Edit journey page loaded");
+    SM.hideLoader();
 
     await getVehicles(localStorage.getItem("username"));
     await loadJourney();
 
     const vehicleId = inputs.vehicleInput.value;
-    vehicleDetails = await SessionMaintenance.getVehicleDetails(vehicleId);
+    vehicleDetails = await SM.getVehicleDetails(vehicleId);
 
     const form = document.getElementById("editJourneyForm");
     form.addEventListener("submit", async (e) => {
@@ -233,9 +233,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 });
 
-// Delete Button -------------------------------------------------------------------------
+// Delete Button --------------------------------------------------------------------------------------------
 btnDelete.addEventListener("click", async ()=>{
-    const confirmed = await SessionMaintenance.cmbQuestion('Delete?', 'Are you sure you want to delete this journey?');
+    const confirmed = await SM.cmbQuestion('Delete?', 'Are you sure you want to delete this journey?');
     if (!confirmed) return;
     await deleteJourney();
 });
