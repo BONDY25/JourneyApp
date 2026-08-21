@@ -57,10 +57,23 @@ body {
     height: 100vh;
     display : flex;
     flex-direction: column;
+    animation: launchIn 0.25s ease-out;
 }
 
 .hidden{
     display: none;
+}
+
+@keyframes launchIn {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 /* --------------------------------------------------------------------------- */

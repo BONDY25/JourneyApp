@@ -51,11 +51,24 @@ body {
     padding: 16px;
     box-sizing: border-box;
     font-family: var(--default-font);
+    animation: launchIn 0.25s ease-out;
 }
 .logo {
     width: 40%;
     max-width: 160px;
     height: auto;
+}
+
+@keyframes launchIn {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 /* --------------------------------------------------------------------------- */

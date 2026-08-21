@@ -53,7 +53,20 @@ body {
     max-width: 500px; /* Keeps content centered, not too wide on desktop */
     min-height: 100%;
     margin-bottom: 20%;
-    height: 800px;
+    height: 1000px;
+    animation: launchIn 0.25s ease-out;
+}
+
+@keyframes launchIn {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 /* --------------------------------------------------------------------------- */

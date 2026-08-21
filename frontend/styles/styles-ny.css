@@ -56,6 +56,19 @@ body {
     min-height: 100%;
     margin-bottom: 20%;
     height: 1440px;
+    animation: launchIn 0.25s ease-out;
+}
+
+@keyframes launchIn {
+    from {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 /* --------------------------------------------------------------------------- */
