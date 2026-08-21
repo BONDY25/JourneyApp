@@ -201,6 +201,7 @@ hr {
     left: 0;
     right: 0;
     height: 80px;
+    padding-bottom: 20px;
     background: var(--accent-color);
     border-top: 1px solid var(--accent-color);
     display: flex;
