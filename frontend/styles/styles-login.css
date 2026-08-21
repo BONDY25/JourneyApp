@@ -6,7 +6,9 @@
 
 :root {
     --bg-color: #3a3a3a; /* Dark grey background */
-    --accent-color: #d95000; /* Bright orange highlight (cards, form backgrounds) */
+    --accent-color: #d95000;
+    --accent-dark: #732c01;
+    --accent-light: #e59769;/* Bright orange highlight (cards, form backgrounds) */
     --text-color: white; /* Default text colour */
     --card-bg: #fff; /* White cards */
     --card-text: #000; /* Black text for cards */
@@ -210,8 +212,28 @@ form input, form select, form button {
     border: none;
     font-size: 1em;
     font-family: var(--default-font);
+
 }
 
+input:focus{
+    outline: none;
+    border-color: var(--accent-dark);
+    animation: pulseFocus 1.5s infinite;
+    background-color: var(--accent-light);
+    color: var(--accent-dark);
+}
+
+@keyframes pulseFocus {
+    0% {
+        box-shadow: 0 0 0 0 var(--accent-dark);
+    }
+    50% {
+        box-shadow: 0 0 0 3px var(--accent-dark);
+    }
+    100% {
+        box-shadow: 0 0 0 0 var(--accent-dark);
+    }
+}
 /* --------------------------------------------------------------------------- */
 /* Loading Spinner */
 /* --------------------------------------------------------------------------- */

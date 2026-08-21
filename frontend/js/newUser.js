@@ -90,7 +90,10 @@ buttons.btnCreate.addEventListener('click', async (e) => {
     } else if (robot !== "I am not a robot.") {
         await SM.cmbError(`Hmm I think you are a robot...`);
     } else {
-        await registerUser(username, password);
+        const confirmed = await SM.cmbQuestion(`Register User "${username}"`,`Are you sure you want to register to this super cool app that lets you track your journeys?`);
+        if (confirmed) {
+            await registerUser(username, password);
+        }
     }
 });
 
