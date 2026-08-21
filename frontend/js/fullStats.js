@@ -36,6 +36,9 @@ const elements = {
     graphTitle: SM.$('graph-title'),
     ctx: SM.$('statsGraph'),
     vehicleOptions: SM.$("vehicle-options"),
+    vehicleList: SM.$("vehicle-list"),
+    vehicleDropdownText: SM.$("vehicle-dropdown-text"),
+    vehicleSelectAll: SM.$("vehicle-select-all"),
 }
 
 const inputs = {
@@ -45,6 +48,7 @@ const inputs = {
     xAxis: SM.$('x-axis'),
     yAxis: SM.$('y-axis'),
     vehicleInput: SM.$('vehicle-input'),
+    vehicleDropdown: SM.$('vehicle-dropdown'),
 }
 
 const buttons = {
@@ -62,9 +66,7 @@ async function getStatsVehicles(username) {
     try {
         SM.showLoader();
 
-        const vehicleList = document.getElementById("vehicle-list");
-
-        vehicleList.innerHTML = "";
+        elements.vehicleList.innerHTML = "";
 
         const res = await fetch(
             `${API_BASE_URL}/api/getVehicles?username=${username}`,
@@ -106,7 +108,7 @@ async function getStatsVehicles(username) {
             label.appendChild(checkbox);
             label.appendChild(name);
 
-            vehicleList.appendChild(label);
+            elements.vehicleList.appendChild(label);
         });
 
         updateVehicleDropdownText();
@@ -135,7 +137,7 @@ function updateVehicleDropdownText() {
         ".vehicle-checkbox:checked"
     );
 
-    const text = document.getElementById("vehicle-dropdown-text");
+    const text = elements.vehicleDropdownText;
 
     if (selectedVehicles.length === 0) {
         text.textContent = "Select Vehicles";
@@ -157,7 +159,7 @@ function updateVehicleDropdownText() {
 function updateSelectAllState() {
     const vehicleCheckboxes = document.querySelectorAll(".vehicle-checkbox");
     const checkedVehicles = document.querySelectorAll(".vehicle-checkbox:checked");
-    const selectAll = document.getElementById("vehicle-select-all");
+    const selectAll = elements.vehicleSelectAll;
     selectAll.checked =
         vehicleCheckboxes.length > 0 &&
         checkedVehicles.length === vehicleCheckboxes.length;
@@ -678,8 +680,7 @@ buttons.btnVehicleDropdown.addEventListener("click", () => {
 
 // Vehicle Dropdown close -----------------------------------------------------------------------------------
 document.addEventListener("click", (event) => {
-    const dropdown = document.getElementById("vehicle-dropdown");
-    if (!dropdown.contains(event.target)) {
+    if (!inputs.vehicleDropdown.contains(event.target)) {
         elements.vehicleOptions.classList.remove("open");
     }
 });

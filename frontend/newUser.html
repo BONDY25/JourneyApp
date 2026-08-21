@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Login</title>
-    <link href="styles/styles-login.css" rel="stylesheet"/>
+    <title>New User</title>
+    <link href="styles/styles-ny.css" rel="stylesheet"/>
     <link rel="icon" type="image/png" href="assets/JourneyApp-logo-1.png"/>
 </head>
 <body>
@@ -39,19 +39,33 @@
 <!-- =========================================================================================================== -->
 
 <div id="app" class="app">
-    <h1>Login</h1>
-    <hr>
-    <form id="login-form">
-        <label for="username">Username</label>
-        <input type="text" id="username" required>
 
-        <label for="password">Password</label>
-        <input type="password" id="password" required>
-    </form>
-    <div class=button-group>
-        <button type="submit" id="submitLogin" class="button">Login</button>
-        <button id="btnRegister" class="button">Register</button>
+    <!-- =========================================================================================================== -->
+    <!-- User Create -->
+    <!-- =========================================================================================================== -->
+
+    <div class="login" id="add-container">
+        <form id="user-create-form" class="input-container">
+            <label for="username">Username</label>
+            <input type="text" id="username" required
+                   autocomplete="off" maxlength="12">
+
+            <label for="password">Password</label>
+            <input type="password" id="password" required autocomplete="off" maxlength="255">
+
+            <label for="password-confirm">Confirm Password</label>
+            <input type="password" id="password-confirm" required autocomplete="off" maxlength="255">
+
+            <label for="robot">Are you a robot?</label>
+            <input type="text" id="robot" required placeholder='Type "I am not a robot."'
+                   autocomplete="off" maxlength="255">
+        </form>
+        <div class=button-group>
+            <button type="submit" id="btnCreate" class="button">Register</button>
+            <button id="btnBack" class="button">Back</button>
+        </div>
     </div>
+
 </div>
 
 <!-- =========================================================================================================== -->
@@ -59,6 +73,7 @@
 <!-- =========================================================================================================== -->
 
 <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-<script type="module" src="js/login.js"></script>
+<script type="module" src="js/newUser.js"></script>
 <script>console.log('⚠️ This is property of Aiden Bond. Any attempt to copy it will result in a stern talking to by the rozzers!👮⚠️');</script>
 </body>
+</html>

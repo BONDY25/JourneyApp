@@ -4,12 +4,17 @@
 
 import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
-
 const SM = SessionMaintenance;
-const usernameInput = document.getElementById("username");
-const submitLogin = document.getElementById("submitLogin");
-const submitReg = document.getElementById("submitRegister");
-const captchaContainer = document.getElementById("captcha-container");
+
+const buttons = {
+    btnRegister: SM.$('btnRegister'),
+    btnLogin: SM.$('submitLogin'),
+}
+
+const inputs = {
+    usernameInput: SM.$("username"),
+    passwordInput: SM.$("password"),
+}
 
 // ==========================================================================================================
 // -- Operational Functions --
@@ -62,71 +67,6 @@ async function loginUser(username, password){
     }
 }
 
-// Register new user ----------------------------------------------------------------------------------------
-async function registerUser(username, password){
-    try {
-        SM.showLoader();
-        // send request to backend
-        const res = await fetch(`${API_BASE_URL}/api/users`, {
-            method: 'POST',
-            headers: {'content-type': 'application/json'},
-            body: JSON.stringify({username, password, captcha: captchaResponse})
-        });
-
-        // evaluate backend response
-        if (res.ok) {
-            await SM.cmbInfo(`Success`,`User Registered successfully.`);
-
-
-            // save username and open home page
-            localStorage.setItem('username', username);
-            localStorage.setItem('tankVolume', '63');
-            localStorage.setItem('fuelCost', '1.4');
-            localStorage.setItem('gallon', 'UK');
-            localStorage.setItem('fuelType', 'Petrol');
-            localStorage.setItem('userFont', 'Lexend');
-            localStorage.setItem('currency', '£');
-            localStorage.setItem('distanceUnit', "Miles");
-            localStorage.setItem('speedUnit', "mph");
-
-            SM.startSession(username);
-
-            window.location.href = "home.html";
-        } else {
-            const err = await res.text();
-            await SM.cmbError(`Registration Failed: ${err}`);
-        }
-    } catch (error) {
-        console.error('Network Error:', error);
-        await SM.cmbError(`Error registering user: ${error}`);
-    } finally {
-        SM.hideLoader();
-    }
-}
-
-// Update UI ------------------------------------------------------------------------------------------------
-async function updateUi(username){
-    try {
-        const res = await fetch(`${API_BASE_URL}/api/getUsers/${username}`);
-
-        if (res.ok) {
-            // User exists -> show Login only
-            submitLogin.style.display = "block";
-            submitReg.style.display = "none";
-            captchaContainer.style.display = "none";
-        } else if (res.status === 404) {
-            // User not found -> show Register + Captcha
-            submitLogin.style.display = "none";
-            submitReg.style.display = "block";
-            captchaContainer.style.display = "block";
-        } else {
-            console.warn("Unexpected response when checking user:", res.status);
-        }
-    } catch (err) {
-        console.error("Error checking user:", err);
-    }
-}
-
 // ==========================================================================================================
 // -- Event Listeners --
 // ==========================================================================================================
@@ -137,44 +77,21 @@ window.addEventListener('DOMContentLoaded', async () => {
     SM.hideLoader();
 });
 
-// User input leave -----------------------------------------------------------------------------------------
-usernameInput.addEventListener("blur", async () => {
-    const username = String(usernameInput.value).toLowerCase().trim();
-    if (!username) return;
-
-    await updateUi(username);
-});
-
 // User Clicks Login Button ---------------------------------------------------------------------------------
-submitLogin.addEventListener('click', async (e) => {
+buttons.btnLogin.addEventListener('click', async (e) => {
     e.preventDefault();
 
     // Get username and password form UI
-    const username = String(document.getElementById('username').value).toLowerCase();
-    const password = String(document.getElementById('password').value);
+    const username = String(inputs.usernameInput.value).toLowerCase();
+    const password = String(inputs.passwordInput.value);
 
     // login User
     await loginUser(username, password);
 
 });
 
-// User Clicks Register button ------------------------------------------------------------------------------
-submitReg.addEventListener('click', async (e) => {
+// Register Button Clicked ----------------------------------------------------------------------------------
+buttons.btnRegister.addEventListener('click', async (e) => {
     e.preventDefault();
-
-    // Get username and password form UI
-    const username = String(document.getElementById('username').value).toLowerCase();
-    const password = String(document.getElementById('password').value);
-
-    // Get Captcha token
-    const captchaResponse = grecaptcha.getResponse();
-    if (!captchaResponse) {
-        await SM.cmbInfo("Beep Boop","Please verify that you are not a robot.");
-        return;
-    }
-
-    // Register User
-    await registerUser(username, password);
-
+    window.location.href = "newUser.html";
 });
-

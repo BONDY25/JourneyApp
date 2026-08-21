@@ -42,13 +42,21 @@
 <div id="app" class="app">
     <h1>Settings</h1>
     <div id="prams" class="stats">
-        <p>Username: <span id="username">Username</span></p>
-        <p>Total Journeys: <span id="totalJourneys">0</span></p>
-        <button id="btnVehicles" class="button">My Vehicles</button>
+        <div id="user-header" class="user-header">
+            <div class="user-info">
+                <p><span id="username">Username</span></p>
+                <p>Total Journeys: <span id="totalJourneys">0</span></p>
+            </div>
+
+            <button id="btnVehicles" class="vehicle-header-button">
+                <span class="material-symbols-outlined">car_gear</span>
+                <span class="vehicle-button-label">Vehicles</span>
+            </button>
+        </div>
         <form id="settingsForm">
             <!-- Tank Volume -->
-<!--            <label for="tankVolume">Default Tank Volume (L):</label>-->
-<!--            <input type="number" id="tankVolume" step="0.1" min="0" autocomplete="off"/>-->
+            <!--            <label for="tankVolume">Default Tank Volume (L):</label>-->
+            <!--            <input type="number" id="tankVolume" step="0.1" min="0" autocomplete="off"/>-->
 
             <!-- Fuel Cost -->
             <label for="fuelCost">Default Fuel Cost (£/L):</label>
@@ -61,12 +69,12 @@
                 <option value="US">US</option>
             </select>
 
-<!--            &lt;!&ndash; Fuel type &ndash;&gt;-->
-<!--            <label for="fuel-select">Fuel Type:</label>-->
-<!--            <select id="fuel-select">-->
-<!--                <option value="Petrol">Petrol</option>-->
-<!--                <option value="Diesel">Diesel</option>-->
-<!--            </select>-->
+            <!--            &lt;!&ndash; Fuel type &ndash;&gt;-->
+            <!--            <label for="fuel-select">Fuel Type:</label>-->
+            <!--            <select id="fuel-select">-->
+            <!--                <option value="Petrol">Petrol</option>-->
+            <!--                <option value="Diesel">Diesel</option>-->
+            <!--            </select>-->
 
             <!-- Font -->
             <label for="font-select">Choose Font:</label>
@@ -86,19 +94,19 @@
                 <option value="€">€</option>
             </select>
 
-<!--            &lt;!&ndash; Speed Unit &ndash;&gt;-->
-<!--            <label for="speed-select">Choose Speed Unit:</label>-->
-<!--            <select id="speed-select">-->
-<!--                <option value="mph">MPH</option>-->
-<!--                <option value="kph">KPH</option>-->
-<!--            </select>-->
+            <!--            &lt;!&ndash; Speed Unit &ndash;&gt;-->
+            <!--            <label for="speed-select">Choose Speed Unit:</label>-->
+            <!--            <select id="speed-select">-->
+            <!--                <option value="mph">MPH</option>-->
+            <!--                <option value="kph">KPH</option>-->
+            <!--            </select>-->
 
-<!--            &lt;!&ndash; Distance Unit &ndash;&gt;-->
-<!--            <label for="distance-select">Choose Distance Unit:</label>-->
-<!--            <select id="distance-select">-->
-<!--                <option value="miles">Miles</option>-->
-<!--                <option value="Kilometers">Kilometers</option>-->
-<!--            </select>-->
+            <!--            &lt;!&ndash; Distance Unit &ndash;&gt;-->
+            <!--            <label for="distance-select">Choose Distance Unit:</label>-->
+            <!--            <select id="distance-select">-->
+            <!--                <option value="miles">Miles</option>-->
+            <!--                <option value="Kilometers">Kilometers</option>-->
+            <!--            </select>-->
 
             <!-- New Password -->
             <label for="new-password">Update Password</label>
@@ -126,53 +134,53 @@
                     <label for="budget-range">Budget Range:</label>
                     <select id="budget-range">
                         <!--  <option value="Daily">Daily</option>-->
-                         <option value="Weekly">Weekly</option>
-                         <option value="Monthly">Monthly</option>
-                         <option value="Quarterly">Quarterly</option>
-                         <option value="Yearly">Yearly</option>
-                     </select>
+                        <option value="Weekly">Weekly</option>
+                        <option value="Monthly">Monthly</option>
+                        <option value="Quarterly">Quarterly</option>
+                        <option value="Yearly">Yearly</option>
+                    </select>
 
-                     <label for="budget-amount">Budget Amount:</label>
-                     <input type="number" id="budget-amount" step="0.01" min="0" autocomplete="off"/>
+                    <label for="budget-amount">Budget Amount:</label>
+                    <input type="number" id="budget-amount" step="0.01" min="0" autocomplete="off"/>
 
-                     <div id="resetDayContainer">
-                         <label for="reset-day">Reset Day:</label>
-                         <select id="reset-day"></select>
-                     </div>
-                 </div>
-             </div>
+                    <div id="resetDayContainer">
+                        <label for="reset-day">Reset Day:</label>
+                        <select id="reset-day"></select>
+                    </div>
+                </div>
+            </div>
 
-             <button type="submit" class="button">Save</button>
-         </form>
-     </div>
+            <button type="submit" class="button">Save</button>
+        </form>
+    </div>
 
     <!-- =========================================================================================================== -->
     <!-- Navigation Bar -->
     <!-- =========================================================================================================== -->
 
-     <div id="nav-bar">
-         <a href="home.html" class="nav-item" id="nav-home">
-             <span class="material-symbols-outlined">home</span>
-             <span class="label">Home</span>
-         </a>
-         <a href="new-journey.html" class="nav-item" id="nav-add">
-             <span class="material-symbols-outlined">add_circle</span>
-             <span class="label">Add</span>
-         </a>
-         <a href="your-journeys.html" class="nav-item" id="nav-journeys">
-             <span class="material-symbols-outlined">directions_car</span>
-             <span class="label">Journeys</span>
-         </a>
-         <a href="full-stats.html" class="nav-item" id="nav-stats">
-             <span class="material-symbols-outlined">query_stats</span>
-             <span class="label">Stats</span>
-         </a>
-         <a href="settings.html" class="nav-item" id="nav-settings">
-             <span class="material-symbols-outlined">settings</span>
-             <span class="label">Settings</span>
-         </a>
-     </div>
- </div>
+    <div id="nav-bar">
+        <a href="home.html" class="nav-item" id="nav-home">
+            <span class="material-symbols-outlined">home</span>
+            <span class="label">Home</span>
+        </a>
+        <a href="new-journey.html" class="nav-item" id="nav-add">
+            <span class="material-symbols-outlined">add_circle</span>
+            <span class="label">Add</span>
+        </a>
+        <a href="your-journeys.html" class="nav-item" id="nav-journeys">
+            <span class="material-symbols-outlined">directions_car</span>
+            <span class="label">Journeys</span>
+        </a>
+        <a href="full-stats.html" class="nav-item" id="nav-stats">
+            <span class="material-symbols-outlined">query_stats</span>
+            <span class="label">Stats</span>
+        </a>
+        <a href="settings.html" class="nav-item" id="nav-settings">
+            <span class="material-symbols-outlined">settings</span>
+            <span class="label">Settings</span>
+        </a>
+    </div>
+</div>
 
 <!-- =========================================================================================================== -->
 <!-- Scripts -->

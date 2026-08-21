@@ -3,16 +3,16 @@
 // ==========================================================================================================
 
 import SessionMaintenance from "./sessionMaintenance.js";
-import { API_BASE_URL } from "./config.js";
+import {API_BASE_URL} from "./config.js";
 
 const SM = SessionMaintenance;
-const editButton = document.getElementById("btnEdit");
-const backbutton = document.getElementById("close-button");
 const currency = localStorage.getItem('currency');
 let fuelType = localStorage.getItem("fuelType") || 'Petrol';
 let journeyId = null;
 
-const journeyDetailsCard= document.getElementById('journey-details');
+const containers = {
+    journeyDetailsCard: SM.$("journey-details"),
+}
 
 const fields = {
     description: SM.$("description"),
@@ -31,6 +31,11 @@ const fields = {
     costPerMile: SM.$("costPerMile"),
     percOfTank: SM.$("percOfTank"),
     carbonFootprint: SM.$("carbonFootprint"),
+}
+
+const buttons = {
+    btnEdit: SM.$("btnEdit"),
+    btnBack: SM.$("close-button"),
 }
 
 // ==========================================================================================================
@@ -53,14 +58,25 @@ async function getJourneys(tableBody, username) {
         journeys.forEach((journey) => {
             const row = document.createElement("tr");
 
+            const date = new Date(journey.dateTime);
+
+            const formattedDate = date.toLocaleString("en-GB", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: true
+            });
+
             row.innerHTML = `
-        <td>${new Date(journey.dateTime).toLocaleString()}</td>
+        <td>${formattedDate}</td>
         <td>${journey.description}</td>
         <td>${journey.distance}</td>
-      `;
+    `;
 
             row.addEventListener("click", async () => {
-                journeyId=journey._id
+                journeyId = journey._id;
                 await getJourneyDetails();
             });
 
@@ -81,8 +97,8 @@ async function getJourneys(tableBody, username) {
 // ==========================================================================================================
 
 // Format Date -----------------------------------------------------------------------------------------
-function formatDateTime(value){
-    if(!value){
+function formatDateTime(value) {
+    if (!value) {
         return "-";
     }
     const date = new Date(value);
@@ -96,8 +112,8 @@ function formatDateTime(value){
 }
 
 // Format Number -----------------------------------------------------------------------------------------
-function formatNumber(value, decimals = 2){
-    if(value==null||value==="") return "-";
+function formatNumber(value, decimals = 2) {
+    if (value == null || value === "") return "-";
     return Number(value).toFixed(decimals);
 }
 
@@ -105,7 +121,7 @@ function formatNumber(value, decimals = 2){
 async function getJourneyDetails() {
 
     try {
-        SessionMaintenance.showLoader();
+        SM.showLoader();
         if (!journeyId) {
             await SessionMaintenance.logBook("journeyDetails", "getJourney", `No Journey Found ${journeyId}`, true);
             return;
@@ -152,17 +168,17 @@ async function getJourneyDetails() {
         fields.avgSpeed.textContent = journey.avgSpeed ? `${formatNumber(journey.avgSpeed, 1)} mph` : "0 mph";
         fields.costPerMile.textContent = journey.costPerMile ? `${currency}${formatNumber(journey.costPerMile, 2)}/mi` : `${currency}0.00/mi`;
         fields.percOfTank.textContent = journey.percOfTank ? `${formatNumber(journey.percOfTank * 100, 2)} %` : "0 %";
-        fields.lpkm.textContent = lpkm ? `${formatNumber(lpkm,2)}` : "0";
+        fields.lpkm.textContent = lpkm ? `${formatNumber(lpkm, 2)}` : "0";
         fields.kWh.textContent = kWh ? `${formatNumber(kWh, 2)}` : "0";
         fields.kWhTotal.textContent = kWhTotal ? `${formatNumber(kWhTotal, 2)}` : "0";
         fields.carbonFootprint.textContent = `${formatNumber(carbonFoorprint, 2)} KG of CO²` || "0";
 
-        journeyDetailsCard.classList.remove('hidden');
+        containers.journeyDetailsCard.classList.remove('hidden');
 
     } catch (err) {
         await SessionMaintenance.logBook("yourJourneys", "getJourneyDetails", `Error getting journeys ${err}`, true);
         await SessionMaintenance.cmbError(`Error getting journey details: ${err}`);
-        journeyDetailsCard.classList.add('hidden');
+        containers.journeyDetailsCard.classList.add('hidden');
     } finally {
         SessionMaintenance.hideLoader();
 
@@ -180,7 +196,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const currentPage = window.location.pathname.split("/").pop();
     SessionMaintenance.highlightActivePage(currentPage);
 
-    journeyDetailsCard.classList.add('hidden');
+    containers.journeyDetailsCard.classList.add('hidden');
     journeyId = null;
 
     SessionMaintenance.hideLoader();
@@ -197,17 +213,17 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // Edit button event listener -------------------------------------------------------------------------
-editButton.addEventListener("click", async () => {
+buttons.btnEdit.addEventListener("click", async () => {
     if (journeyId) {
         window.location.href = `edit-journey.html?id=${journeyId}`;
     } else {
-        journeyDetailsCard.classList.add('hidden');
+        containers.journeyDetailsCard.classList.add('hidden');
         await SessionMaintenance.cmbError(`No journey ID available to edit.`);
     }
 });
 
 // Back button event listener -------------------------------------------------------------------------
-backbutton.addEventListener("click", async () => {
-    journeyDetailsCard.classList.add('hidden');
+buttons.btnBack.addEventListener("click", async () => {
+    containers.journeyDetailsCard.classList.add('hidden');
     journeyId = null;
 });

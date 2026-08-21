@@ -144,7 +144,7 @@ async function calculateValues({timeUnit = 'minutes'} = {}) {
         const dateTime = dateTimeRaw ? new Date(dateTimeRaw) : new Date();
         const mpg = getValue(inputs.mpgInput, 'number');
         const distance = getValue(inputs.distanceInput, 'number');
-        const timeDriven = parseDuration(inputs.timeDrivenInput.value);
+        const timeDriven = SM.parseDuration(inputs.timeDrivenInput.value);
         const temp = getValue(inputs.tempInput, 'number');
         const condition = getValue(inputs.conditionInput);
         const costPerLitre = getValue(inputs.costInput, 'number');
@@ -199,42 +199,6 @@ async function calculateValues({timeUnit = 'minutes'} = {}) {
     }
 }
 
-// Parse Duration function ----------------------------------------------------------------------------------
-function parseDuration(duration) {
-    if (typeof duration !== "string") {
-        throw new Error("Time driven must be entered as text.");
-    }
-
-    duration = duration.trim().toLowerCase();
-    if (!duration) {
-        throw new Error("Please enter a journey duration.");
-    }
-
-    console.log(duration);
-
-    const match = duration.match(/^(?:(\d+)\s*h)?\s*(?:(\d+)s*m)?$/);
-    if (!match || (match[1 === undefined && match[2] === undefined])) {
-        throw new Error(`Invalid duration format, please use something like "1h 20m"`);
-    }
-
-    const hours = match[1] ? parseInt(match[1], 10) : 0;
-    const minutes = match[2] ? parseInt(match[2], 10) : 0;
-
-    console.log(`${hours}:${minutes}`);
-
-    if (match[1] && minutes >= 60) {
-        throw new Error(`Minutes must be less that 60 when using hours.`);
-    }
-
-    const totalMinutes = (hours * 60) + minutes;
-    if (totalMinutes <= 0) {
-        throw new Error(`Time driven must be more that zero`);
-    }
-
-    console.log(totalMinutes);
-    return totalMinutes;
-}
-
 // ==========================================================================================================
 // -- Event Listeners --
 // ==========================================================================================================
@@ -281,7 +245,7 @@ inputs.vehicleInput.addEventListener('change', async () => {
 // Time Driven Field ----------------------------------------------------------------------------------------
 inputs.timeDrivenInput.addEventListener('change', async () => {
    try{
-       const timeDriven = parseDuration(inputs.timeDrivenInput.value);
+       const timeDriven = SM.parseDuration(inputs.timeDrivenInput.value);
        if (!timeDriven) {
            throw new Error("Time driven must be entered.");
        }

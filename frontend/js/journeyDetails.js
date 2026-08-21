@@ -4,10 +4,32 @@
 
 import SessionMaintenance from "./sessionMaintenance.js";
 import { API_BASE_URL } from "./config.js";
+const SM = SessionMaintenance
 
-const editButton = document.getElementById("btnEdit");
 const currency = localStorage.getItem('currency');
 let journeyId = null;
+
+const buttons = {
+    editButton: SM.$("btnEdit")
+};
+
+const fields ={
+    dateTime: SM.$("DateTime"),
+    description: SM.$("description"),
+    distance: SM.$("distance"),
+    timeDriven:SM.$("timeDriven"),
+    fuelUsedL:SM.$("fuelUsedL"),
+    cost:SM.$("cost"),
+    mpg:SM.$("mpg"),
+    temp:SM.$("temp"),
+    condition:SM.$("condition"),
+    avgSpeed:SM.$("avgSpeed"),
+    costPerMile:SM.$("costPerMile"),
+    percOfTank:SM.$("percOfTank"),
+    lpkm:SM.$("lpkm"),
+    kWh:SM.$("kWh"),
+    kWhTotal:SM.$("kWhTotal"),
+}
 
 // ==========================================================================================================
 // -- Operational Functions --
@@ -63,21 +85,21 @@ async function getJourneys(journeyId) {
         await SessionMaintenance.logBook("journeyDetails", "getJourney", `journey Data: ${JSON.stringify(journey)}`);
 
         // Populate Fields
-        document.getElementById("DateTime").textContent = formatDateTime(journey.dateTime);
-        document.getElementById("description").textContent = journey.description || "-";
-        document.getElementById("distance").textContent = journey.distance ? `${formatNumber(journey.distance, 1)} mi` : "0 mi";
-        document.getElementById("timeDriven").textContent = `${formatNumber(formattedTime, (timeUnit === "Minutes" ? 0 : 2))} ${timeUnit}` || "-";
-        document.getElementById("fuelUsedL").textContent = journey.fuelUsedL ? `${formatNumber(journey.fuelUsedL, 2)} L` : "0 L";
-        document.getElementById("cost").textContent = journey.totalCost ? `${currency}${formatNumber(journey.totalCost, 2)}` : "£0.00";
-        document.getElementById("mpg").textContent = journey.mpg ? `${formatNumber(journey.mpg, 1)}` : "0 mpg";
-        document.getElementById("temp").textContent = journey.temp ? `${formatNumber(journey.temp, 1)} °C` : "0 °C";
-        document.getElementById("condition").textContent = journey.condition || "-";
-        document.getElementById("avgSpeed").textContent = journey.avgSpeed ? `${formatNumber(journey.avgSpeed, 1)} mph` : "0 mph";
-        document.getElementById("costPerMile").textContent = journey.costPerMile ? `${currency}${formatNumber(journey.costPerMile, 2)}/mi` : `${currency}0.00/mi`;
-        document.getElementById("percOfTank").textContent = journey.percOfTank ? `${formatNumber(journey.percOfTank * 100, 2)} %` : "0 %";
-        document.getElementById("lpkm").textContent = lpkm ? `${formatNumber(lpkm,2)}` : "0";
-        document.getElementById("kWh").textContent = kWh ? `${formatNumber(kWh, 2)}` : "0";
-        document.getElementById("kWhTotal").textContent = kWhTotal ? `${formatNumber(kWhTotal, 2)}` : "0";
+        fields.dateTime.textContent = formatDateTime(journey.dateTime);
+        fields.description.textContent = journey.description || "-";
+        fields.distance.textContent = journey.distance ? `${formatNumber(journey.distance, 1)} mi` : "0 mi";
+        fields.timeDriven.textContent = `${formatNumber(formattedTime, (timeUnit === "Minutes" ? 0 : 2))} ${timeUnit}` || "-";
+        fields.fuelUsedL.textContent = journey.fuelUsedL ? `${formatNumber(journey.fuelUsedL, 2)} L` : "0 L";
+        fields.cost.textContent = journey.totalCost ? `${currency}${formatNumber(journey.totalCost, 2)}` : "£0.00";
+        fields.mpg.textContent = journey.mpg ? `${formatNumber(journey.mpg, 1)}` : "0 mpg";
+        fields.temp.textContent = journey.temp ? `${formatNumber(journey.temp, 1)} °C` : "0 °C";
+        fields.condition.textContent = journey.condition || "-";
+        fields.avgSpeed.textContent = journey.avgSpeed ? `${formatNumber(journey.avgSpeed, 1)} mph` : "0 mph";
+        fields.costPerMile.textContent = journey.costPerMile ? `${currency}${formatNumber(journey.costPerMile, 2)}/mi` : `${currency}0.00/mi`;
+        fields.percOfTank.textContent = journey.percOfTank ? `${formatNumber(journey.percOfTank * 100, 2)} %` : "0 %";
+        fields.lpkm.textContent = lpkm ? `${formatNumber(lpkm,2)}` : "0";
+        fields.kWh.textContent = kWh ? `${formatNumber(kWh, 2)}` : "0";
+        fields.kWhTotal.textContent = kWhTotal ? `${formatNumber(kWhTotal, 2)}` : "0";
 
     } catch (err) {
         await SessionMaintenance.logBook("journeyDetails", "getJourney", `Error getting journeys ${err}`, true);
@@ -106,7 +128,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 });
 
 // Edit button event listener -------------------------------------------------------------------------
-editButton.addEventListener("click", async () => {
+buttons.editButton.addEventListener("click", async () => {
     if (journeyId) {
         window.location.href = `edit-journey.html?id=${journeyId}`;
     } else {

@@ -184,73 +184,38 @@ p {
 /* Table Styles */
 /* --------------------------------------------------------------------------- */
 
-#journeys-table {
+#vehicle-table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0 10px;
-    margin-top: 0.5rem;
-    padding: 0.5rem;
 }
 
-/* Shared cell styles */
-#journeys-table th,
-#journeys-table td {
-    padding: 0.75rem;
-    text-align: left;
-}
-
-/* Header */
-#journeys-table thead th {
-    position: sticky;
-    top: 0;
-    background-color: #000;
-    color: #fff;
-    font-weight: bold;
-    z-index: 1;
-}
-
-/* Row "card" look */
-#journeys-table tbody tr {
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-
-/* Cells (acts as the visible card surface) */
-#journeys-table tbody td {
-    background-color: #fff;
-}
-
-/* Rounded corners */
-#journeys-table tbody td:first-child {
-    border-top-left-radius: 10px;
-    border-bottom-left-radius: 10px;
-}
-
-#journeys-table tbody td:last-child {
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
-}
-
-#journeys-table thead th:first-child {
-    border-top-left-radius: 10px;
-    border-bottom-left-radius: 10px;
-}
-
-#journeys-table thead th:last-child {
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
-}
-
-/* Hover effects */
-#journeys-table tbody tr:hover {
-    transform: translateY(-2px);
+#vehicle-table tr {
     cursor: pointer;
+    text-align: center;
 }
 
-#journeys-table tbody tr:hover td {
-    background-color: rgba(0, 0, 0, 0.1);
+#vehicle-table td {
+    background: var(--card-bg);
+    padding: 15px 20px;
+    transition: 0.2s ease;
 }
 
+#vehicle-table td:first-child {
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+#vehicle-table td:last-child {
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+#vehicle-table tr:hover td {
+    background-color: var(--button-bg);
+    color: var(--button-text);
+    transform: translateY(-1px);
+}
 /* --------------------------------------------------------------------------- */
 /* Loading Spinner */
 /* --------------------------------------------------------------------------- */
@@ -377,7 +342,12 @@ form input, form select, form button {
     text-decoration: none;
     font-size: 12px;
     margin: 5px;
-    height: 75%
+    height: 75%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 18px;
 }
 
 .nav-item .material-symbols-outlined {
@@ -387,15 +357,17 @@ form input, form select, form button {
 }
 
 .nav-item:hover {
-    color: white; /* highlight on hover */
+    color: white;
 }
 
 .nav-item.active {
-    color: white; /* active blue, pick your color */
+    color: var(--accent-color);
+    background-color: #732c01;
 }
 
 .nav-item.active .material-symbols-outlined {
-    color: white;
+    color: var(--accent-color);
+    background-color: transparent;
 }
 
 /* ================================================================ */

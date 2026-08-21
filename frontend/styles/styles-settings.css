@@ -107,6 +107,75 @@ hr {
     padding: 4px 6px;
 }
 
+.user-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin: 20px;
+
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.user-header p {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+/* Vehicle button */
+.vehicle-header-button {
+    width: 60px;
+    height: 60px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 10px;
+
+    background-color: var(--button-bg);
+    color: var(--text-color);
+
+    cursor: pointer;
+
+    transition: transform 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.vehicle-header-button .material-symbols-outlined {
+    font-size: 28px;
+}
+
+.vehicle-button-label {
+    font-family: Lexend, sans-serif;
+    font-size: 0.65rem;
+    margin-top: 2px;
+}
+
+.vehicle-header-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    background-color: #00d916;
+    color: #000000;
+}
+
+.vehicle-header-button:active {
+    transform: translateY(0);
+}
+
 /* --------------------------------------------------------------------------- */
 /* Button Styles */
 /* --------------------------------------------------------------------------- */
@@ -307,7 +376,12 @@ form input, form select, form button {
     text-decoration: none;
     font-size: 12px;
     margin: 5px;
-    height: 75%
+    height: 75%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 18px;
 }
 
 .nav-item .material-symbols-outlined {
@@ -317,15 +391,17 @@ form input, form select, form button {
 }
 
 .nav-item:hover {
-    color: white; /* highlight on hover */
+    color: white;
 }
 
 .nav-item.active {
-    color: white; /* active blue, pick your color */
+    color: var(--accent-color);
+    background-color: #732c01;
 }
 
 .nav-item.active .material-symbols-outlined {
-    color: white;
+    color: var(--accent-color);
+    background-color: transparent;
 }
 
 /* --------------------------------------------------------------------------- */

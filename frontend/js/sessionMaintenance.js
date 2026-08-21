@@ -169,6 +169,42 @@ export default class SessionMaintenance {
         }
     }
 
+    // Parse Duration function ----------------------------------------------------------------------------------
+    static parseDuration(duration) {
+        if (typeof duration !== "string") {
+            throw new Error("Time driven must be entered as text.");
+        }
+
+        duration = duration.trim().toLowerCase();
+        if (!duration) {
+            throw new Error("Please enter a journey duration.");
+        }
+
+        console.log(duration);
+
+        const match = duration.match(/^(?:(\d+)\s*h)?\s*(?:(\d+)s*m)?$/);
+        if (!match || (match[1 === undefined && match[2] === undefined])) {
+            throw new Error(`Invalid duration format, please use something like "1h 20m"`);
+        }
+
+        const hours = match[1] ? parseInt(match[1], 10) : 0;
+        const minutes = match[2] ? parseInt(match[2], 10) : 0;
+
+        console.log(`${hours}:${minutes}`);
+
+        if (match[1] && minutes >= 60) {
+            throw new Error(`Minutes must be less that 60 when using hours.`);
+        }
+
+        const totalMinutes = (hours * 60) + minutes;
+        if (totalMinutes <= 0) {
+            throw new Error(`Time driven must be more that zero`);
+        }
+
+        console.log(totalMinutes);
+        return totalMinutes;
+    }
+
 // ==========================================================================================================
 // -- Custom Message Box --
 // ==========================================================================================================

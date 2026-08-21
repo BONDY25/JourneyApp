@@ -8,11 +8,22 @@ import SessionMaintenance from "./sessionMaintenance.js";
 const SM = SessionMaintenance;
 const params = new URLSearchParams(window.location.search);
 const journeyId = params.get("id");
-const btnDelete = document.getElementById('deleteBtn');
 let vehicleDetails = {};
 
 const inputs = {
     vehicleInput: SM.$("vehicle"),
+    dateTimeInput: SM.$("datetime"),
+    distanceInput: SM.$("distance"),
+    mpgInput: SM.$("mpg"),
+    timeDrivenInput: SM.$("timeDriven"),
+    tempInput: SM.$("temp"),
+    conditionInput: SM.$("condition"),
+    costInput: SM.$("cost"),
+}
+
+const buttons = {
+    btnSave: SM.$("btnSave"),
+    btnDelete: SM.$("btnDelete"),
 }
 
 // ==========================================================================================================
@@ -88,13 +99,13 @@ async function reCalculateValues({timeUnit = 'minutes'} = {}) {
     const fuelType = vehicleDetails.fuelType;
     const tankVolume = vehicleDetails.tankVolume;
 
-    const dateTime = document.getElementById("datetime").value || "";
-    const distance = document.getElementById("distance").value || 0;
-    const mpg = document.getElementById("mpg").value || 0;
-    const timeDriven = document.getElementById("timedriven").value || 0;
-    const costPerLitre = document.getElementById("cost").value || 0;
-    const condition = document.getElementById("condition").value || "Dry";
-    const temp = document.getElementById("temp").value  || 0;
+    const dateTime = inputs.dateTimeInput.value || "";
+    const distance = inputs.distanceInput.value || 0;
+    const mpg = inputs.mpgInput.value || 0;
+    const timeDriven = SM.parseDuration(inputs.timeDrivenInput.value);
+    const costPerLitre = inputs.costInput.value || 0;
+    const condition = inputs.conditionInput.value || "Dry";
+    const temp = inputs.tempInput.value  || 0;
 
     // Calculate Helpers
     const gallon = localStorage.getItem('gallon');
@@ -146,13 +157,13 @@ async function loadJourney() {
         const journey = await res.json();
 
         inputs.vehicleInput.value = journey.vehicleId;
-        document.getElementById("datetime").value = formatDatetime(journey.dateTime) || journey.dateTime?.split("T")[0] || ""
-        document.getElementById("distance").value = journey.distance || "";
-        document.getElementById("mpg").value = journey.mpg || "";
-        document.getElementById("timedriven").value = journey.timeDriven || "";
-        document.getElementById("temp").value = journey.temp || "";
-        document.getElementById("condition").value = journey.condition || "";
-        document.getElementById("cost").value = journey.costPl || "";
+        inputs.dateTimeInput.value = formatDatetime(journey.dateTime) || journey.dateTime?.split("T")[0] || ""
+        inputs.distanceInput.value = journey.distance || "";
+        inputs.mpgInput.value = journey.mpg || "";
+        inputs.timeDrivenInput.value = journey.timeDriven || "";
+        inputs.tempInput.value = journey.temp || "";
+        inputs.conditionInput.value = journey.condition || "";
+        inputs.costInput.value = journey.costPl || "";
 
     } catch (err) {
         await SM.logBook("editJourney", "loadJourney", `Error getting journey ${err}`, true);
@@ -226,15 +237,30 @@ document.addEventListener("DOMContentLoaded", async () => {
     const vehicleId = inputs.vehicleInput.value;
     vehicleDetails = await SM.getVehicleDetails(vehicleId);
 
-    const form = document.getElementById("editJourneyForm");
-    form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        await saveJourney();
-    });
+});
+
+// Time Driven Field ----------------------------------------------------------------------------------------
+inputs.timeDrivenInput.addEventListener('change', async () => {
+    try{
+        const timeDriven = SM.parseDuration(inputs.timeDrivenInput.value);
+        if (!timeDriven) {
+            throw new Error("Time driven must be entered.");
+        }
+    } catch (error) {
+        await SM.cmbError(`${error}`);
+        inputs.timeDrivenInput.value = "";
+        inputs.timeDrivenInput.focus();
+    }
+});
+
+// Save Button ----------------------------------------------------------------------------------------------
+buttons.btnSave.addEventListener("click", async (e) => {
+    e.preventDefault();
+    await saveJourney();
 });
 
 // Delete Button --------------------------------------------------------------------------------------------
-btnDelete.addEventListener("click", async ()=>{
+buttons.btnDelete.addEventListener("click", async ()=>{
     const confirmed = await SM.cmbQuestion('Delete?', 'Are you sure you want to delete this journey?');
     if (!confirmed) return;
     await deleteJourney();

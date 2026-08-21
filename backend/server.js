@@ -151,8 +151,9 @@ async function startServer() {
         // Insert User --------------------------------------------------------------------------------------------
         app.post('/api/users', async (req, res) => {
             try {
-                const {username, password, captcha} = req.body;
+                const {username, password} = req.body;
 
+                /*
                 const secretKey = process.env.RECAPTCHA_SECRET;
                 const verifyRes = await fetch(
                     `https://www.google.com/recaptcha/api/siteverify?secret=${secretKey}&response=${captcha}`,
@@ -165,6 +166,8 @@ async function startServer() {
                 if (!verifyData.success) {
                     return res.status(400).send("Captcha failed, try again.");
                 }
+
+                 */
 
                 // check is fields are complete
                 if (!username || !password) {

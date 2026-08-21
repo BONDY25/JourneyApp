@@ -309,7 +309,12 @@ form input, form select, form button {
     text-decoration: none;
     font-size: 12px;
     margin: 5px;
-    height: 75%
+    height: 75%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 18px;
 }
 
 .nav-item .material-symbols-outlined {
@@ -319,15 +324,17 @@ form input, form select, form button {
 }
 
 .nav-item:hover {
-    color: white; /* highlight on hover */
+    color: white;
 }
 
 .nav-item.active {
-    color: white; /* active blue, pick your color */
+    color: var(--accent-color);
+    background-color: #000000;
 }
 
 .nav-item.active .material-symbols-outlined {
-    color: white;
+    color: var(--accent-color);
+    background-color: transparent;
 }
 
 /* ================================================================ */

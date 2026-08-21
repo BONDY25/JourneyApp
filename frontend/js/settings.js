@@ -11,22 +11,21 @@ const buttons = {
     btnVehicles: SM.$("btnVehicles")
 }
 
-const fields = {
+const inputs = {
     fontSelect: SM.$("font-select"),
     budgetToggle: SM.$("budget-toggle"),
     budgetFields: SM.$("budgetFields"),
     rangeSelect: SM.$("budget-range"),
-    resetDayContainer: SM.$("resetDayContainer"),
     resetDaySelect: SM.$("reset-day"),
-
 }
 
-const fontSelect = document.getElementById('font-select');
-const budgetToggle = document.getElementById('budget-toggle');
-const budgetFields = document.getElementById('budgetFields');
-const rangeSelect = document.getElementById('budget-range');
-const resetDayContainer = document.getElementById('resetDayContainer');
-const resetDaySelect = document.getElementById('reset-day');
+const containers = {
+    resetDayContainer: SM.$("resetDayContainer"),
+}
+
+const elements = {
+    totalJourneys: SM.$("totalJourneys"),
+}
 
 // ==========================================================================================================
 // -- Operational Functions --
@@ -34,14 +33,13 @@ const resetDaySelect = document.getElementById('reset-day');
 
 // Get total number of journeys -----------------------------------------------------------------------------
 async function getTotalJourneys(username) {
-    const totalElem = document.getElementById('totalJourneys');
-    totalElem.textContent = await SM.getTotalJourneys(username)
+    elements.totalJourneys.textContent = await SM.getTotalJourneys(username)
 }
 
 // Update UI for reset day ----------------------------------------------------------------------------------
 function updateResetDayOptions() {
-    const range = rangeSelect.value;
-    resetDaySelect.innerHTML = ''; // Clear previous options
+    const range = inputs.rangeSelect.value;
+    inputs.resetDaySelect.innerHTML = ''; // Clear previous options
 
     if (range === 'Weekly') {
         // Weekly: Monday-Sunday
@@ -50,21 +48,21 @@ function updateResetDayOptions() {
             const option = document.createElement('option');
             option.value = index + 1; // Optional: store as 1–7
             option.textContent = day;
-            resetDaySelect.appendChild(option);
+            inputs.resetDaySelect.appendChild(option);
         });
-        resetDayContainer.style.display = 'block';
+        containers.resetDayContainer.style.display = 'block';
     } else if (range === 'Monthly') {
         // Monthly: 1–28
         for (let i = 1; i <= 28; i++) {
             const option = document.createElement('option');
             option.value = i;
             option.textContent = i;
-            resetDaySelect.appendChild(option);
+            inputs.resetDaySelect.appendChild(option);
         }
-        resetDayContainer.style.display = 'block';
+        containers.resetDayContainer.style.display = 'block';
     } else {
         // Hide for other ranges
-        resetDayContainer.style.display = 'none';
+        containers.resetDayContainer.style.display = 'none';
     }
 }
 
@@ -77,7 +75,7 @@ buttons.btnVehicles.addEventListener('click', async () =>{
 });
 
 // Font Select ----------------------------------------------------------------------------------------------
-fontSelect.addEventListener('change', (e) => {
+inputs.fontSelect.addEventListener('change', (e) => {
     document.documentElement.style.setProperty(
         '--default-font',
         `${e.target.value}, sans-serif`
@@ -85,14 +83,14 @@ fontSelect.addEventListener('change', (e) => {
 });
 
 // Budget Tracking ------------------------------------------------------------------------------------------
-budgetToggle.addEventListener('change', () => {
-    budgetFields.style.display = budgetToggle.checked ? 'block' : 'none';
-    if (budgetToggle.checked) updateResetDayOptions();
+inputs.budgetToggle.addEventListener('change', () => {
+    inputs.budgetFields.style.display = inputs.budgetToggle.checked ? 'block' : 'none';
+    if (inputs.budgetToggle.checked) updateResetDayOptions();
 });
 
 // Range Select ---------------------------------------------------------------------------------------------
-rangeSelect.addEventListener('change', () => {
-    if (budgetToggle.checked) updateResetDayOptions();
+inputs.rangeSelect.addEventListener('change', () => {
+    if (inputs.budgetToggle.checked) updateResetDayOptions();
 });
 
 // window loaded event listener -----------------------------------------------------------------------------
@@ -143,10 +141,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     } finally {
         SM.hideLoader();
 
-        budgetFields.style.display = budgetToggle.checked ? 'block' : 'none';
-        if (budgetToggle.checked) updateResetDayOptions();
+        inputs.budgetFields.style.display = inputs.budgetToggle.checked ? 'block' : 'none';
+        if (inputs.budgetToggle.checked) updateResetDayOptions();
 
-        if (budgetToggle.checked) updateResetDayOptions();
+        if (inputs.budgetToggle.checked) updateResetDayOptions();
     }
 
     // Handle save function -----------------------------------------------------------------------------------------

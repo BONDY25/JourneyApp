@@ -56,6 +56,8 @@ const elements = {
     tanksUsed: SM.$("tanksUsed"),
     olympicPools: SM.$("olympicPools"),
     yearsOffset: SM.$("yearsOffset"),
+    budgetStatus: SM.$("budgetStatus"),
+    budgetChart: SM.$("budgetChart"),
 }
 
 // ==========================================================================================================
@@ -688,10 +690,6 @@ async function loadBudget(username) {
         card.style.display = 'block';
 
         // Start budget statement
-        const summary = document.getElementById('budgetSummary');
-        const budgetProgressText = document.getElementById('budgetProgress');
-        const periodProgressText = document.getElementById('periodProgress');
-        const budgetStatusText = document.getElementById('budgetStatus');
         const currency = localStorage.getItem('currency') || "£";
         const resetDay = localStorage.getItem('resetDay') || 1;
 
@@ -723,19 +721,19 @@ async function loadBudget(username) {
         const periodProgress = getPeriodPercentage(data.period, resetDay);
 
         // display statement
-        summary.textContent = `This ${newPeriod}: ${currency}${data.cost.toFixed(2)} of ${currency}${data.budget.toFixed(2)} → ${diffText}.`;
-        budgetProgressText.textContent = `Budget Spent: ${budgetProgress.toFixed(2)}%`;
-        periodProgressText.textContent = `${newPeriod[0].toUpperCase() + newPeriod.slice(1)} Progress: ${periodProgress.toFixed(2)}%`;
+        elements.budgetSummary.textContent = `This ${newPeriod}: ${currency}${data.cost.toFixed(2)} of ${currency}${data.budget.toFixed(2)} → ${diffText}.`;
+        elements.budgetProgress.textContent = `Budget Spent: ${budgetProgress.toFixed(2)}%`;
+        elements.periodProgress.textContent = `${newPeriod[0].toUpperCase() + newPeriod.slice(1)} Progress: ${periodProgress.toFixed(2)}%`;
 
         if (budgetProgress <= periodProgress) {
-            budgetStatusText.textContent = `You are on target 👍`;
+            elements.budgetStatus.textContent = `You are on target 👍`;
         } else {
-            budgetStatusText.textContent = `You are off target 👎`;
+            elements.budgetStatus.textContent = `You are off target 👎`;
         }
 
         let cumulativeCosts = [];
         let labels = [];
-        const ctx = document.getElementById('budgetChart').getContext('2d');
+        const ctx = elements.budgetChart.getContext('2d');
 
         if (data.journeys && data.journeys.length > 0) {
             // Sort journeys just in case
